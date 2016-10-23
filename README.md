@@ -18,4 +18,7 @@ There are a few things I need to finish but if you would like to contribute, ple
 
 
 #Quick Links
-* [Support][http://aquatictechtank.net/viewforum.php?f=48]
+* <a href="http://aquatictechtank.net/viewforum.php?f=48">Support</a>
+
+#Donation
+<a href='https://pledgie.com/campaigns/32780'><img alt='Click here to lend your support to: Support WAAC and make a donation at pledgie.com !' src='https://pledgie.com/campaigns/32780.png?skin_name=chrome' border='0' ></a>
