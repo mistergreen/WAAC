@@ -3,7 +3,7 @@ Alpha 0.01
 
 There are a few things I need to finish but if you would like to contribute, please do.
 
-1. Save and Retrieves device settings to SD card as quarry string for backup
+1. Save and Retrieves device settings to SD card as query string for backup
 2. Add simple device interface like digital devices like buttons
 3. Possible use NTP (Network Time Protocol) instead of RTC to keep time
 
