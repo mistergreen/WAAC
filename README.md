@@ -15,7 +15,7 @@ There are a few things I need to finish but if you would like to contribute, ple
 
 #Setup
 1. Copy all .html, .js, .css files onto the SD card
-2. Library files go into the Arduino Libray folder
+2. Library files go into the Arduino Library folder
 
 #Quick Links
 * <a href="http://aquatictechtank.net/viewforum.php?f=48">Support</a>
