@@ -170,7 +170,9 @@ void setup()
   setSyncProvider(syncProvider);   // the function to get/sync the time from the RTC - occurs every 5 mins?, you can change the interval 
   
 
-  //********************** manually add I2C devices for the app **********************
+  //********************** manually add devices for the app in code, can add through UI at runtime **********************
+  //                       but it needs to be backed up on SD card or eprom
+  //
   //                                     name,  i2c address, low target, high target
   //CO2sensor *co2 = new CO2sensor("CO2 sensor",0x7F, 0, 43);
  // deviceDelegate.addDevice(co2);
