@@ -17,6 +17,10 @@ There are a few things I need to finish but if you would like to contribute, ple
 1. Copy all .html, .js, .css files onto the SD card
 2. Library files go into the Arduino Library folder
 
+#Running
+1. Find the local network IP, (default) 192.168.1.177:8080 in a browser
+2. Login (default) user: admin pass: waac
+
 #Quick Links
 * <a href="http://aquatictechtank.net/viewforum.php?f=48">Support</a>
 
