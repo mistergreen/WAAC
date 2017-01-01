@@ -3,9 +3,10 @@ Alpha 0.01
 
 There are a few things I need to finish but if you would like to contribute, please do.
 
-1. Save and Retrieves device settings to SD card as query string for backup
-2. Add simple device interface like digital devices like buttons
-3. Possible use NTP (Network Time Protocol) instead of RTC to keep time
+1. Add simple device interface like digital devices like buttons
+2. Possible use NTP (Network Time Protocol) instead of RTC to keep time
+
+I decided not to do back up to settings. It's too complicated. It's best you stick a 9v battery to the arduino in case of a power outtage :)
 
 #Required Equipments
 1. Arduino Due
