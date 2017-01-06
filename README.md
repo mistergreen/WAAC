@@ -2,6 +2,8 @@
 Alpha 0.01
 
 There are a few things I need to finish but if you would like to contribute, please do.
+Here are videos of the development
+https://www.youtube.com/playlist?list=PLBa21usjmOFKCHJmGBnlkjP8v2rVpoFGZ
 
 1. Add simple device interface like digital devices like buttons
 2. Possible use NTP (Network Time Protocol) instead of RTC to keep time
