@@ -11,7 +11,7 @@ I decided not to do back up to settings. It's too complicated. It's best you sti
 #Required Equipments
 1. Arduino Due
 2. DS1307 RTC
-3. Arduino Ethernet Shield (W5100) with SD card slot. Make sure the W5100 or whatever supports at least 4 simultaneous socket connections.
+3. Arduino Ethernet Shield (W5100) with SD card slot. Make sure the W5100 or whatever supports at least 4 simultaneous socket connections. A UDP connection is used to update time.
 4. SD card
 
 #Setup
