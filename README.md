@@ -1,4 +1,4 @@
-# WAAC - Web Arduino Aquarium Controller
+# WAAC - Web-enabled Arduino Aquarium Controller
 Alpha 0.01
 
 There are a few things I need to finish but if you would like to contribute, please do.
