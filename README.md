@@ -6,15 +6,13 @@ Here are videos of the development
 https://www.youtube.com/playlist?list=PLBa21usjmOFKCHJmGBnlkjP8v2rVpoFGZ
 
 1. Add simple device interface like digital devices like buttons
-2. Possible use NTP (Network Time Protocol) instead of RTC to keep time
 
 I decided not to do back up to settings. It's too complicated. It's best you stick a 9v battery to the arduino in case of a power outtage :)
 
 #Required Equipments
 1. Arduino Due
-2. DS1307 RTC
-3. Arduino Ethernet Shield (W5100) with SD card slot. Make sure the W5100 or whatever supports at least 4 simultaneous socket connections. A UDP connection is used to update time.
-4. SD card
+2. Arduino Ethernet Shield (W5100) with SD card slot. Make sure the W5100 or whatever supports at least 4 simultaneous socket connections. A UDP connection is used to update time.
+3. SD card
 
 #Setup
 1. Copy all .html, .js, .css files onto the SD card
