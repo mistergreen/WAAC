@@ -4,7 +4,7 @@ There are a few things I need to finish but if you would like to contribute, ple
 Here are videos of the development
 https://www.youtube.com/playlist?list=PLBa21usjmOFKCHJmGBnlkjP8v2rVpoFGZ
 
-1. Add simple device interface like digital devices like buttons
+1. Add more devices like pH sensor, simple push button, any device that can interface with the Arduino.
 
 I decided not to do back up to settings. It's too complicated. It's best you stick a 9v battery to the arduino in case of a power outtage :)
 
