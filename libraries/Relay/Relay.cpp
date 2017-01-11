@@ -13,9 +13,8 @@ Relay::Relay(char *in_name, int in_pin, int in_dependent_device_id) : Device()
     // Device() call super to init vars
     dependentDeviceId = in_dependent_device_id;
     //find dependent device once - not all the time
-    if(dependentDeviceId) {
-        dependentDeviceObject = deviceDelegate.findDevice(dependentDeviceId);
-    }
+    setDependentDevice(dependentDeviceId);
+    
     
     //deviceID is automatically set my deviceDeleGate
 
@@ -25,6 +24,8 @@ Relay::Relay(char *in_name, int in_pin, int in_dependent_device_id) : Device()
 
     pin = in_pin;
     pinMode(pin, OUTPUT);
+    digitalWrite(pin,LOW); // weird where pin gets high on startup
+                           // devices need pullup or pulldown for desired output
     
     isDay = false; // isDay is the day an event is to occur
     timedIndexCounter = 0;
@@ -76,7 +77,7 @@ void Relay::loop()
                     durationTime = durationTime - 86400L;
                 }
                 
-                if(dependentDeviceObject) { //if there's a dependent device
+                if(dependentDeviceId > 0) { //if there's a dependent device
                     if(currentTime >= eventTime && currentTime <= durationTime)
                     {
                         boolean temp = dependentDeviceObject->getDeviceState();
@@ -111,12 +112,12 @@ void Relay::loop()
 
 void Relay::setEvent(char *in_string)
 {
-
+    if(in_string[0] == '\0') return;
     // start time, duration, dow
     // "8:00:00,1:00:00,1111111,9:30:00,1:30:01,1101111,15:34:02,1:05:02,1010101"
     //you can only add up to 4 events- each event is -on and duration -off pairs
 
-    char events[12][9];
+    char events[12][67];
     
     //parse incoming string *** MAKE ROOM FOR THE NUL TERMINATOR in the string!
     char *tok1;
@@ -192,7 +193,7 @@ void Relay::getEvent(char *string) {
     //manipulat incoming string rather than returning. Saves memory?
     if(timedIndexCounter > 0) {
    
-        char buf[27];
+        char buf[104];
         sprintf(buf, "%02d:%02d:%02d,%02d:%02d:%02d,%s", hour[0],minute[0],second[0],hourDuration[0],minuteDuration[0],secondDuration[0],dow[0]);
         strcpy(string, buf);
         
@@ -200,6 +201,8 @@ void Relay::getEvent(char *string) {
             sprintf(buf, ",%02d:%02d:%02d,%02d:%02d:%02d,%s", hour[i],minute[i],second[i],hourDuration[i],minuteDuration[i],secondDuration[i],dow[i]);
             strcat(string,buf);
         }
+    } else {
+        string[0] = '\0';
     }
 }
 
@@ -210,7 +213,7 @@ int Relay::getDependentDevice() {
 
 void Relay::setDependentDevice(int id) {
     dependentDeviceId = id;
-    if(dependentDeviceId) {
+    if(dependentDeviceId > 0) {
         dependentDeviceObject = deviceDelegate.findDevice(dependentDeviceId);
     } else {
         dependentDeviceObject = NULL;
@@ -241,6 +244,7 @@ void Relay::switchOff()
 
 void Relay::toggleState()
 {
+   //Serial.println("toggle called");
     if (deviceState) {
         //digitalWrite(pin,LOW);
         //deviceState = false;

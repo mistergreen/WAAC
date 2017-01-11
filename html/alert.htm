@@ -44,7 +44,7 @@
 								//****** grab device specific data & populate fields ********
 								if(deviceId != 0) {	
 										$('#name').val(decodeURIComponent($(data).find("deviceName").text()));
-										$('#email').val($(data).find("email").text());
+										//$('#email').val($(data).find("email").text());
 										$('#subject').val( decodeURIComponent($(data).find("subject").text()) );
 										$('#message').val( decodeURIComponent($(data).find("message").text()) );
 										
@@ -78,9 +78,16 @@
 			
 			function testEmail() {
 				var id = localStorage.getItem("deviceId");
-				
+				$.mobile.loading("show");
 				$.get("?testemail&subject=" + $('#subject').val() +"&message=" +$('#message').val(), function(data) {
-				//nothing
+					if(data != null) {
+						$.mobile.loading("hide");
+					}
+					console.log( data);
+				}).fail(function( jqXHR, textStatus, errorThrown ) {
+					$.mobile.loading("hide");
+					alert("Email failed. See console.log for info.");
+					console.log( "error: " +":"+textStatus +":"+errorThrown);
 				});
 				
 				
@@ -99,7 +106,7 @@
 				var state = $("#statemenu option:selected").val();
 				
 				str += "name=" + $("#name").val() + "&image=" + imageStyle +"&dependent=" + dependent +"&state=" + state;
-				str += "&email="+ $("#email").val() +"&subject="+ $("#subject").val() + "&message="+$("#message").val();
+				str += "&subject="+ $("#subject").val() + "&message="+$("#message").val();
 				var eventStr = "&event=" + $("#hour").val() + ":" + $("#minute").val();
 				str += eventStr;
 		

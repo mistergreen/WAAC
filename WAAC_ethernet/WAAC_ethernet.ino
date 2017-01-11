@@ -1,24 +1,31 @@
 #define UNSET -1
+#define bufferMax 628
+#define queryMax 350
+#define W5200_CS  10
+#define SDCARD_CS 4
+#define DEBUG
+
 
 #include <SD.h>
 #include <SPI.h>
 
 #include <Ethernet.h>
+#include <EthernetUdp.h>
 
 // memory check
 #include <malloc.h>
 //#include <stdlib.h>
 #include <stdio.h>
 //
-//#include <utility/w5100.h>
-//#include <utility/socket.h>
+#include <utility/w5100.h>
+#include <utility/socket.h>
 
 #include <Wire.h>
 #include <WebParser.h>
 //#include <MemoryFree.h>
 #include <Time.h>
 //#include <DS1307RTC.h>
-#include "RTClib.h"
+//#include "RTClib.h"
 #include <dtostrf.h>
 
 //devices - add any necessary libs for devices here!
@@ -32,12 +39,10 @@
 //don't forget to include dependent library into the ino file
 #include <OneWire.h>
 #include <OneWireSensor.h>
-#include <PWM1.h>
 #include <PWM4.h>
 #include <Video.h>
 #include <Adafruit_PWMServoDriver.h>
-#include <AdaFruitPWM.h>
-#include <AdaFruitPWM4.h>
+#include <AdaFruitPWM8.h>
 #include <Alert.h>
 #include <Shunt.h>
 #include <Analog.h>
@@ -69,24 +74,21 @@ char *ramend=(char *)0x20088000;
 
 //tmElements_t tm;
 
-char *dayName[8] = {"", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturnday"};
+char *dayName[8] = {"", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
 char *monthName[13] = {"", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
-RTC_DS1307 rtc;
+//RTC_DS1307 rtc;
 
 /************* Device menu **************/
 // { device type (must be unique & same as classType), description, html form to configure it }
 char *deviceMenu[][3] = {
-                        {"Analog","Analog input", "analog.htm"},
-                        {"AdaFruitPWM","AdaFruit PWM 12-bit, 1 channel", "adapwm.htm"},
-                        {"AdaFruitPWM4","AdaFruit PWM 12-bit, 4 channel", "adapwm4.htm"},
+                        {"Analog","Analog input with Shunt", "analog.htm"},
+                        {"AdaFruitPWM8","AdaFruit PWM 12-bit, 8 channel", "adapwm8.htm"},
                         {"Alert","Email Alerts", "alert.htm"},
                         {"OneWireSensor", "OneWire Dallas/Maxim", "onewire.htm"},
-                        {"PWM1","Arduino PWM, 1 channel", "pwm.htm"},
                         {"PWM4","Arduino PWM, 4 channels", "pwm4.htm"},
                         {"Relay","Digital out", "relay.htm"},
-                        {"Sensor", "Analog In", "sensor.htm"},
                         {"Video", "Yout-tube Stream", "video.htm"},
                         {NULL}
                        };
@@ -106,16 +108,11 @@ char *deviceStyle[][2] = {
                       };
 /************* network & server configuration ***************/
 
-#define bufferMax 628
-#define queryMax 144
-#define W5200_CS  10
-#define SDCARD_CS 4
-#define DEBUG
-
 // Enter a MAC address and IP address for your controller below.
 // The IP address will be dependent on your local network:
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 IPAddress ip(192,168,1,177);
+//setting subnet & gateway somehow interfers with calling external php script
 //IPAddress gateway(192,168,1,1);	
 //IPAddress subnet(255, 255, 255, 0);
 
@@ -147,6 +144,8 @@ void setup()
  
   // start serial port:
   Serial.begin(115200);
+  //SerialUSB.begin(115200);  // Due nativeUSB port, no reset of board on open serial port
+  
   
   #ifdef AVR
     Wire.begin();
@@ -156,42 +155,44 @@ void setup()
 
   
   //sync RTC time
-   rtc.begin();
+ 
+   //rtc.begin();
 
-  if (! rtc.isrunning()) {
-    Serial.println("RTC is NOT running!");
+  //if (! rtc.isrunning()) {
+    //Serial.println("RTC is NOT running!");
     // following line sets the RTC to the date & time this sketch was compiled
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+   // rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
     // This line sets the RTC with an explicit date & time, for example to set
     // January 21, 2014 at 3am you would call:
     // rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
-  }
+ // }
    
-  setSyncProvider(syncProvider);   // the function to get/sync the time from the RTC - occurs every 5 mins?, you can change the interval 
+  //setSyncProvider(syncProvider);   // the function to get/sync the time from the RTC - occurs every 5 mins?, you can change the interval 
+ 
   
 
-  //********************** manually add devices for the app in code, can add through UI at runtime **********************
-  //                       but it needs to be backed up on SD card or eprom
-  //
+  //********************** manually add I2C devices for the app **********************
   //                                     name,  i2c address, low target, high target
   //CO2sensor *co2 = new CO2sensor("CO2 sensor",0x7F, 0, 43);
  // deviceDelegate.addDevice(co2);
   //deviceDelegate.currentDevice()->setStyle(deviceStyle[3][0],deviceStyle[3][1]);
-  
+  /*
   OneWireSensor *one = new OneWireSensor("Water temp", 2, 0, 100);
   deviceDelegate.addDevice(one);
   deviceDelegate.currentDevice()->setStyle(deviceStyle[7][0],deviceStyle[7][1]);
   static_cast<OneWireSensor*>(deviceDelegate.currentDevice())->setLowerTarget(70.0);
   static_cast<OneWireSensor*>(deviceDelegate.currentDevice())->setHigherTarget(81.0);
-  
+  */
   
   //temp, no interface
+// relay time event trigger a crash!?  
+  /*
   Relay *tempObj = new Relay("LED", 22, 0);
   deviceDelegate.addDevice( tempObj );
   deviceDelegate.currentDevice()->setStyle(deviceStyle[3][0],deviceStyle[3][1]);
-  char temp[] = "8:00:00,1:30:00,1111111,10:30:00,5:00:00,1010101";
+  char temp[] = "10:00:00,1:30:00,1111111,12:30:00,5:00:00,1010101";
   deviceDelegate.currentDevice()->setEvent(temp);
-  
+  */
  //temp, no interface
  /*
   deviceDelegate.addDevice( new PWM4("PWM Lights",0) );
@@ -205,12 +206,19 @@ void setup()
   char temp3[] = "1111111,8:00:00,0:30:00,100,9:30:00,0:00:10,4055";
   deviceDelegate.currentDevice()->setEvent(temp3);
   */
+ 
   /*
-  
   deviceDelegate.addDevice( new AdaFruitPWM4("AdaPWM Lights",0) );
   deviceDelegate.currentDevice()->setStyle(deviceStyle[3][0],deviceStyle[3][1]);
   static_cast<AdaFruitPWM4*>(deviceDelegate.currentDevice())->setPins(0,1,2,3);
   char temp2[] = "1111111,8:00:00,0:30:00,100:10:255:50,9:30:00,0:00:10,255:50:30:255";
+  deviceDelegate.currentDevice()->setEvent(temp2);
+ */
+  /*
+   deviceDelegate.addDevice( new AdaFruitPWM8("Pendant Light",0) );
+  deviceDelegate.currentDevice()->setStyle(deviceStyle[3][0],deviceStyle[3][1]);
+  static_cast<AdaFruitPWM8*>(deviceDelegate.currentDevice())->setPins(0,1,2,3,4,5,6,7);
+  char temp2[] = "1111111,8:00:00,0:30:00,100:10:255:50:100:10:255:50,9:30:00,0:00:10,255:50:30:255:100:10:255:50";
   deviceDelegate.currentDevice()->setEvent(temp2);
   */
   
@@ -224,13 +232,18 @@ void setup()
   deviceDelegate.currentDevice()->setStyle(deviceStyle[1][0],deviceStyle[1][1]);
   */
   
-
+  /*
   deviceDelegate.addDevice( new Analog("Temperature Analog", A0) );
   deviceDelegate.currentDevice()->setStyle(deviceStyle[1][0],deviceStyle[1][1]);
-
+  */
   
   //************ initialize SD card & ethernet*******************
+  //Ethernet.begin(mac, ip, INADDR_NONE, gateway, subnet);
   Ethernet.begin(mac, ip);
+  //set up upd first so it gets sockets #0
+  wwws.begin();
+  
+  // set up server for the rest of the sockets
   server.begin();
   Serial.print("server is at ");
   Serial.println(Ethernet.localIP());
@@ -259,7 +272,7 @@ void setup()
     
   //digitalWrite(SDCARD_CS, HIGH);
   //let the ethernet card get ready before peforming tasks
-  wwws.begin();
+
   //wwws.setToEmail("minh@2noodles.com");
   //wwws.setEvent(0,5);
   //wwws.setNetworkAddress("api.ipify.org");
@@ -273,25 +286,29 @@ void setup()
 
   delay(10000);
   
+  //sync time to NTP
+  wwws.syncNTP();
   
- 
   Serial.print("memory ");
-  //Serial.println(freeMemory());
+  Serial.println(freeMemory());
   
   
 }
 
 /************************************************************ loop *********************************/
-
+// connectLoop controls the hardware fail timeout
+int connectLoop = 0;
+  
 void loop() 
 {
   //Serial.println("x");
+  
   //loop through devices
   deviceDelegate.loopDevices();
-  
+   //Serial.println("y");
   //www settings
   wwws.check();
- 
+  //Serial.println("z");
   // listen for incoming clients
   EthernetClient client = server.available();
  
@@ -303,6 +320,7 @@ void loop()
         while (client.connected()) {
             if (client.available()) {   // client data available to read
                 char c = client.read(); // read 1 byte (character) from client
+                //Serial.println(c);
                 if (bufferSize < bufferMax) queryBuffer[bufferSize++] = c;
                  if (c == '\n' && currentLineIsBlank) {
                    parseReceivedRequest(client);
@@ -320,13 +338,27 @@ void loop()
                     // a text character was received from client
                     currentLineIsBlank = false;
                 }
+                connectLoop = 0;
                 
             }//end if available
+           /*
+            connectLoop++;
+            // if more than 10000 milliseconds since the last packet
+            if(connectLoop > 10000)
+            {
+              // then close the connection from this end.
+              Serial.println();
+              Serial.println(F("Timeout"));
+              client.stop();
+            }
+          */
+         
+    
         }//end while connected
     
     
-    // give the web browser time to receive the data
-    delay(1);
+      // give the web browser time to receive the data
+      delay(1);
     // close the connection:
     client.stop();
     //disconnect the W5200
@@ -338,14 +370,14 @@ void loop()
   }//end client
   
   //*******socket
-  /*
+
   if(Serial.available()) {
     if(Serial.read() == 'r') ShowSockStatus();    
   }
   
 
-  checkSockStatus();
-  */
+  //checkSockStatus();
+
   
 }
 
@@ -423,6 +455,22 @@ void renderHtmlPage(char *page, EthernetClient client)
         
 }
 
+void successAjax(EthernetClient client) {
+       //ajax requires a response or will throw a connection lost
+      client.println(F("HTTP/1.1 200 OK"));
+      client.println(F("Content-Type: text/xml"));
+      client.println();
+      client.println(F("<?xml version = \"1.0\" ?>"));
+      client.print(F("<response>success</response>"));
+}
+
+void errorAjax(EthernetClient client) {
+        client.println(F("HTTP/1.1 200 OK"));
+        client.println(F("Content-Type: text/xml"));
+        client.println();
+        client.println(F("<?xml version = \"1.0\" ?>"));
+        client.print(F("<response>error</response>"));
+}
 
 void parseReceivedRequest(EthernetClient client) 
 {
@@ -590,7 +638,7 @@ void parseReceivedRequest(EthernetClient client)
         client.print(deviceDelegate.devices[i]->getClassName());
         client.println(F("</type></device>"));
          
-      }
+      }// for list
       
       client.println(F("</list>"));
      
@@ -598,328 +646,89 @@ void parseReceivedRequest(EthernetClient client)
     // ***************** switch digital  ********************
     else if(webParser.contains(queryBuffer, "switch="))
     {
-      
-      webParser.clearBuffer(param_value, queryMax);
-      webParser.parseQuery(queryBuffer, "switch", param_value);
-       //generic casting works but not recommended
-       //((Relay *)deviceDelegate.findDevice(atoi(param_value)))->togglePin();
-       //static_cast<Relay*>(deviceDelegate.findDevice(atoi(param_value)))->toggleState();
-      deviceDelegate.findDevice(atoi(param_value))->toggleState();
+      //will work for all device type with toggleState()
+      switchDigital(client);
         
     } 
     
       // ***************** set PWM values  ********************
     else if(webParser.contains(queryBuffer, "setpwms"))
     {
-     
-      webParser.clearBuffer(param_value, queryMax);
-      webParser.parseQuery(queryBuffer, "setpwms", param_value);
 
-      Device *device = deviceDelegate.findDevice(atoi(param_value));
-      char red[4] = {'\0'};
-      char green[4] = {'\0'};
-      char blue[4] = {'\0'};
-      char white[4] = {'\0'};
-      
-      
-      webParser.parseQuery(queryBuffer, "red", red);
-      
-      webParser.parseQuery(queryBuffer, "green", green);
-      
-      webParser.parseQuery(queryBuffer, "blue", blue);
-      
-      webParser.parseQuery(queryBuffer, "white", white);
-      
-      static_cast<PWM4*>(device)->setPWMs(atoi(red),atoi(green),atoi(blue),atoi(white));
-      //ajax requires a response or will throw a connection lost
-      client.println(F("HTTP/1.1 200 OK"));
-      client.println(F("Content-Type: text/xml"));
-      client.println();
-      client.println(F("<?xml version = \"1.0\" ?>"));
-      client.print(F("<response>success</response>"));
-      
+      set4PWM(client);
         
     } 
     
      // ***************** set adafruit PWM value 1 channel ********************
+     /*
     else if(webParser.contains(queryBuffer, "setadapwm"))
     {
      
-      webParser.clearBuffer(param_value, queryMax);
-      webParser.parseQuery(queryBuffer, "setadapwm", param_value);
-
-      Device *device = deviceDelegate.findDevice(atoi(param_value));
-      
-      webParser.clearBuffer(param_value, queryMax);
-      webParser.parseQuery(queryBuffer, "pwm", param_value);
- 
-      static_cast<AdaFruitPWM*>(device)->setPWM(atoi(param_value));
-      //ajax requires a response or will throw a connection lost
-      client.println(F("HTTP/1.1 200 OK"));
-      client.println(F("Content-Type: text/xml"));
-      client.println();
-      client.println(F("<?xml version = \"1.0\" ?>"));
-      client.print(F("<response>success</response>"));
+     setAdaPWM(client);
         
-    } 
+    } */
       // ***************** set ada PWM 4 channels  ********************
+      /*
     else if(webParser.contains(queryBuffer, "set4adapwms"))
     {
      //gets confused with setadapwm
       //Serial.println(queryBuffer);
-      
-      webParser.clearBuffer(param_value, queryMax);
-      webParser.parseQuery(queryBuffer, "set4adapwms", param_value);
+      set4AdaPWMs(client);
 
-      Device *device = deviceDelegate.findDevice(atoi(param_value));
-      char red[5] = {'\0'};
-      char green[5] = {'\0'};
-      char blue[5] = {'\0'};
-      char white[5] = {'\0'};
-      
-      webParser.parseQuery(queryBuffer, "red", red);
-      
-      webParser.parseQuery(queryBuffer, "green", green);
-      
-      webParser.parseQuery(queryBuffer, "blue", blue);
-      
-      webParser.parseQuery(queryBuffer, "white", white);
-      
-      static_cast<AdaFruitPWM4*>(device)->setPWMs(atoi(red),atoi(green),atoi(blue),atoi(white));
-      //ajax requires a response or will throw a connection lost
-      client.println(F("HTTP/1.1 200 OK"));
-      client.println(F("Content-Type: text/xml"));
-      client.println();
-      client.println(F("<?xml version = \"1.0\" ?>"));
-      client.print(F("<response>success</response>"));
-      
+        
+    } */
+      // ***************** set ada PWM 8 channels  ********************
+    else if(webParser.contains(queryBuffer, "set8adapwms"))
+    {
+     //gets confused with setadapwm
+      //Serial.println(queryBuffer);
+      set8AdaPWMs(client);
+
         
     } 
       // ***************** set  PWM value 1 channel ********************
+      /*
     else if(webParser.contains(queryBuffer, "setpwm"))
     {
-     
-      webParser.clearBuffer(param_value, queryMax);
-      webParser.parseQuery(queryBuffer, "setpwm", param_value);
 
-      Device *device = deviceDelegate.findDevice(atoi(param_value));
       
-      webParser.clearBuffer(param_value, queryMax);
-      webParser.parseQuery(queryBuffer, "pwm", param_value);
- 
-      static_cast<PWM1*>(device)->setPWM(atoi(param_value));
-      //ajax requires a response or will throw a connection lost
-      client.println(F("HTTP/1.1 200 OK"));
-      client.println(F("Content-Type: text/xml"));
-      client.println();
-      client.println(F("<?xml version = \"1.0\" ?>"));
-      client.print(F("<response>success</response>"));
+      setPWM(client);
         
-    } 
+    } */
        // ***************** Test Email ********************
     else if(webParser.contains(queryBuffer, "testemail"))
     {
-      char subject[55] = {'\0'};
-      char message[100] = {'\0'};
-      
-      webParser.parseQuery(queryBuffer, "email", param_value);
-      wwws.setToEmail(param_value);
-      
-      webParser.parseQuery(queryBuffer, "subject", subject);
-    
-      webParser.parseQuery(queryBuffer, "message", message);
-      
-      if(wwws.email(subject, message)) {
-      //ajax requires a response or will throw a connection lost
-        client.println(F("HTTP/1.1 200 OK"));
-        client.println(F("Content-Type: text/xml"));
-        client.println();
-        client.println(F("<?xml version = \"1.0\" ?>"));
-        client.print(F("<response>success</response>"));
-      } else {
-        client.println(F("HTTP/1.1 200 OK"));
-        client.println(F("Content-Type: text/xml"));
-        client.println();
-        client.println(F("<?xml version = \"1.0\" ?>"));
-        client.print(F("<response>error</response>"));
-      }
-        
+       testEmail(client);
     } 
         // ***************** Test IP ********************
     else if(webParser.contains(queryBuffer, "testip"))
     {
-      webParser.clearBuffer(param_value, queryMax);
-      webParser.parseQuery(queryBuffer, "ipaddress", param_value);
-      wwws.setNetworkAddress(param_value);
-      
-      webParser.clearBuffer(param_value, queryMax);
-      webParser.parseQuery(queryBuffer, "iphost", param_value);
-      wwws.setNetworkHost(param_value);
-      
-      char holder[55]={'\0'};
-      if(wwws.getNetworkIp(holder)) {
-      //ajax requires a response or will throw a connection lost
-        client.println(F("HTTP/1.1 200 OK"));
-        client.println(F("Content-Type: text/xml"));
-        client.println();
-        client.println(F("<?xml version = \"1.0\" ?>"));
-        client.print(F("<feed>"));
-        client.print(F("<response>success</response>"));
-        client.print(F("<ip>"));
-        client.print(holder);
-        Serial.print(holder);
-        Serial.println(strlen(holder));
-        client.print(F("</ip>"));
-        client.print(F("</feed>"));
-        
-      } else {
-        client.println(F("HTTP/1.1 200 OK"));
-        client.println(F("Content-Type: text/xml"));
-        client.println();
-        client.println(F("<?xml version = \"1.0\" ?>"));
-        client.print(F("<response>error</response>"));
-      }
+      testIp(client);
         
     } 
           // ***************** Test DDNS ********************
     else if(webParser.contains(queryBuffer, "testddns"))
     {
-      webParser.clearBuffer(param_value, queryMax);
-      webParser.parseQuery(queryBuffer, "ddnshost", param_value);
-      wwws.setDdnsHost(param_value);
-      
-      webParser.clearBuffer(param_value, queryMax);
-      webParser.parseQuery(queryBuffer, "ddnshostname", param_value);
-      wwws.setDdnsHostName(param_value);
-      
-      webParser.clearBuffer(param_value, queryMax);
-      webParser.parseQuery(queryBuffer, "user", param_value);
-      wwws.setUser(param_value);
-      
-      webParser.clearBuffer(param_value, queryMax);
-      webParser.parseQuery(queryBuffer, "password", param_value);
-      wwws.setPassword(param_value);
-
-      if(wwws.updateDDNS()) {
-      //ajax requires a response or will throw a connection lost
-        client.println(F("HTTP/1.1 200 OK"));
-        client.println(F("Content-Type: text/xml"));
-        client.println();
-        client.println(F("<?xml version = \"1.0\" ?>"));
-        client.print(F("<response>success</response>"));
+       testDNS(client);
         
-      } else {
-        client.println(F("HTTP/1.1 200 OK"));
-        client.println(F("Content-Type: text/xml"));
-        client.println();
-        client.println(F("<?xml version = \"1.0\" ?>"));
-        client.print(F("<response>error</response>"));
-      }
+    } 
+    // ***************** Test NTP ********************
+    else if(webParser.contains(queryBuffer, "testntp"))
+    {
+       testNTP(client);
         
     } 
     // ***************** SAVE Settings ********************
     else if(webParser.contains(queryBuffer, "savesetting"))
     {
-      webParser.clearBuffer(param_value, queryMax);
-      webParser.parseQuery(queryBuffer, "email", param_value);
-      wwws.setToEmail(param_value);
-      
-      char thour[4] = {'\0'};
-      char tminute[4] = {'\0'};
-      webParser.parseQuery(queryBuffer, "hour", thour);
-      webParser.parseQuery(queryBuffer, "minute", tminute);
-      wwws.setEvent(atoi(thour),atoi(tminute));
-      
-      webParser.clearBuffer(param_value, queryMax);
-      webParser.parseQuery(queryBuffer, "istype", param_value);
-      
-      if(atoi(param_value) == 1) {
-        wwws.setEmailIpState(true);
-        webParser.clearBuffer(param_value, queryMax);
-        webParser.parseQuery(queryBuffer, "ipaddress", param_value);
-        wwws.setNetworkAddress(param_value);
-        webParser.clearBuffer(param_value, queryMax);
-        webParser.parseQuery(queryBuffer, "iphost", param_value);
-        wwws.setNetworkHost(param_value);
-      } else if(atoi(param_value) == 2) {
-        wwws.setDDNSIpState(true);
-        webParser.clearBuffer(param_value, queryMax);
-        webParser.parseQuery(queryBuffer, "ddnshost", param_value);
-        wwws.setDdnsHost(param_value);
-        
-        webParser.clearBuffer(param_value, queryMax);
-        webParser.parseQuery(queryBuffer, "ddnshostname", param_value);
-        wwws.setDdnsHostName(param_value);
-        
-        webParser.clearBuffer(param_value, queryMax);
-        webParser.parseQuery(queryBuffer, "user", param_value);
-        wwws.setUser(param_value);
-        
-        webParser.clearBuffer(param_value, queryMax);
-        webParser.parseQuery(queryBuffer, "password", param_value);
-        wwws.setPassword(param_value);
-      }
-      
-      
-      //ajax requires a response or will throw a connection lost
-      client.println(F("HTTP/1.1 200 OK"));
-      client.println(F("Content-Type: text/xml"));
-      client.println();
-      client.println(F("<?xml version = \"1.0\" ?>"));
-      client.print(F("<response>success</response>"));
+      saveSetting(client);
         
     } 
      // ***************** LOAD Settings ********************
     else if(webParser.contains(queryBuffer, "getsetting"))
     {
      
-      client.println(F("HTTP/1.1 200 OK"));
-      client.println(F("Content-Type: text/xml"));
-      client.println();
-      client.println(F("<?xml version = \"1.0\" encoding=\"UTF-8\"?>"));
-      client.print(F("<setting>"));   
-      client.print(F("<email>"));
-      client.print(wwws.getToEmail());
-      client.print(F("</email>"));
-      if(wwws.getEmailIpState()) {
-        client.print(F("<isEmail>"));
-        client.print("1");
-        client.print(F("</isEmail>"));
-        client.print(F("<ipAddress>"));
-        client.print(wwws.getNetworkAddress());
-        client.print(F("</ipAddress>"));
-        client.print(F("<ipHost>"));
-        client.print(wwws.getNetworkHost());
-        client.print(F("</ipHost>"));
-      
-      } else if(wwws.getDDNSIpState()) {
-        client.print(F("<isDDNS>"));
-        client.print("1");
-        client.print(F("</isDDNS>"));
-        client.print(F("<ddnsHost>"));
-        client.print(wwws.getDdnsHost());
-        client.print(F("</ddnsHost>"));
-        client.print(F("<ddnsHostName>"));
-        client.print(wwws.getDdnsHostName());
-        client.print(F("</ddnsHostName>"));   
-        client.print(F("<user>"));
-        client.print(wwws.getUser());
-        client.print(F("</user>"));
-        client.print(F("<password>"));
-        client.print(wwws.getPassword());
-        client.print(F("</password>"));
-
-      }
-   
-      client.print(F("<hour>"));
-      client.print(wwws.getHour());
-      client.print(F("</hour>"));
-      
-      client.print(F("<minute>"));
-      client.print(wwws.getMinute());
-      client.print(F("</minute>"));
-      
-      client.print(F("</setting>"));
+       getSetting(client);
 
     } 
     // ***************** logout  ********************
@@ -1023,10 +832,6 @@ void parseReceivedRequest(EthernetClient client)
             client.print(F("<deviceName>"));
             client.print(device->getDeviceName());
             client.print(F("</deviceName>"));
-            client.print(F("<pin>"));
-            client.print(device->getPin());
-            client.print(F("</pin>"));
-           
             client.print(F("<deviceImage>"));
             client.print(device->getImageName());
             client.print(F("</deviceImage>"));
@@ -1041,147 +846,41 @@ void parseReceivedRequest(EthernetClient client)
             webParser.parseQuery(queryBuffer, "devicetype", param_value);
             //Serial.println("devicetype ");
             //Serial.println(param_value);
-            if(webParser.compare(param_value, "Relay") || webParser.compare(param_value, "PWM1") || webParser.compare(param_value, "AdaFruitPWM")) {
-              client.print(F("<dependent>"));
-              client.print(device->getDependentDevice());
-              client.print(F("</dependent>"));
-              client.print(F("<event>"));
-              char string[queryMax];
-              device->getEvent(string);
-              client.print(string);
-              client.print(F("</event>"));
-              //
+            if(webParser.compare(param_value, "Relay")) {
+                
+              relayAjaxOutput(client, device);
+              
             } else if(webParser.compare(param_value, "OneWireSensor")) 
             {
                
-               client.print(F("<min>"));
-               client.print(static_cast<OneWireSensor*>(device)->getMin());
-               client.print(F("</min>"));
-               client.print(F("<max>"));
-               client.print(static_cast<OneWireSensor*>(device)->getMax());
-               client.print(F("</max>"));
-               client.print(F("<lower>"));
-               client.print(static_cast<OneWireSensor*>(device)->getLowerTarget());
-               client.print(F("</lower>"));
-               client.print(F("<higher>"));
-               client.print(static_cast<OneWireSensor*>(device)->getHigherTarget());
-               client.print(F("</higher>"));
-               client.print(F("<unit>"));
-               client.print(static_cast<OneWireSensor*>(device)->getF());
-               client.print(F("</unit>"));
-               client.print(F("<readout>"));
-               client.print(static_cast<OneWireSensor*>(device)->read());
-               client.print(F("</readout>"));
-               client.print(F("<conditiontype>"));
-               client.print(static_cast<OneWireSensor*>(device)->getConditionType());
-               client.print(F("</conditiontype>"));
+              oneWireAjaxOutput(client, device);
                
             } 
             else if(webParser.compare(param_value, "Analog")) 
             {
                
-               client.print(F("<min>"));
-               client.print(static_cast<Analog*>(device)->getMin());
-               client.print(F("</min>"));
-               client.print(F("<max>"));
-               client.print(static_cast<Analog*>(device)->getMax());
-               client.print(F("</max>"));
-               client.print(F("<lower>"));
-               client.print(static_cast<Analog*>(device)->getLowerTarget());
-               client.print(F("</lower>"));
-               client.print(F("<higher>"));
-               client.print(static_cast<Analog*>(device)->getHigherTarget());
-               client.print(F("</higher>"));
-               client.print(F("<unit>"));
-               client.print(static_cast<Analog*>(device)->getUnit());
-               client.print(F("</unit>"));
-               client.print(F("<readout>"));
-               client.print(static_cast<Analog*>(device)->read());
-               client.print(F("</readout>"));
-               client.print(F("<conditiontype>"));
-               client.print(static_cast<Analog*>(device)->getConditionType());
-               client.print(F("</conditiontype>"));
-               client.print(F("<formula>"));
-               client.print(static_cast<Analog*>(device)->getFormula());
-               client.print(F("</formula>"));
+              analogAjaxOutput(client, device);
                
             } 
             else if(webParser.compare(param_value, "PWM4")) 
             {
-                client.print(F("<dependent>"));
-                client.print(device->getDependentDevice());
-                client.print(F("</dependent>"));
-                client.print(F("<event>"));
-                char string[queryMax];
-                device->getEvent(string);
-                client.print(string);
-                client.print(F("</event>"));
-                uint8_t pinArray[4];
-                static_cast<PWM4*>(device)->getPins(pinArray);
-                client.print(F("<redpin>"));
-                client.print(pinArray[0]);
-                client.print(F("</redpin>"));
-                client.print(F("<greenpin>"));
-                client.print(pinArray[1]);
-                client.print(F("</greenpin>"));
-                client.print(F("<bluepin>"));
-                client.print(pinArray[2]);
-                client.print(F("</bluepin>"));
-                client.print(F("<whitepin>"));
-                client.print(pinArray[3]);
-                client.print(F("</whitepin>"));
-            } 
-             else if(webParser.compare(param_value, "AdaFruitPWM4")) 
+               pwm4AjaxOutput(client, device);
+            } /*
+            else if(webParser.compare(param_value, "AdaFruitPWM4")) 
             {
-                client.print(F("<dependent>"));
-                client.print(device->getDependentDevice());
-                client.print(F("</dependent>"));
-                client.print(F("<event>"));
-                char string[queryMax];
-                device->getEvent(string);
-                client.print(string);
-                client.print(F("</event>"));
-                int pinArray[4];
-                static_cast<AdaFruitPWM4*>(device)->getPins(pinArray);
-
-                client.print(F("<redpin>"));
-                client.print(pinArray[0]);
-                client.print(F("</redpin>"));
-                client.print(F("<greenpin>"));
-                client.print(pinArray[1]);
-                client.print(F("</greenpin>"));
-                client.print(F("<bluepin>"));
-                client.print(pinArray[2]);
-                client.print(F("</bluepin>"));
-                client.print(F("<whitepin>"));
-                client.print(pinArray[3]);
-                client.print(F("</whitepin>"));
+               adaFruit4PWMAjaxOutput(client, device);
+            } */
+            else if(webParser.compare(param_value, "AdaFruitPWM8")) 
+            {
+               adaFruit8PWMAjaxOutput(client, device);
             } 
             else if(webParser.compare(param_value, "Video")) {
-                client.print(F("<video>"));
-                client.print(static_cast<Video*>(device)->getCode());
-                client.print(F("</video>"));
+               videoAjaxOutput(client, device);
                 
             }
             else if(webParser.compare(param_value, "Alert")) 
             {
-                client.print(F("<dependent>"));
-                client.print(device->getDependentDevice());
-                client.print(F("</dependent>"));
-                client.print(F("<email>"));
-                client.print(static_cast<Alert*>(device)->getEmail());
-                client.print(F("</email>"));
-                client.print(F("<subject>"));
-                client.print(static_cast<Alert*>(device)->getSubject());
-                client.print(F("</subject>"));
-                client.print(F("<message>"));
-                client.print(static_cast<Alert*>(device)->getMessage());
-                client.print(F("</message>"));
-                client.print(F("<event>"));
-                char string[7];
-                device->getEvent(string);
-                client.print(string);
-                client.print(F("</event>"));
+               alertAjaxOutput(client, device);
                 
             }
             
@@ -1223,13 +922,14 @@ void parseReceivedRequest(EthernetClient client)
     // ***************** save or create device object  ********************
     else if(webParser.contains(queryBuffer, "savedevice"))
     {
-      Serial.print("xxxxxxx save device xxxxxxxx");
+     
       //Serial.println(queryBuffer);
       
       webParser.clearBuffer(param_value, queryMax);
       webParser.parseQuery(queryBuffer, "savedevice", param_value);
         
         if(atoi(param_value) > 0) {
+          // Serial.print("xxxxxxx save device xxxxxxxx");
           //alter existing device
           Device *device = deviceDelegate.findDevice(atoi(param_value));
           device->setSuspendTime(false);
@@ -1253,246 +953,81 @@ void parseReceivedRequest(EthernetClient client)
           webParser.clearBuffer(param_value, queryMax);
           webParser.parseQuery(queryBuffer, "devicetype", param_value);
           
-          if(webParser.compare(param_value, "Relay") || webParser.compare(param_value, "PWM1") || webParser.compare(param_value, "AdaFruitPWM"))
+          if(webParser.compare(param_value, "Relay"))
           {
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "dependent", param_value);
-            device->setDependentDevice(atoi(param_value));
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "event", param_value);
-            device->setEvent(param_value);
+               saveRelay(device);
           
           } 
           else if(webParser.compare(param_value, "OneWireSensor")) 
           {
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "min", param_value);
-            static_cast<OneWireSensor*>(device)->setMin(atof(param_value));
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "max", param_value);
-            static_cast<OneWireSensor*>(device)->setMax(atof(param_value));
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "lower", param_value);
-            static_cast<OneWireSensor*>(device)->setLowerTarget(atof(param_value));
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "higher", param_value);
-            static_cast<OneWireSensor*>(device)->setHigherTarget(atof(param_value));
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "unit", param_value);
-            static_cast<OneWireSensor*>(device)->setF(atoi(param_value));
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "conditiontype", param_value);
-            static_cast<OneWireSensor*>(device)->setConditionType(param_value);
-            
+           
+               saveOneWire(device);
            
           } 
            else if(webParser.compare(param_value, "Analog")) 
           {
-            Serial.println(queryBuffer);
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "min", param_value);
-            static_cast<Analog*>(device)->setMin(atof(param_value));
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "max", param_value);
-            static_cast<Analog*>(device)->setMax(atof(param_value));
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "lower", param_value);
-            static_cast<Analog*>(device)->setLowerTarget(atof(param_value));
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "higher", param_value);
-            static_cast<Analog*>(device)->setHigherTarget(atof(param_value));
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "unit", param_value);
-            static_cast<Analog*>(device)->setUnit(param_value);
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "formula", param_value);
-            //Serial.println("cccc");
-            //Serial.println(param_value);
-            //webParser.urldecode(param_value);
-            //Serial.println("cccc");
-            //Serial.println(param_value);
-            static_cast<Analog*>(device)->setFormula(param_value);
-            
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "conditiontype", param_value);
-            static_cast<Analog*>(device)->setConditionType(param_value);
-            
+               saveAnalog(device);
            
           } 
           else if(webParser.compare(param_value, "PWM4")) 
           {
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "redpin", param_value);
-            int red = atoi(param_value);
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "greenpin", param_value);
-            int green = atoi(param_value);
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "bluepin", param_value);
-            int blue = atoi(param_value);
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "whitepin", param_value);
-            int white = atoi(param_value);
-            
-            static_cast<PWM4*>(device)->setPins(red,green,blue,white);
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "dependent", param_value);
-            device->setDependentDevice(atoi(param_value));
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "event", param_value);
-            device->setEvent(param_value);
+               savePWM4(device);
           }  
+          /*
           else if(webParser.compare(param_value, "AdaFruitPWM4")) 
           {
             
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "redpin", param_value);
-            int red;
-            if(param_value[0] == '\0') {
-              red = UNSET;
-            } else {
-              red = atoi(param_value);
-            }
+              saveAdaFruit4PWM(device);
+          }  */
+          else if(webParser.compare(param_value, "AdaFruitPWM8")) 
+          {
             
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "greenpin", param_value);
-            int green;
-            if(param_value[0] == '\0') {
-              green = UNSET;
-            } else {
-              green = atoi(param_value);
-            }
-            
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "bluepin", param_value);
-            int blue;
-            if(param_value[0] == '\0') {
-              blue = UNSET;
-            } else {
-              blue = atoi(param_value);
-            }
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "whitepin", param_value);
-            int white;
- 
-            if(param_value[0] == '\0') {
-              white = UNSET;
-            } else {
-              white = atoi(param_value);
-            }
-            
-            static_cast<AdaFruitPWM4*>(device)->setPins(red,green,blue,white);
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "dependent", param_value);
-            device->setDependentDevice(atoi(param_value));
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "event", param_value);
-            device->setEvent(param_value);
+              saveAdaFruit8PWM(device);
           }  
           else if(webParser.compare(param_value, "Video")) 
           {
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "code", param_value);
-            
-            static_cast<Video*>(device)->setCode(param_value);
+              saveAVideo(device);
            
             
           }
            else if(webParser.compare(param_value, "Alert")) 
           {
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "email", param_value);
-            static_cast<Alert*>(device)->setEmail(param_value);
-           
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "subject", param_value);
-            static_cast<Alert*>(device)->setSubject(param_value);
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "message", param_value);
-            static_cast<Alert*>(device)->setMessage(param_value);
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "dependent", param_value);
-            device->setDependentDevice(atoi(param_value));
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "event", param_value);
-            device->setEvent(param_value);
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "state", param_value);
-            device->setDeviceState(atoi(param_value));
+             saveAlert(device);
             
           }
           
           
         } else {
           //create new object 
+          //Serial.print("xxxxxxx created device xxxxxxxx");
           webParser.clearBuffer(param_value, queryMax);
           webParser.parseQuery(queryBuffer, "devicetype", param_value);
           //******************* RELAY ***********************
           if(webParser.compare(param_value, "Relay")) {
-           
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "name", param_value);
-            
-            char tempPin[5];
-            webParser.parseQuery(queryBuffer, "pin", tempPin);
-            
-            char tempDependent[5];
-            webParser.parseQuery(queryBuffer, "dependent", tempDependent);
-            Relay *temp = new Relay(param_value, atoi(tempPin), atoi(tempDependent));
-            deviceDelegate.addDevice( temp );
-            
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "image", param_value);
-            deviceDelegate.currentDevice()->setImageName(param_value);
-            
-            char color[7];
-            webParser.parseQuery(queryBuffer, "color", param_value);
-            findColor(param_value, color);
-            deviceDelegate.currentDevice()->setDeviceColor(color);
-
-            webParser.clearBuffer(param_value, queryMax);
-            webParser.parseQuery(queryBuffer, "event", param_value);
-            if(webParser.compare(param_value, '\0')) {
-              Serial.println("event is a null xxxxxxxxxx");
-            } else {
-              deviceDelegate.currentDevice()->setEvent(param_value);
-            }
-            
+              createRelay();
+          } 
+          else if(webParser.compare(param_value, "AdaFruitPWM8")) {
+              createAdaFruit8PWM();
           }
-          
+          else if(webParser.compare(param_value, "Alert")) {
+              createAlert();
+          }
+          else if(webParser.compare(param_value, "Analog")) {
+              createAnalog();
+          }
+          else if(webParser.compare(param_value, "OneWireSensor")) {
+              createOneWire();
+          }
+          else if(webParser.compare(param_value, "PWM4")) {
+              createPWM4();
+          }
+          else if(webParser.compare(param_value, "Video")) {
+              createVideo();
+          }
+
         }
         //response back to client on success of saving or creating
-        client.println(F("HTTP/1.1 200 OK"));
-        client.println(F("Content-Type: text/xml"));
-        client.println();
-        
-        client.println(F("<?xml version = \"1.0\" ?>"));
-        client.print(F("<response>success</response>"));
+        successAjax(client);
     }
     // ***************** delete device object  ********************
     else if(webParser.contains(queryBuffer, "deletedevice"))
@@ -1502,13 +1037,7 @@ void parseReceivedRequest(EthernetClient client)
         webParser.parseQuery(queryBuffer, "deletedevice", param_value);
         deviceDelegate.removeDevice(atoi(param_value));
         
-        client.println(F("HTTP/1.1 200 OK"));
-        client.println(F("Content-Type: text/xml"));
-        
-        client.println();
-        
-        client.println(F("<?xml version = \"1.0\" ?>"));
-        client.print(F("<response>success</response>"));
+        successAjax(client);
     }
     // ***************** cancel device changes  ********************
     else if(webParser.contains(queryBuffer, "canceldevice"))
@@ -1520,12 +1049,8 @@ void parseReceivedRequest(EthernetClient client)
         Device *device = deviceDelegate.findDevice(atoi(param_value));
         device->setSuspendTime(false);
           
-        client.println(F("HTTP/1.1 200 OK"));
-        client.println(F("Content-Type: text/xml"));
-        client.println();
+        successAjax(client);
         
-        client.println(F("<?xml version = \"1.0\" ?>"));
-        client.print("<response>success</response>");
     }// end else if
     
     
@@ -1547,13 +1072,14 @@ void findColor(char *image, char *ar) {
 }
 
 //****************** RTC stuff ************************************
+/*
 time_t syncProvider()
 {
   //this does the same thing as RTC_DS1307::get()
   return rtc.now().unixtime();
 }
 
-/*
+
 bool getTime(const char *str)
 {
   int Hour, Min, Sec;
@@ -1596,7 +1122,7 @@ int freeMemory() {
   
 }
 
-/*
+
 //********************** socket ********************
 byte socketStat[MAX_SOCK_NUM];
 unsigned long connectTime[MAX_SOCK_NUM];
@@ -1645,5 +1171,5 @@ void checkSockStatus()
   }
 }
 
-*/
+
 

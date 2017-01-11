@@ -4,6 +4,8 @@
 
 #include "OneWireSensor.h"
 #include <dtostrf.h>
+#include <OneWire.h>
+#include <Sensor.h>
 
 OneWireSensor::OneWireSensor(char *in_name, uint8_t in_pin, float in_min, float in_max) : Device(), Sensor()
 {
@@ -11,8 +13,8 @@ OneWireSensor::OneWireSensor(char *in_name, uint8_t in_pin, float in_min, float 
     max = in_max;
     pin = in_pin;
     
-    //Onewire instance
-    this->ds = new OneWire(pin);
+    //Onewire instance - doesn't let me do automatic instance for some reason
+    ds = new OneWire(pin);
     
     strcpy(deviceName,in_name);
     strcpy(classType,"OneWireSensor");
@@ -23,8 +25,8 @@ OneWireSensor::OneWireSensor(char *in_name, uint8_t in_pin, float in_min, float 
 }
 
 OneWireSensor::~OneWireSensor() {
-    delete this->ds;
-    this->ds = NULL;
+    delete ds;
+    ds = NULL;
 }
 
 float OneWireSensor::getTemp() {
@@ -32,9 +34,9 @@ float OneWireSensor::getTemp() {
     byte data[12];
     byte addr[8];
     
-    if ( !this->ds->search(addr)) {
+    if ( !ds->search(addr)) {
         //no more sensors on chain, reset search
-        this->ds->reset_search();
+        ds->reset_search();
         return -1000;
     }
     
@@ -48,20 +50,20 @@ float OneWireSensor::getTemp() {
         return -1000;
     }
     
-    this->ds->reset();
-    this->ds->select(addr);
-    this->ds->write(0x44,1); // start conversion, with parasite power on at the end
+    ds->reset();
+    ds->select(addr);
+    ds->write(0x44,1); // start conversion, with parasite power on at the end
     
-    byte present = this->ds->reset();
-    this->ds->select(addr);
-    this->ds->write(0xBE); // Read Scratchpad
+    byte present = ds->reset();
+    ds->select(addr);
+    ds->write(0xBE); // Read Scratchpad
     
     
     for (int i = 0; i < 9; i++) { // we need 9 bytes
-        data[i] = this->ds->read();
+        data[i] = ds->read();
     }
     
-    this->ds->reset_search();
+    ds->reset_search();
     
     byte MSB = data[1];
     byte LSB = data[0];

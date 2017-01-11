@@ -7,10 +7,21 @@
 #include <Base64.h>
 #include <EthernetClient.h>
 #include <Arduino.h>
-
+#include <EthernetUdp.h>
+#include <SPI.h>
+//used for NTP sync function
+WWWsettings* WWWsettings::thisClassObj;
+//static member
+char WWWsettings::toEmail[50] = {};
 
 WWWsettings::WWWsettings()
 {
+    localPort = 8888;
+    timeZone  = -5;
+    strcpy(NTPip, "132.163.4.101"); //defaul NTP
+    twoAM = convertToSeconds(18,0,0);
+    syncOnce = false;
+    //strcpy(toEmail, "");
     
 }
 
@@ -21,24 +32,118 @@ void WWWsettings::begin()
     isEmailIp = false;
     intervalTime = 0;
     previousTime = 0;
-    hour = 0;
-    minute = 5;
-    interval = convertToSeconds(hour,minute,0);
+    hour = 12;
+    minute = 0;
+    interval = 0;
+    
+    //NTPio get split up in timeServer[] - get sent to sendNTPacket
+    splitIP(NTPip, timeServer);
 
+    //timeServer(ipArray[0], ipArray[1], ipArray[2], ipArray[3]);
+    //need to only do it once so you don't eat up all of the sockets
+    Udp.begin(localPort);
+    
 }
+
+void WWWsettings::syncNTP() {
+    thisClassObj = this;
+    Serial.println("waiting for sync");
+    //sync expects a function, not method, so a static method is used
+    setSyncProvider(globalGetNTPTime);
+    setSyncInterval(twoAM);
+    
+}
+
+void WWWsettings::splitIP(char *inString, uint8_t *inArray) {
+    char *tokens;
+    int i = 0;
+    //make a copy to reassign later
+    char temp[25];
+    strcpy(temp, inString);
+    
+    tokens = strtok(inString, ".");
+    while (tokens != NULL) {
+        inArray[i] = atoi(tokens);
+        tokens = strtok(NULL, ".");
+        i++;
+    }
+    
+    //reassembles NTPip
+    strcpy(inString, temp);
+    
+}
+
+time_t WWWsettings::testNTP() {
+
+     return getNtpTime();
+}
+
+/*-------- NTP code ----------*/
+
+time_t WWWsettings::getNtpTime()
+{
+    Udp.flush(); // discard any previously received packets
+    Serial.println("Transmit NTP Request");
+    sendNTPpacket(timeServer);
+    uint32_t beginWait = millis();
+ while (millis() - beginWait < 1500) {
+    int size = Udp.parsePacket();
+    if (size >= NTP_PACKET_SIZE) {
+        Serial.println("Receive NTP Response");
+        Udp.read(packetBuffer, NTP_PACKET_SIZE);  // read packet into the buffer
+        unsigned long secsSince1900;
+        // convert four bytes starting at location 40 to a long integer
+        secsSince1900 =  (unsigned long)packetBuffer[40] << 24;
+        secsSince1900 |= (unsigned long)packetBuffer[41] << 16;
+        secsSince1900 |= (unsigned long)packetBuffer[42] << 8;
+        secsSince1900 |= (unsigned long)packetBuffer[43];
+        return secsSince1900 - 2208988800UL + timeZone * SECS_PER_HOUR;
+    }
+ }
+        Serial.println("No NTP Response :-(");
+        return 0; // return 0 if unable to get the time
+
+    
+}
+
+// send an NTP request to the time server at the given address
+void WWWsettings::sendNTPpacket(byte *address)
+{
+    // set all bytes in the buffer to 0
+    memset(packetBuffer, 0, NTP_PACKET_SIZE);
+    // Initialize values needed to form NTP request
+    // (see URL above for details on the packets)
+    packetBuffer[0] = 0b11100011;   // LI, Version, Mode
+    packetBuffer[1] = 0;     // Stratum, or type of clock
+    packetBuffer[2] = 6;     // Polling Interval
+    packetBuffer[3] = 0xEC;  // Peer Clock Precision
+    // 8 bytes of zero for Root Delay & Root Dispersion
+    packetBuffer[12]  = 49;
+    packetBuffer[13]  = 0x4E;
+    packetBuffer[14]  = 49;
+    packetBuffer[15]  = 52;
+    // all NTP fields have been given values, now
+    // you can send a packet requesting a timestamp:
+    Udp.beginPacket(address, 123); //NTP requests are to port 123
+    Udp.write(packetBuffer, NTP_PACKET_SIZE);
+    Udp.endPacket();
+}
+
+
 
 void WWWsettings::check()
 {
    //**** add non blocking code
     //Serial.println("m ");
     //Serial.println(toEmail);
+    long currentTime = convertToSeconds(::hour(),::minute(),::second());
+   // Serial.println(currentTime);
+    //Serial.println(interval);
+    
+    if(interval > 0) { // only go through if interval is set which is alway
 
-    if(interval > 0) { // only go through if interval is set
-      
-        long currentTime = convertToSeconds(::hour(),::minute(),::second());
-        //check for interval , every second
-     
-        
+        //check for interval
+        //check every second intervalTime, 12 hours as default
         if(currentTime != previousTime) {
             
             previousTime = currentTime;
@@ -64,48 +169,100 @@ void WWWsettings::check()
                     }
 
                 }
+               
                 
             }//interval
            
         }//every second
         
     }// interval exists
- 
+    /*
+     //don't need it. the tiem lib syncs for you with setSyncInterval(interval); in secs. Default is 5min?
+    if(currentTime == twoAM && syncOnce == false) {
+        //sync at 2am
+        setSyncProvider(globalGetNTPTime);
+        syncOnce = true;
+    } else if(currentTime >= twoAM && syncOnce == true) {
+        syncOnce = false;
+    }
+     */
+    
+    if (client.available()) {
+        char c = client.read();
+        Serial.print(c);
+    }
+    
+    if (!client.connected()) {
+        //Serial.println();
+        //Serial.println("disconnecting.");
+        client.stop();
+
+    }
+
 }
 
-boolean WWWsettings::email(char *in_subject, char *in_message) {
-    Serial.println("2noodles mail start");
-    EthernetClient client;
+
+void WWWsettings::email(char *in_subject, char *in_message) {
+//Serial.println("2noodles mail start");
+    //EthernetClient client;
     
     if (client.connect("www.2noodles.com", 80)) {
         
-        Serial.println("2noodles server connected");
+Serial.println("2noodles server connected");
         // Make a HTTP request:
         char emailString[200];
         char key[] = "greencontroller";
-        sprintf(emailString, "to=%s&subject=%s&txt=%s&key=%s&", toEmail, in_subject, in_message, key);
-        Serial.println(emailString);
-        client.print(F("POST /arduino_script/arduino_mail.php"));
-        
-        client.println(F(" HTTP/1.1"));
+        sprintf(emailString, "to=%s&subject=%s&txt=%s&key=%s", WWWsettings::toEmail, in_subject, in_message, key);
+//Serial.println(emailString);
+    
+         //post
+        client.println(F("POST /arduino_script/arduino_mail.php HTTP/1.1"));
         client.println(F("Host: www.2noodles.com"));
+        client.println(F("Connection: keep-alive"));
         client.println(F("Content-Type: application/x-www-form-urlencoded"));
         client.print(F("Content-Length: "));
         client.println(strlen(emailString));
-        client.println(F("Connection: close"));
         client.println();
         client.println(emailString);
-        //waitForResponse(client);
-        client.stop();
-        Serial.println("disconnect");
-        return true;
+    
+        
+        //get
+        /*
+        //client.print(F("GET /arduino_script/arduino_mail.php?"));
+        client.println(F("GET /arduino_script/arduino_mail.php?to=5137036979@vtext.com&subject=testing&txt=testing&key=greencontroller HTTP/1.1"));
+        //client.print(F(emailString));
+        //client.println(F(" HTTP/1.1"));
+        client.println(F("Host: www.2noodles.com"));
+        client.println(F("Connection: close"));
+        client.println();
+        */
+        
+        //wait for response - no response
+        /*
+        long beginWait = millis();
+        while (millis() - beginWait < 1500) {
+            Serial.print("wait...");
+            while (client.available())
+            {
+                char c = client.read();
+                Serial.print(c);
+            }//end while
+
+        }
+        */
+        //don't stop or wont complete connection
+        //client.stop();
+//Serial.println("disconnect");
+
+        
+        //return true;
         
     }
     else {
         // didn't get a connection to the server:
         Serial.println("connection failed");
         client.stop();
-        return false;
+        //return false;
     }
 
 }
@@ -116,7 +273,7 @@ void WWWsettings::setNetworkIp(char *in_ip) {
 
 char * WWWsettings::getNetworkIp(char *in_holder) {
     
-    EthernetClient client;
+    //EthernetClient client;
     Serial.println("getting network ip");
     if (client.connect(networkAddress, 80))
     {
@@ -203,7 +360,7 @@ char * WWWsettings::getNetworkIp(char *in_holder) {
 boolean WWWsettings::updateDDNS() {
     Serial.println("update ddns");
     
-    EthernetClient client;
+    //EthernetClient client;
     
     
     char userpass[100]={'\0'};
@@ -260,6 +417,8 @@ boolean WWWsettings::updateDDNS() {
     
 }
 
+
+
 void WWWsettings::setPort(int in_port)
 {
     smtpPort = in_port;
@@ -281,6 +440,7 @@ char * WWWsettings::getSMTP()
 }
 
 /*
+ //most smtp will not send because this is considered spam
 byte WWWsettings::emailSMTP(char *in_subject, char *in_message)
 {
     EthernetClient client;
@@ -365,13 +525,17 @@ void WWWsettings::getEvent(char *string) {
     sprintf(string, "%02d:%02d", hour,minute);
 }
 
-
+//don't declare static in method cpp, only h
 char * WWWsettings::getToEmail() {
-    return toEmail;
+    return WWWsettings::toEmail;
+    Serial.println("---to email");
+    Serial.println(WWWsettings::toEmail);
 }
 
 void WWWsettings::setToEmail(char *in_email) {
-    strcpy(toEmail, in_email);
+    strcpy(WWWsettings::toEmail, in_email);
+    Serial.println("***to email");
+    Serial.println(WWWsettings::toEmail);
 }
 
 char * WWWsettings::getFromEmail() {
@@ -399,6 +563,26 @@ void WWWsettings::setNetworkHost(char *in_host) {
     strcpy(networkHost, in_host);
    
 }
+
+char * WWWsettings::getNTPip() {
+    return NTPip;
+    
+}
+
+void WWWsettings::setNTPip(char *in_ip){
+     //strcpy(NTPip, in_ip);
+    //setup and copy
+    splitIP(NTPip, timeServer);
+}
+
+int WWWsettings::getTimeZone() {
+    return timeZone;
+}
+
+void WWWsettings::setTimeZone(int zone){
+    timeZone = zone;
+}
+
 
 char * WWWsettings::getDdnsHost() {
     return ddnsHost;

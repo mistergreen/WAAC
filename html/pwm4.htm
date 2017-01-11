@@ -120,6 +120,12 @@
 								console.log( "error: " +":"+textStatus +":"+errorThrown);
 						}); // xml function
 					
+					$("#imagemenu").change(function() {
+						var str = $(this).val();
+						
+						$("#display_image img").attr("src", "images/"+str);
+						
+					});
 					
 					var pwmVal = [];
 					$('input[name=slider1]').on('slidestop', function(event) {

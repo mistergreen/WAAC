@@ -10,7 +10,7 @@
 class Alert : public Device
 {
   public:
-    Alert(char *in_name, char *in_email, int in_dependent_device_id);
+    Alert(char *in_name, int in_dependent_device_id);
     ~Alert(); // destructor
 
     void loop(); // required
@@ -36,7 +36,7 @@ class Alert : public Device
     char * getMessage();
     void setMessage(char *in_message);
     
-    EthernetClient *client;
+    EthernetClient client;
     
     char email[35];
     char subject[35];
@@ -51,6 +51,7 @@ class Alert : public Device
     //char key[35]; //needed to email, like a password
     long interval;
     long intervalTime;
+
 
     
 };

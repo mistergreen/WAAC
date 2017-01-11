@@ -2,16 +2,18 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>PWM</title>
+<title>Adafruit 12bit PWM 8 channels</title>
 <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
 <link rel="stylesheet" href="common.css" />
 <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
 <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
 <script src="common.js"></script>
+
 <script>
-     
+  
+	
 	$(document).on('pagebeforeshow',function(event) {
-			
+				
 					var deviceId = localStorage.getItem("deviceId");
 					var deviceType = localStorage.getItem("deviceType");
 			
@@ -22,16 +24,17 @@
 					
 						$.get( "?deviceid="+ deviceId +"&devicetype=" + deviceType + nocache,  
 							function(data) {
+			console.dirxml(data);
 								// grab images & color list
 								$(data).find("item").each(function() {
 									imageStr += '<option value="'+ $(this).find("image").text()+'">'+ $(this).find("image").text()+'</option>';
 								});
-							
+		
 								$('#imagemenu').append(imageStr).selectmenu("refresh",true);
 								
 								// grab dependent device  list
 								$(data).find("device").each(function() {
-									deviceStr += '<option value="'+ $(this).find("id").text()+'">'+ decodeURIComponent($(this).find("name").text()) +'</option>';
+									deviceStr += '<option value="'+ $(this).find("id").text()+'">'+ decodeURIComponent($(this).find("name").text())+'</option>';
 								});
 								
 								$('#dependentmenu').append(deviceStr).selectmenu("refresh",true);
@@ -39,15 +42,43 @@
 							
 								//****** grab device specific data & populate fields ********
 								if(deviceId != 0) {	
+								
 										$('#name').val(decodeURIComponent($(data).find("deviceName").text()));
-										$('#pin').val($(data).find("pin").text());
+										
+										var redpin = $(data).find("redpin").text();
+										$('#redpin').val((redpin=="-1")?"":redpin);
+										
+										var greenpin = $(data).find("greenpin").text();
+										$('#greenpin').val((greenpin=="-1")?"":greenpin);
+										
+										var bluepin = $(data).find("bluepin").text();
+										$('#bluepin').val((bluepin=="-1")?"":bluepin);
+										
+										var whitepin = $(data).find("whitepin").text()
+										$('#whitepin').val((whitepin=="-1")?"":whitepin);
+										
+										var aux1pin = $(data).find("aux1").text();
+										$('#aux1pin').val((aux1pin=="-1")?"":aux1pin);
+										
+										var aux2pin = $(data).find("aux2").text();
+										$('#aux2pin').val((aux2pin =="-1")?"":aux2pin);
+										
+										var aux3pin = $(data).find("aux3").text();
+										$('#aux3pin').val((aux3pin=="-1")?"":aux3pin);
+										
+										var aux4pin = $(data).find("aux4").text()
+										$('#aux4pin').val((aux4pin=="-1")?"":aux4pin);
+										
 										var value = $(data).find("state").text();
 									
+										
 										if(value == "0") {
-											$('#status').html('<span class="led-off"></span>OFF');
+											$('#status').val("off").slider("refresh");
 										} else {
-											$('#status').html('<span class="led-on"></span>ON');
+											$('#status').val("on").slider("refresh");
 										}
+		
+
 										
 										var imageMenu = $(data).find("deviceImage").text();
 										$('#imagemenu').val(imageMenu).selectmenu("refresh");
@@ -75,24 +106,43 @@
 											});
 											
 										var j = 1;
-								
+								// parts[0] is dow
+								console.log("parts: "+parts);
 										for(var i=1; i < parts.length; i+=3) {
-											var start = parts[i].split(":");
+											var startTime = parts[i];
+											var start = startTime.split(":");
 											$("#hour"+j).val(start[0]);
 											$("#minute"+j).val(start[1]);
 											$("#second"+j).val(start[2]);
-											var duration = parts[i+1].split(":");
+											
+											var durationPart = parts[i+1];
+							console.log("duration: "+durationPart);
+											var duration = durationPart.split(":");
 											$("#hourd"+j).val(duration[0]);
 											$("#minuted"+j).val(duration[1]);
 											$("#secondd"+j).val(duration[2]);
-											//pwm
-											$("#slider"+j).val(parts[i+2]).slider("refresh");
+											
+											var pwmPart = parts[i+2];
+											var pwm = pwmPart.split(":");
+											$("#red"+j).val(pwm[0]).slider("refresh");
+											$("#green"+j).val(pwm[1]).slider("refresh");
+											$("#blue"+j).val(pwm[2]).slider("refresh");
+											$("#white"+j).val(pwm[3]).slider("refresh");
+											$("#aux"+j+"1").val(pwm[4]).slider("refresh");
+											$("#aux"+j+"2").val(pwm[5]).slider("refresh");
+											$("#aux"+j+"3").val(pwm[6]).slider("refresh");
+											$("#aux"+j+"4").val(pwm[7]).slider("refresh");
 											j++;
 										}
-										
-										
-					
-								}
+$.mobile.loading("hide");
+								} else {
+									//hide slider so not to crash the server
+									//on creating device
+									//$("#one").hide();
+									//$("#two").hide();
+									//$("#three").hide();
+									//$("#four").hide();
+								}//end deviceId
 	
 							
 							}).fail(function( jqXHR, textStatus, errorThrown ) {
@@ -100,46 +150,76 @@
 								console.log( "error: " +":"+textStatus +":"+errorThrown);
 						}); // xml function
 					
+					$("#imagemenu").change(function() {
+						var str = $(this).val();
+					
+						$("#display_image img").attr("src", "images/"+str);
+					
+					});
+				
+					var pwmVal = [];
 					$('input[name=slider1]').on('slidestop', function(event) {
-						setPWM($(this).val());
+						var i = 0;
+						$('input[name=slider1]').each(function() {
+							pwmVal[i] = $(this).val();
+							i++;
+						});
+						setPWMs(pwmVal);
 					});
 					
 					$('input[name=slider2]').on('slidestop', function(event) {
-						setPWM($(this).val());
+						var i = 0;
+						$('input[name=slider2]').each(function() {
+							pwmVal[i] = $(this).val();
+							i++;
+						});
+						setPWMs(pwmVal);
 					});
 					
 					$('input[name=slider3]').on('slidestop', function(event) {
-						setPWM($(this).val());
+						var i = 0;
+						$('input[name=slider3]').each(function() {
+							pwmVal[i] = $(this).val();
+							i++;
+						});
+						setPWMs(pwmVal);
 					});
 					$('input[name=slider4]').on('slidestop', function(event) {
-						setPWM($(this).val());
-					});		
-				
-				
+						var i = 0;
+						$('input[name=slider4]').each(function() {
+							pwmVal[i] = $(this).val();
+							i++;
+						});
+						setPWMs(pwmVal);
+					});
+					
 			});
 			
-			function setPWM(inVal) {
+			
+			
+			function setPWMs(inArray) {
 				var id = localStorage.getItem("deviceId");
-				
-				$.get("?setpwm=" + id + "&pwm="+ inVal+"&", function(data) {
+				//don't set so not to crash the server
+				if(id != 0) {
+					console.log("setPWM");
+				$.get("?set8adapwms=" + id + "&red="+ inArray[0] +"&green="+inArray[1]+"&blue="+inArray[2]+"&white="+inArray[3]+"&aux1="+inArray[4]+"&aux2="+inArray[5]+"&aux3="+inArray[6]+"&aux4="+inArray[7], function(data) {
 				//nothing
 				});
-				
-				
+				}
+	
 			}
-			
-			
 			
 	
 			function validate() {
-	
+				$.mobile.loading("show");
+
 				var deviceId = localStorage.getItem("deviceId");
 				var deviceType = localStorage.getItem("deviceType");
 				var str = "";
-				
-				var imageStyle = $("#imagemenu option:selected").val();
 
-				str += "name=" + $("#name").val() + "&pin=" + $("#pin").val() + "&image=" + imageStyle +"&";
+				str += "name=" + $("#name").val() + "&redpin=" + $("#redpin").val() + "&greenpin=" + $("#greenpin").val() + "&bluepin=" + $("#bluepin").val() + "&whitepin=" + $("#whitepin").val();
+				str += "&aux1pin=" + $("#aux1pin").val() + "&aux2pin=" + $("#aux2pin").val() + "&aux3pin=" + $("#aux3pin").val() + "&aux4pin=" + $("#aux4pin").val()
+				str += "&image=" + $("#imagemenu option:selected").val() + "&dependent=" + $("#dependentmenu option:selected").val() +"&";
 			
 				var eventStr = "event=";
 				var dow = "";
@@ -158,16 +238,15 @@
 						
 						eventStr = eventStr + "," + $("#hour"+i).val() + ":" + $("#minute"+i).val() + ":" + $("#second"+i).val();
 						eventStr = eventStr + "," + $("#hourd"+i).val() + ":" + $("#minuted"+i).val() + ":" + $("#secondd"+i).val();
-						eventStr = eventStr + "," + $("#slider"+i).val();
+						eventStr = eventStr + "," + $("#red"+i).val() + ":" + $("#green"+i).val() + ":"+ $("#blue"+i).val() +":"+ $("#white"+i).val();
+						eventStr = eventStr + ":" + $("#aux"+i+"1").val() + ":" + $("#aux"+i+"2").val() + ":"+ $("#aux"+i+"3").val() +":"+ $("#aux"+i+"4").val();
 					}
 				}
 				
 				str += eventStr;
 				
-				
-			
-				
-		
+	
+		console.log(deviceId+ ":"+ deviceType+":"+ str);
 				$.get( "?savedevice="+ deviceId +"&devicetype="+ deviceType + "&"+ str, function(data) {
 					if(data != null) {
 						//on complete save, go back to home
@@ -183,26 +262,45 @@
 				
 			}// end function
 			
+		function clearOut(inId) {
+				if(confirm("Are you sure?")) {
+					$("#hour"+inId+", #minute"+inId+", #second"+inId+", #hourd"+inId+", #minuted"+inId+", #secondd"+inId).val("");
+					$("input[name='dow']").attr("checked",false).checkboxradio("refresh");
+					$("input[name='slider" +inId+"']").val(0).slider("refresh");
 	
+					
+				}
+			}
 	
-</script>             
+</script>
+          
 </head>
 
 <body>
 
 <div data-role="header" data-theme="b">
-	<h1>PWM</h1>
+	<h1>Adafruit 12bit PWM 8 channels</h1>
 </div>
 
 <div class="ui-body ui-grid-a ui-responsive">
         <div class="ui-block-a">
             <input name="name" type="text" id="name" placeholder="Name" value="" maxlength="25" /> 
-            <input name="pin" type="number" id="pin" placeholder="ARDUINO PIN" value=""  />
+            <input name="redpin" type="number" id="redpin" placeholder="RED PIN" value=""  />
+            <input name="greenpin" type="number" id="greenpin" placeholder="GREEN PIN" value=""  />
+            <input name="bluepin" type="number" id="bluepin" placeholder="BLUE PIN" value=""  />
+            <input name="whitepin" type="number" id="whitepin" placeholder="WHITE PIN" value=""  />
+           <input name="aux1pin" type="number" id="aux1pin" placeholder="AUX1 PIN" value=""  />
+            <input name="aux2pin" type="number" id="aux2pin" placeholder="AUX2 PIN" value=""  />
+            <input name="aux3pin" type="number" id="aux3pin" placeholder="AUX3 PIN" value=""  />
+            <input name="aux4pin" type="number" id="aux4pin" placeholder="AUX4 PIN" value=""  />
+
+ 			<br>
             <legend>Device Status</legend>
-            <p>
-            <span id="status"><span class="led-off"></span>OFF</span>
-            </p>
-         
+            <select name="status" id="status" data-role="slider" onChange="switchState()">
+                <option value="off">Off</option>
+                <option value="on">On</option>
+            </select>
+            
             
          </div>
          <div class="ui-block-b">
@@ -240,10 +338,10 @@
 	</div>
     <div data-role="navbar" id="navbar">
             <ul>
-                <li><a href="#one" data-ajax="false" class="ui-btn-active" data-theme="b">one</a></li>
-                <li><a href="#two" data-ajax="false" data-theme="b">two</a></li>
-                <li><a href="#three" data-ajax="false" data-theme="b">three</a></li>
-                <li><a href="#four" data-ajax="false" data-theme="b">four</a></li>
+                <li><a href="#one" data-ajax="false" class="ui-btn-active" data-theme="b">event 1</a></li>
+                <li><a href="#two" data-ajax="false" data-theme="b">event 2</a></li>
+                <li><a href="#three" data-ajax="false" data-theme="b">event 3</a></li>
+                <li><a href="#four" data-ajax="false" data-theme="b">event 4</a></li>
             </ul>
         </div>
         
@@ -255,13 +353,13 @@
         	<b>Start</b>
          	<div class="ui-grid-b">
                 <div class = "ui-block-a">
-                     <input name="hour1" type="number" id="hour1" placeholder="Hour" value="" />
+                     <input name="hour1" type="number" pattern="[0-9]" id="hour1" placeholder="Hour" value="" />
                 </div>
                 <div class = "ui-block-b">
-                     <input name="minute1" type="number" id="minute1" placeholder="Minute" value="" />
+                     <input name="minute1" type="number" pattern="[0-9]" id="minute1" placeholder="Minute" value="" />
                 </div>
               	<div class = "ui-block-c">
-                 	<input name="second1" type="number" id="second1" placeholder="Second" value="" />
+                 	<input name="second1" type="number" pattern="[0-9]" id="second1" placeholder="Second" value="" />
               	</div>
         	</div>
            
@@ -270,20 +368,42 @@
             	 <b>Duration</b>
                 <div class="ui-grid-b">
                     <div class = "ui-block-a">
-                         <input name="hourd1" type="number" id="hourd1" placeholder="Hour" value="" />
+                         <input name="hourd1" type="number" pattern="[0-9]" id="hourd1" placeholder="Hour" value="" />
                     </div>
                     <div class = "ui-block-b">
-                         <input name="minuted1" type="number" id="minuted1" placeholder="Minute" value="" />
+                         <input name="minuted1" type="number" pattern="[0-9]" id="minuted1" placeholder="Minute" value="" />
                     </div>
                     <div class = "ui-block-c">
-                        <input name="secondd1" type="number" id="secondd1" placeholder="Second" value="" />
+                        <input name="secondd1" type="number" pattern="[0-9]" id="secondd1" placeholder="Second" value="" />
                     </div>
                 </div>
             </div>  
   		</fieldset>
         <div class="ui-field-contain" >
-        <label for="slider">PWM</label>
-        <input type="range" name="slider1" id="slider1" data-highlight="true" min="0" max="255" value="0">
+        <label for="slider">RED</label>
+        <input type="range" name="slider1" id="red1" data-highlight="true" min="0" max="4095" value="0">
+        
+        <label for="slider">GREEN</label>
+        <input type="range" name="slider1" id="green1" data-highlight="true" min="0" max="4095" value="0">
+        
+        <label for="slider">BLUE</label>
+        <input type="range" name="slider1" id="blue1" data-highlight="true" min="0" max="4095" value="0">
+        
+        <label for="slider">WHITE</label>
+        <input type="range" name="slider1" id="white1" data-highlight="true" min="0" max="4095" value="0">
+         
+        <label for="slider">AUX1</label>
+        <input type="range" name="slider1" id="aux11" data-highlight="true" min="0" max="4095" value="0">
+        
+        <label for="slider">AUX2</label>
+        <input type="range" name="slider1" id="aux12" data-highlight="true" min="0" max="4095" value="0">
+        
+        <label for="slider">AUX3</label>
+        <input type="range" name="slider1" id="aux13" data-highlight="true" min="0" max="4095" value="0">
+        
+        <label for="slider">AUX4</label>
+        <input type="range" name="slider1" id="aux14" data-highlight="true" min="0" max="4095" value="0">
+        
         </div>
         <a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="clearOut(1)" style="width: 55px; float: right;">RESET</a>      
   </div>
@@ -321,8 +441,32 @@
             </div>    
   		</fieldset>
         <div class="ui-field-contain" >
-            <label for="slider">PWM</label>
-            <input type="range" name="slider2" id="slider2" data-highlight="true" min="0" max="255" value="0">
+            <label for="slider">RED</label>
+            <input type="range" name="slider2" id="red2" data-highlight="true" min="0" max="4095" value="0">
+            
+            <label for="slider">GREEN</label>
+            <input type="range" name="slider2" id="green2" data-highlight="true" min="0" max="4095" value="0">
+            
+            <label for="slider">BLUE</label>
+            <input type="range" name="slider2" id="blue2" data-highlight="true" min="0" max="4095" value="0">
+            
+            <label for="slider">WHITE</label>
+            <input type="range" name="slider2" id="white2" data-highlight="true" min="0" max="4095" value="0">
+            
+              
+        <label for="slider">AUX1</label>
+        <input type="range" name="slider2" id="aux21" data-highlight="true" min="0" max="4095" value="0">
+        
+        <label for="slider">AUX2</label>
+        <input type="range" name="slider2" id="aux22" data-highlight="true" min="0" max="4095" value="0">
+        
+        <label for="slider">AUX3</label>
+        <input type="range" name="slider2" id="aux23" data-highlight="true" min="0" max="4095" value="0">
+        
+        <label for="slider">AUX4</label>
+        <input type="range" name="slider2" id="aux24" data-highlight="true" min="0" max="4095" value="0">
+        
+        
         </div>
         <a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="clearOut(2)" style="width: 55px; float: right;">RESET</a>	 
 	</div>
@@ -361,8 +505,32 @@
             </div>    
   		</fieldset>
         <div class="ui-field-contain" >
-        <label for="slider">PWM</label>
-        <input type="range" name="slider3" id="slider3" data-highlight="true" min="0" max="255" value="0">
+        <label for="slider">RED</label>
+        <input type="range" name="slider3" id="red3" data-highlight="true" min="0" max="4095" value="0">
+        
+        <label for="slider">GREEN</label>
+        <input type="range" name="slider3" id="green3" data-highlight="true" min="0" max="4095" value="0">
+        
+        <label for="slider">BLUE</label>
+        <input type="range" name="slider3" id="blue3" data-highlight="true" min="0" max="4095" value="0">
+        
+        <label for="slider">WHITE</label>
+        <input type="range" name="slider3" id="white3" data-highlight="true" min="0" max="4095" value="0">
+        
+                  
+        <label for="slider">AUX1</label>
+        <input type="range" name="slider3" id="aux31" data-highlight="true" min="0" max="4095" value="0">
+        
+        <label for="slider">AUX2</label>
+        <input type="range" name="slider3" id="aux32" data-highlight="true" min="0" max="4095" value="0">
+        
+        <label for="slider">AUX3</label>
+        <input type="range" name="slider3" id="aux33" data-highlight="true" min="0" max="4095" value="0">
+        
+        <label for="slider">AUX4</label>
+        <input type="range" name="slider3" id="aux34" data-highlight="true" min="0" max="4095" value="0">
+        
+        
         </div>	
         <a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="clearOut(3)" style="width: 55px; float: right;">RESET</a> 
   	</div>
@@ -401,9 +569,34 @@
             </div>    
   		</fieldset>
         <div class="ui-field-contain" >
-        <label for="slider">PWM</label>
-        <input type="range" name="slider4" id="slider4" data-highlight="true" min="0" max="255" value="0">
+        <label for="slider">RED</label>
+        <input type="range" name="slider4" id="red4" data-highlight="true" min="0" max="4095" value="0">
+        
+        <label for="slider">GREEN</label>
+        <input type="range" name="slider4" id="green4" data-highlight="true" min="0" max="4095" value="0">
+        
+        <label for="slider">BLUE</label>
+        <input type="range" name="slider4" id="blue4" data-highlight="true" min="0" max="4095" value="0">
+        
+        <label for="slider">WHITE</label>
+        <input type="range" name="slider4" id="white4" data-highlight="true" min="0" max="4095" value="0">
+        
+                  
+        <label for="slider">AUX1</label>
+        <input type="range" name="slider4" id="aux41" data-highlight="true" min="0" max="4095" value="0">
+        
+        <label for="slider">AUX2</label>
+        <input type="range" name="slider4" id="aux42" data-highlight="true" min="0" max="4095" value="0">
+        
+        <label for="slider">AUX3</label>
+        <input type="range" name="slider4" id="aux43" data-highlight="true" min="0" max="4095" value="0">
+        
+        <label for="slider">AUX4</label>
+        <input type="range" name="slider4" id="aux44" data-highlight="true" min="0" max="4095" value="0">
+        
         </div>
+        
+        
         <a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="clearOut(4)" style="width: 55px; float: right;">RESET</a>	 
   	</div>
 
@@ -412,7 +605,7 @@
             
         <div style="text-align: center">
             <a href="#" class="ui-btn ui-icon-check ui-btn-icon-left" onClick="validate()">SAVE</a>
-            <a href="index.htm" data-ajax="false" class="ui-btn ui-icon-minus ui-btn-icon-left">CANCEL</a>
+            <a href="#" data-ajax="false" class="ui-btn ui-icon-minus ui-btn-icon-left" onClick="cancel()">CANCEL</a>
             <a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="deleteDevice()">DELETE</a>
         </div>
             

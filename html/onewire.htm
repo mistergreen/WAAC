@@ -21,6 +21,7 @@
 					
 						$.get( "?deviceid="+ deviceId +"&devicetype=" + deviceType + nocache,  
 							function(data) {
+	console.log(data);
 									// grab images & color list
 							$(data).find("item").each(function() {
 								imageStr += '<option value="'+ $(this).find("image").text()+'">'+ $(this).find("image").text()+'</option>';
@@ -44,13 +45,17 @@
 										var imageMenu = $(data).find("deviceImage").text();
 										$('#imagemenu').val(imageMenu).selectmenu("refresh");
 										
-										$('#min').val(parseFloat($(data).find("min").text()));
-										$('#max').val(parseFloat($(data).find("max").text()));
+										var minVal = parseFloat($(data).find("min").text());
+										var maxVal = parseFloat($(data).find("max").text());
+console.log("minmax"+minVal+":"+maxVal);
+										$('#min').val(minVal);
+										$('#max').val(maxVal);
 	
-										
-										$("#higher").attr("max", parseFloat($(data).find("max").text())).attr("min", parseFloat($(data).find("min").text())).val(parseFloat($(data).find("higher").text())).slider("refresh");
-										
-										$("#lower").attr("max", parseFloat($(data).find("max").text())).attr("min", parseFloat($(data).find("min").text())).val(parseFloat($(data).find("lower").text())).slider("refresh");
+										var higherVal = parseFloat($(data).find("higher").text());
+										var lowerVal = parseFloat($(data).find("lower").text());
+console.log("lowhigh"+lowerVal+":"+higherVal);
+										$("#higher").attr("max", maxVal).attr("min", minVal).val(higherVal).slider("refresh");
+										$("#lower").attr("max", maxVal).attr("min", minVal).val(lowerVal).slider("refresh");
 										
 										if($(data).find("unit").text() == "0") {
 											$("#celsius").attr("checked",true);
@@ -95,7 +100,12 @@
 								console.log( "error: " +":"+textStatus +":"+errorThrown);
 						}); // xml function
 					
+				$("#imagemenu").change(function() {
+					var str = $(this).val();
 					
+					$("#display_image img").attr("src", "images/"+str);
+					
+				});
 				
 				$("#max, #min").change(function() {
 		
@@ -140,7 +150,7 @@
 				
 			
 				
-			});
+			}); // document
 	
 	
 			function validate() {
@@ -158,7 +168,7 @@
 				str += "min="+ $("#min").val() +"&max="+ $("#max").val() + "&lower=" + $("#lower").val() + "&higher=" + $("#higher").val();
 				
 				str +=  "&conditiontype=" + $("input[name='slidertype']:checked").val();
-		//console.log(str);
+console.log(str);
 				$.get( "?savedevice="+ deviceId +"&devicetype="+ deviceType + "&"+ str, function(data) {
 					if(data != null) {
 						//on complete save, go back to home

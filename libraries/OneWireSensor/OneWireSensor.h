@@ -27,7 +27,7 @@ class OneWireSensor : public Device, public Sensor
     bool getF();
     
   private:
-    
+    //uint8_t pin;
     bool fahrenheit;
     char temperature[17];
     OneWire *ds;

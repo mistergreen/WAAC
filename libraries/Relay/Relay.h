@@ -31,12 +31,12 @@ class Relay : public Device
   private:
     boolean isDay;
     uint8_t timedIndexCounter;
-    uint8_t hour[5];
-    uint8_t minute[5];
-    uint8_t second[5];
-    uint8_t hourDuration[5];
-    uint8_t minuteDuration[5];
-    uint8_t secondDuration[5];
+    int hour[5];
+    int minute[5];
+    int second[5];
+    int hourDuration[5];
+    int minuteDuration[5];
+    int secondDuration[5];
     char dow[5][8];
     
 };//need ; at the end of a class def
