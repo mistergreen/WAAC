@@ -8,6 +8,10 @@ https://www.youtube.com/playlist?list=PLBa21usjmOFKCHJmGBnlkjP8v2rVpoFGZ
 
 I decided not to do back up to settings. It's too complicated. It's best you stick a 9v battery to the arduino in case of a power outtage :)
 
+#ABOUT
+This a plug and play system where you add and control devices through a browser, basically, no coding involved. It's developed by Minh Truong and copyrighted under 2noodles llc. It is free to use with Copyright restrictions.
+
+
 #Required Equipments
 1. Arduino Due
 2. Arduino Ethernet Shield (W5100) with SD card slot. Make sure the W5100 or whatever supports at least 4 simultaneous socket connections. A UDP connection is used to update time.
