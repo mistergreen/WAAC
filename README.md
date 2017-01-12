@@ -13,7 +13,7 @@ This a plug and play system where you add and control devices through a browser,
 
 
 #Required Equipments
-1. Arduino Due
+1. Arduino Due or something comparable in memory
 2. Arduino Ethernet Shield (W5100) with SD card slot. Make sure the W5100 or whatever supports at least 4 simultaneous socket connections. A UDP connection is used to update time.
 3. SD card
 
