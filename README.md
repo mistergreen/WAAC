@@ -26,6 +26,9 @@ This a plug and play system where you add and control devices through a browser,
 2. Find the local network IP, (default) 192.168.1.177:8080 in a browser
 3. Login (default) user: admin pass: waac
 
+#Known Issues
+It's having compiling issues with Arduino IDE 1.8.x. It compiles fine on IDE 1.6.1
+
 #Quick Links
 * <a href="http://aquatictechtank.net/viewforum.php?f=48">Support</a>
 
