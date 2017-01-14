@@ -22,7 +22,7 @@ class Analog : public Device, public Sensor
     
 
     void loop(); // required
-    char * read(); // override
+    const char * read(); // override
     
     void setFormula(char *in_formula);
     char * getFormula();

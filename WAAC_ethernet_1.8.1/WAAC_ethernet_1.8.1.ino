@@ -15,17 +15,14 @@
 // memory check
 #include <malloc.h>
 //#include <stdlib.h>
-#include <stdio.h>
+//#include <stdio.h>
 //
 #include <utility/w5100.h>
 #include <utility/socket.h>
 
 #include <Wire.h>
 #include <WebParser.h>
-//#include <MemoryFree.h>
-#include <Time.h>
-//#include <DS1307RTC.h>
-//#include "RTClib.h"
+#include <TimeLib.h>
 #include <dtostrf.h>
 
 //devices - add any necessary libs for devices here!
@@ -52,17 +49,7 @@
 
 // pin 10-12 & 4 are off limits SPI & SD card
 
-/*notes
-1. i2c devices requires to poke different bytes sequences like a sensor, you'll have to write your own library
-2. use Time.h to sync with RTC.. Time.h will sync automatically when set param
-3. device object will get time from Time.h instead of RTC.
-4. create session for login
-5. server will not render html page if enter through url field. If doesn't understand what to render like index.htm
-
-*/
 /************* systems **************/
-// DS1807 address is 0x68
-// CO2_I2C_ADDRESS 0x7F - 'any sensor' default is 0x68 (same as the RTC)
 // memory check for 'Due'
 extern char _end;
 extern "C" char *sbrk(int i);
@@ -74,15 +61,14 @@ char *ramend=(char *)0x20088000;
 
 //tmElements_t tm;
 
-char *dayName[8] = {"", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+const char *dayName[8] = {"", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
-char *monthName[13] = {"", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+const char *monthName[13] = {"", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
-//RTC_DS1307 rtc;
 
 /************* Device menu **************/
 // { device type (must be unique & same as classType), description, html form to configure it }
-char *deviceMenu[][3] = {
+const char *deviceMenu[8][3] = {
                         {"Analog","Analog input with Shunt", "analog.htm"},
                         {"AdaFruitPWM8","AdaFruit PWM 12-bit, 8 channel", "adapwm8.htm"},
                         {"Alert","Email Alerts", "alert.htm"},
@@ -93,7 +79,7 @@ char *deviceMenu[][3] = {
                         {NULL}
                        };
 
-char *deviceStyle[][2] = {
+const char *deviceStyle[11][2] = {
                         {"none.jpg", "FFFFFF"},
                         {"alert.jpg", "FCDF31"},
                         {"fan.jpg", "4B8BE3"},
@@ -154,89 +140,6 @@ void setup()
   #endif
 
   
-  //sync RTC time
- 
-   //rtc.begin();
-
-  //if (! rtc.isrunning()) {
-    //Serial.println("RTC is NOT running!");
-    // following line sets the RTC to the date & time this sketch was compiled
-   // rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-    // This line sets the RTC with an explicit date & time, for example to set
-    // January 21, 2014 at 3am you would call:
-    // rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
- // }
-   
-  //setSyncProvider(syncProvider);   // the function to get/sync the time from the RTC - occurs every 5 mins?, you can change the interval 
- 
-  
-
-  //********************** manually add I2C devices for the app **********************
-  //                                     name,  i2c address, low target, high target
-  //CO2sensor *co2 = new CO2sensor("CO2 sensor",0x7F, 0, 43);
- // deviceDelegate.addDevice(co2);
-  //deviceDelegate.currentDevice()->setStyle(deviceStyle[3][0],deviceStyle[3][1]);
-  /*
-  OneWireSensor *one = new OneWireSensor("Water temp", 2, 0, 100);
-  deviceDelegate.addDevice(one);
-  deviceDelegate.currentDevice()->setStyle(deviceStyle[7][0],deviceStyle[7][1]);
-  static_cast<OneWireSensor*>(deviceDelegate.currentDevice())->setLowerTarget(70.0);
-  static_cast<OneWireSensor*>(deviceDelegate.currentDevice())->setHigherTarget(81.0);
-  */
-  
-  //temp, no interface
-// relay time event trigger a crash!?  
-  /*
-  Relay *tempObj = new Relay("LED", 22, 0);
-  deviceDelegate.addDevice( tempObj );
-  deviceDelegate.currentDevice()->setStyle(deviceStyle[3][0],deviceStyle[3][1]);
-  char temp[] = "10:00:00,1:30:00,1111111,12:30:00,5:00:00,1010101";
-  deviceDelegate.currentDevice()->setEvent(temp);
-  */
- //temp, no interface
- /*
-  deviceDelegate.addDevice( new PWM4("PWM Lights",0) );
-  deviceDelegate.currentDevice()->setStyle(deviceStyle[3][0],deviceStyle[3][1]);
-  static_cast<PWM4*>(deviceDelegate.currentDevice())->setPins(8,7,6,5);
-  char temp2[] = "1111111,8:00:00,0:30:00,100:10:255:50,9:30:00,0:00:10,255:50:30:255";
-  deviceDelegate.currentDevice()->setEvent(temp2);
-  
-  deviceDelegate.addDevice( new AdaFruitPWM("Ada PWM",0,0) );
-  deviceDelegate.currentDevice()->setStyle(deviceStyle[3][0],deviceStyle[3][1]);
-  char temp3[] = "1111111,8:00:00,0:30:00,100,9:30:00,0:00:10,4055";
-  deviceDelegate.currentDevice()->setEvent(temp3);
-  */
- 
-  /*
-  deviceDelegate.addDevice( new AdaFruitPWM4("AdaPWM Lights",0) );
-  deviceDelegate.currentDevice()->setStyle(deviceStyle[3][0],deviceStyle[3][1]);
-  static_cast<AdaFruitPWM4*>(deviceDelegate.currentDevice())->setPins(0,1,2,3);
-  char temp2[] = "1111111,8:00:00,0:30:00,100:10:255:50,9:30:00,0:00:10,255:50:30:255";
-  deviceDelegate.currentDevice()->setEvent(temp2);
- */
-  /*
-   deviceDelegate.addDevice( new AdaFruitPWM8("Pendant Light",0) );
-  deviceDelegate.currentDevice()->setStyle(deviceStyle[3][0],deviceStyle[3][1]);
-  static_cast<AdaFruitPWM8*>(deviceDelegate.currentDevice())->setPins(0,1,2,3,4,5,6,7);
-  char temp2[] = "1111111,8:00:00,0:30:00,100:10:255:50:100:10:255:50,9:30:00,0:00:10,255:50:30:255:100:10:255:50";
-  deviceDelegate.currentDevice()->setEvent(temp2);
-  */
-  
-  /*
-  deviceDelegate.addDevice( new Video("Aquarium Stream", "owTmdfiTjIM") );
-  deviceDelegate.currentDevice()->setStyle(deviceStyle[8][0],deviceStyle[8][1]);
-  */
-
-  /*
-  deviceDelegate.addDevice( new Alert("Temperature Alert", "5137036979@vtext.com", 0) );
-  deviceDelegate.currentDevice()->setStyle(deviceStyle[1][0],deviceStyle[1][1]);
-  */
-  
-  /*
-  deviceDelegate.addDevice( new Analog("Temperature Analog", A0) );
-  deviceDelegate.currentDevice()->setStyle(deviceStyle[1][0],deviceStyle[1][1]);
-  */
-  
   //************ initialize SD card & ethernet*******************
   //Ethernet.begin(mac, ip, INADDR_NONE, gateway, subnet);
   Ethernet.begin(mac, ip);
@@ -270,19 +173,7 @@ void setup()
  
   Serial.println("SUCCESS - Found index.htm file.");
     
-  //digitalWrite(SDCARD_CS, HIGH);
-  //let the ethernet card get ready before peforming tasks
-
-  //wwws.setToEmail("minh@2noodles.com");
-  //wwws.setEvent(0,5);
-  //wwws.setNetworkAddress("api.ipify.org");
-  //wwws.setNetworkHost("api.ipify.org");
-  //wwws.setEmailIpState(true);
-  //setDdnsHost("dynupdate.no-ip.com");
-  //setDdnsHostName("greencontroller.ddns.net");
-  
-  //setUser("mistergreen15");
-  //setPassword("mynoip123");
+ // wait for 10 seconds
 
   delay(10000);
   
@@ -296,13 +187,10 @@ void setup()
 }
 
 /************************************************************ loop *********************************/
-// connectLoop controls the hardware fail timeout
-int connectLoop = 0;
   
 void loop() 
 {
-  //Serial.println("x");
-  
+ 
   //loop through devices
   deviceDelegate.loopDevices();
    //Serial.println("y");
@@ -320,7 +208,7 @@ void loop()
         while (client.connected()) {
             if (client.available()) {   // client data available to read
                 char c = client.read(); // read 1 byte (character) from client
-                //Serial.println(c);
+               
                 if (bufferSize < bufferMax) queryBuffer[bufferSize++] = c;
                  if (c == '\n' && currentLineIsBlank) {
                    parseReceivedRequest(client);
@@ -338,22 +226,10 @@ void loop()
                     // a text character was received from client
                     currentLineIsBlank = false;
                 }
-                connectLoop = 0;
+               
                 
             }//end if available
-           /*
-            connectLoop++;
-            // if more than 10000 milliseconds since the last packet
-            if(connectLoop > 10000)
-            {
-              // then close the connection from this end.
-              Serial.println();
-              Serial.println(F("Timeout"));
-              client.stop();
-            }
-          */
-         
-    
+          
         }//end while connected
     
     
@@ -361,11 +237,6 @@ void loop()
       delay(1);
     // close the connection:
     client.stop();
-    //disconnect the W5200
-    //digitalWrite(W5200_CS,HIGH);
-    
-    //Serial.println("client disonnected");
-   //
     
   }//end client
   
@@ -387,10 +258,7 @@ boolean loggedIn()
    webParser.clearBuffer(param_value,queryMax);
    //going to need a parse cookie function
    webParser.parseQuery(queryBuffer, "ARDUINOSESSIONID", param_value);
-   //Serial.println("vvvvvlogin");
-   //Serial.println(arduinoSession);
-   //Serial.println(param_value);
-   //Serial.println(atol(param_value));
+  
    if(arduinoSession == atol(param_value)) {
       return true;
    } else {
@@ -441,7 +309,7 @@ void renderHtmlPage(char *page, EthernetClient client)
               
             myFile.close();
              // disconnect the SD card
-             //digitalWrite(SDCARD_CS, HIGH);
+
         } else {
           Serial.println("file not found"); 
           Serial.println(page);
@@ -491,9 +359,7 @@ void parseReceivedRequest(EthernetClient client)
        //render html pages
        webParser.clearBuffer(param_value, queryMax);
        webParser.fileUrl(queryBuffer, param_value);
-       //Serial.print("xxxx render html");
-       //Serial.println(param_value);
-       // in case no html is defined
+      
        if(strcmp(param_value, "/") == 0) {
          strcpy(param_value, "index.htm");
          client.println(F("HTTP/1.1 302 Found"));
@@ -658,43 +524,14 @@ void parseReceivedRequest(EthernetClient client)
       set4PWM(client);
         
     } 
-    
-     // ***************** set adafruit PWM value 1 channel ********************
-     /*
-    else if(webParser.contains(queryBuffer, "setadapwm"))
-    {
-     
-     setAdaPWM(client);
-        
-    } */
-      // ***************** set ada PWM 4 channels  ********************
-      /*
-    else if(webParser.contains(queryBuffer, "set4adapwms"))
-    {
-     //gets confused with setadapwm
-      //Serial.println(queryBuffer);
-      set4AdaPWMs(client);
-
-        
-    } */
       // ***************** set ada PWM 8 channels  ********************
     else if(webParser.contains(queryBuffer, "set8adapwms"))
     {
-     //gets confused with setadapwm
-      //Serial.println(queryBuffer);
+
       set8AdaPWMs(client);
 
         
     } 
-      // ***************** set  PWM value 1 channel ********************
-      /*
-    else if(webParser.contains(queryBuffer, "setpwm"))
-    {
-
-      
-      setPWM(client);
-        
-    } */
        // ***************** Test Email ********************
     else if(webParser.contains(queryBuffer, "testemail"))
     {
@@ -776,12 +613,10 @@ void parseReceivedRequest(EthernetClient client)
     // ***************** get .htm for what device  ********************
     else if(webParser.contains(queryBuffer, "gettemplate"))
     {
-          //
-          //Serial.println(queryBuffer);
+         
           webParser.clearBuffer(param_value, queryMax);
           webParser.parseQuery(queryBuffer, "gettemplate", param_value);
-      //Serial.println(param_value);
-          //Serial.println("getting template");
+   
           Device *device = deviceDelegate.findDevice(atoi(param_value));
 
           webParser.clearBuffer(param_value,30);
@@ -844,8 +679,7 @@ void parseReceivedRequest(EthernetClient client)
             
             webParser.clearBuffer(param_value, queryMax);
             webParser.parseQuery(queryBuffer, "devicetype", param_value);
-            //Serial.println("devicetype ");
-            //Serial.println(param_value);
+          
             if(webParser.compare(param_value, "Relay")) {
                 
               relayAjaxOutput(client, device);
@@ -865,11 +699,7 @@ void parseReceivedRequest(EthernetClient client)
             else if(webParser.compare(param_value, "PWM4")) 
             {
                pwm4AjaxOutput(client, device);
-            } /*
-            else if(webParser.compare(param_value, "AdaFruitPWM4")) 
-            {
-               adaFruit4PWMAjaxOutput(client, device);
-            } */
+            } 
             else if(webParser.compare(param_value, "AdaFruitPWM8")) 
             {
                adaFruit8PWMAjaxOutput(client, device);
@@ -973,12 +803,6 @@ void parseReceivedRequest(EthernetClient client)
           {
                savePWM4(device);
           }  
-          /*
-          else if(webParser.compare(param_value, "AdaFruitPWM4")) 
-          {
-            
-              saveAdaFruit4PWM(device);
-          }  */
           else if(webParser.compare(param_value, "AdaFruitPWM8")) 
           {
             
@@ -988,7 +812,6 @@ void parseReceivedRequest(EthernetClient client)
           {
               saveAVideo(device);
            
-            
           }
            else if(webParser.compare(param_value, "Alert")) 
           {
@@ -1071,48 +894,11 @@ void findColor(char *image, char *ar) {
               
 }
 
-//****************** RTC stuff ************************************
-/*
-time_t syncProvider()
-{
-  //this does the same thing as RTC_DS1307::get()
-  return rtc.now().unixtime();
-}
-
-
-bool getTime(const char *str)
-{
-  int Hour, Min, Sec;
-
-  if (sscanf(str, "%d:%d:%d", &Hour, &Min, &Sec) != 3) return false;
-  tm.Hour = Hour;
-  tm.Minute = Min;
-  tm.Second = Sec;
-  return true;
-}
-
-bool getDate(const char *str)
-{
-  char Month[12];
-  int Day, Year;
-  uint8_t monthIndex;
-
-  if (sscanf(str, "%s %d %d", Month, &Day, &Year) != 3) return false;
-  for (monthIndex = 0; monthIndex < 13; monthIndex++) {
-    if (strcmp(Month, monthName[monthIndex]) == 0) break;
-  }
-  if (monthIndex >= 13) return false;
-  tm.Day = Day;
-  tm.Month = monthIndex;
-  tm.Year = CalendarYrToTm(Year);
-  return true;
-}
-*/
-
 int freeMemory() {
   char *heapend=sbrk(0);
   register char * stack_ptr asm ("sp");
-  struct mallinfo mi=mallinfo();
+  struct mallinfo mi = mallinfo();
+
   //printf("\nDynamic ram used: %d\n",mi.uordblks);
   //printf("Program static ram used %d\n",&_end - ramstart); 
   //printf("Stack ram used %d\n\n",ramend - stack_ptr); 

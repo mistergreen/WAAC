@@ -4,7 +4,8 @@
 #ifndef Alert_h
 #define Alert_h
 
-#include "../Device/Device.h" 
+//#include "../Device/Device.h"
+#include <Device.h>
 #include <EthernetClient.h>
 
 class Alert : public Device

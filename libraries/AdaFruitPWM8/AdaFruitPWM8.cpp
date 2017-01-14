@@ -29,7 +29,7 @@ AdaFruitPWM8::AdaFruitPWM8(char *in_name, int in_dependent_device_id) : Device()
     isDay = false; // isDay is the day an event is to occur
     timedIndexCounter = 0;
     
-    for(int i=0; i < CHANNEL;i++) {
+    for(int i=0; i < CHANNEL8;i++) {
         color[i].currentColor = 0;
         color[i].initColor = 0;
     }
@@ -52,7 +52,7 @@ AdaFruitPWM8::~AdaFruitPWM8() {
     switchOff();
     
     //delete pwmObj;
-    pwmObj = NULL;
+    //pwmObj = NULL; // dont need too. NULL to pointer
     
     //need clean up the struct?
     //colorAux = NULL;
@@ -82,7 +82,7 @@ void AdaFruitPWM8::setPins(int red, int green, int blue, int white, int aux1, in
 
 void AdaFruitPWM8::getPins(int *inArray) {
     
-     for(int i=0; i < CHANNEL; i++) {
+     for(int i=0; i < CHANNEL8; i++) {
          inArray[i] = color[i].pin;
      }
     
@@ -158,7 +158,7 @@ void AdaFruitPWM8::loop()
                     // if no dependent
                     deviceState = false;
                     
-                    for(uint8_t k=0; k < CHANNEL; k++) {
+                    for(uint8_t k=0; k < CHANNEL8; k++) {
                         if(color[k].currentColor > 0) {
                             deviceState = true;
                             break;
@@ -176,14 +176,14 @@ void AdaFruitPWM8::loop()
                         
                         initMillis = millis();
                         
-                        for(uint8_t k=0; k < CHANNEL; k++) {
+                        for(uint8_t k=0; k < CHANNEL8; k++) {
                             color[k].colorStartTime = initMillis;
                         }
 
                         //in case no duration
                         if(eventTime == durationTime) {
                             
-                            for(uint8_t k=0; k < CHANNEL; k++) {
+                            for(uint8_t k=0; k < CHANNEL8; k++) {
                                 pwmObj.setPin(color[k].pin, color[k].pwm[i], false);
                             }
                             
@@ -202,7 +202,7 @@ void AdaFruitPWM8::loop()
                         long currentMillis = millis();
                         float percent = (float)(currentMillis-initMillis)/(float)fadeSpan;
                         
-                        for(uint8_t k=0; k < CHANNEL; k++) {
+                        for(uint8_t k=0; k < CHANNEL8; k++) {
                             if(color[k].pin > UNSET) {
                                 int colorDif = color[k].pwm[i] - color[k].initColor; // can be + -
                                 long colorInterval = fadeSpan/abs(colorDif);
@@ -230,7 +230,7 @@ void AdaFruitPWM8::loop()
                         //reset and initialize for next event
                         oneTime = false;
       //Serial.println("end fading******");
-                        for(uint8_t k=0; k < CHANNEL; k++) {
+                        for(uint8_t k=0; k < CHANNEL8; k++) {
                             if(color[k].pin > UNSET) {
                                 color[k].currentColor = color[k].pwm[i];
                                 color[k].initColor = color[k].currentColor;
@@ -323,9 +323,9 @@ void AdaFruitPWM8::setEvent(char *in_string)
         secondDuration[l] = tempArr2[2];
         j++;
         
-        int tempArr3[CHANNEL] = {0};
+        int tempArr3[CHANNEL8] = {0};
         stripTime(events[j], tempArr3);
-        for(int k=0; k < CHANNEL; k++) {
+        for(int k=0; k < CHANNEL8; k++) {
             color[k].pwm[l] = tempArr3[k];
         }
         j++;
@@ -415,7 +415,7 @@ void AdaFruitPWM8::setSuspendTime(boolean in_suspend) {
     suspendTime = in_suspend;
     //save current vals
     //reset leds
-    for(uint8_t k=0; k < CHANNEL; k++) {
+    for(uint8_t k=0; k < CHANNEL8; k++) {
         if(color[k].pin > UNSET) {
              pwmObj.setPin(color[k].pin, color[k].currentColor, false);
         }
@@ -431,7 +431,7 @@ void AdaFruitPWM8::switchOn()
     // address is defined in the device cpp file
     //Serial.println("switching on");
    
-    for(uint8_t k=0; k <  CHANNEL; k++) {
+    for(uint8_t k=0; k <  CHANNEL8; k++) {
         if(color[k].pin > UNSET) {
             pwmObj.setPin(color[k].pin, 4095, false);
         }
@@ -445,7 +445,7 @@ void AdaFruitPWM8::switchOff()
 {
     //Serial.println("switching off");
     
-    for(uint8_t k=0; k < CHANNEL;k++) {
+    for(uint8_t k=0; k < CHANNEL8;k++) {
         if(color[k].pin > UNSET) {
             pwmObj.setPin(color[k].pin, 0, false);
         }
@@ -468,7 +468,7 @@ void AdaFruitPWM8::setPWMs(int in_red, int in_green, int in_blue, int in_white, 
 {
     int tempColor[8] = {in_red, in_green, in_blue, in_white, in_aux1, in_aux2, in_aux3, in_aux4};
     
-    for(uint8_t k=0; k < CHANNEL; k++) {
+    for(uint8_t k=0; k < CHANNEL8; k++) {
         if(color[k].pin > UNSET) {
             pwmObj.setPin(color[k].pin, tempColor[k], false);
             //Serial.println(color[k].pin);

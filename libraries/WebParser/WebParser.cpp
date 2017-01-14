@@ -3,9 +3,6 @@
 */
 
 
-
-
-
 #include "WebParser.h"
 
 
@@ -15,7 +12,7 @@ WebParser::WebParser()
 }
 
 //cleaner, more versatile
-const char * WebParser::parseQuery(char *s, char *inparam, char *param_value) {
+const char * WebParser::parseQuery(char *s, const char *inparam, char *param_value) {
     //clear before setting values to it. can't do this because you can only get the size of the pointer.
     //memset(param_value, '\0', sizeof(param_value));
     
@@ -177,7 +174,7 @@ void WebParser::splitTime(char *inString, int *inArray) {
     
 }
 
-bool WebParser::contains(char *inBuff, char *inString) {
+bool WebParser::contains(char *inBuff, const char *inString) {
     
     if(strstr(inBuff, inString) == NULL) {
         return false;
@@ -186,7 +183,7 @@ bool WebParser::contains(char *inBuff, char *inString) {
     }
 }
 
-bool WebParser::compare(char *ins1, char *ins2) {
+bool WebParser::compare(const char *ins1, const char *ins2) {
     
     if(strcmp(ins1, ins2) == 0) {
         //Serial.println("compare true");

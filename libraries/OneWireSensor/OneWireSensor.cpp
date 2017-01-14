@@ -79,7 +79,7 @@ float OneWireSensor::getTemp() {
 }
 
 
-char * OneWireSensor::read() {
+const char * OneWireSensor::read() {
 
     float temp = getTemp();
     

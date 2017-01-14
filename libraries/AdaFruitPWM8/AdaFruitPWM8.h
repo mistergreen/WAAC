@@ -5,7 +5,7 @@
 #ifndef AdaFruitPWM8_h
 #define AdaFruitPWM8_h
 
-#define CHANNEL 8
+#define CHANNEL8 8
 
 
 #include "Arduino.h"
@@ -52,7 +52,7 @@ class AdaFruitPWM8 : public Device
         long colorStartTime;
     } colorAux;
     
-    colorAux color[CHANNEL];
+    colorAux color[CHANNEL8];
     
     //Adafruit_PWMServoDriver *pwmObj; //new() allocated memory
     Adafruit_PWMServoDriver pwmObj; // automatic memory
@@ -77,7 +77,7 @@ class AdaFruitPWM8 : public Device
     
     long fadeSpan;
     
-    int currentPWM[CHANNEL];
+    int currentPWM[CHANNEL8];
    
     
 };

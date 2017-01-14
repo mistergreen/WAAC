@@ -12,7 +12,7 @@ class Device
     
     //can override
     virtual void setSuspendTime(boolean in_suspend);
-    virtual char * read(){ return "0.0"; };
+    virtual const char * read(){ return "0.0"; };
     virtual void setEvent(char *in_string){};
     virtual void getEvent(char *string){};
     virtual int getDependentDevice(){};

@@ -17,7 +17,7 @@ class OneWireSensor : public Device, public Sensor
     
     //****** required **********
     void loop();
-    char * read(); // override
+    const char * read(); // override
     
     //******************
     

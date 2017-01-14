@@ -44,7 +44,7 @@ float Analog::getNewValue() {
     
 }
 
-char * Analog::read() {
+const char * Analog::read() {
     
     output[70];
     

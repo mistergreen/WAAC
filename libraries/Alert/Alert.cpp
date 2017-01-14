@@ -3,8 +3,10 @@
 */
 
 #include "Alert.h"
-#include "../Device/Device.h"
-#include "../DeviceDelegate/DeviceDelegate.h"
+//#include "../Device/Device.h"
+//#include "../DeviceDelegate/DeviceDelegate.h"
+#include <Device.h>
+#include <DeviceDelegate.h>
 #include <EthernetClient.h>
 #include <Time.h>
 #include <WWWsettings.h>
@@ -48,7 +50,7 @@ Alert::Alert(char *in_name, int in_dependent_device_id) : Device()
 
 Alert::~Alert() {
     //delete client;
-    client = NULL;
+    //client = NULL;
 }; // destructor
 
 
@@ -88,7 +90,7 @@ void Alert::emailAlert()
         //Serial.println(emailString);
         
         client.print(F("GET /arduino_script/arduino_mail.php?"));
-        //client.print(F("to=5137036979@vtext.com&subject=test&txt=testinmore&key=greencontroller"));
+        
         client.print(emailString);
         
         client.println(F(" HTTP/1.1"));

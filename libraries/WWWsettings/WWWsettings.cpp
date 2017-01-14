@@ -368,7 +368,7 @@ boolean WWWsettings::updateDDNS() {
     
     sprintf(userpass, "%s:%s", user, password);
     //Serial.println(userpass);
-    base64_encode(output,userpass,strlen(userpass));
+    Base64.encode(output,userpass,strlen(userpass));
     //Serial.println(output);
     if (client.connect(ddnsHost, 80))
     {
