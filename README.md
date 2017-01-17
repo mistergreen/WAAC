@@ -5,6 +5,7 @@ Here are videos of the development
 https://www.youtube.com/playlist?list=PLBa21usjmOFKCHJmGBnlkjP8v2rVpoFGZ
 
 1. Add more devices like pH sensor, simple push button, any device that can interface with the Arduino.
+2. Add data logging capabilities. The data would be saved onto the SD cards and displayed on a highchart framework.
 
 I decided not to do back up to settings. It's too complicated. It's best you stick a 9v battery to the arduino in case of a power outtage :)
 
