@@ -83,23 +83,22 @@ char * Analog::getUnit() {
 void Analog::loop() {
     
     float temp = getNewValue();
-    //float temp = 0.0;
-    //Serial.println("xxxx");
-    //Serial.println(temp);
+  
     if(strcmp(conditionType, "and") == 0) {
-        if(temp < lowerTarget) {
+        //prevents rapid switching by offsetting the values
+        if(temp < lowerTarget-1) {
             //lower target
             deviceState = false;
             
-        } else if(temp > higherTarget) {
+        } else if(temp > higherTarget+1) {
             //high target
             deviceState = false;
-        } else {
+        } else if(temp <= higherTarget || temp >= lowerTarget) {
             //within target
             deviceState = true;
         }
     } else if(strcmp(conditionType, "greater") == 0) {
-        if(temp < lowerTarget) {
+        if(temp < lowerTarget-1) {
             //lower target
             deviceState = false;
             
@@ -112,22 +111,23 @@ void Analog::loop() {
             //lower target
             deviceState = true;
             
-        } else if(temp > higherTarget) {
+        } else if(temp > higherTarget+1) {
             //high target
             deviceState = false;
         }
     } else if(strcmp(conditionType, "not") == 0) {
-        if(temp < lowerTarget) {
+        if(temp < lowerTarget-1) {
             //lower target
             deviceState = true;
             
-        } else if(temp > higherTarget) {
+        } else if(temp > higherTarget+1) {
             //high target
             deviceState = true;
-        } else {
+        } else if(temp <= higherTarget || temp >= lowerTarget) {
             deviceState = false;
         }
     }
+
 }
 
 
