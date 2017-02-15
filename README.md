@@ -15,7 +15,7 @@ This is a plug and play system where you add and control devices through a brows
 
 #Required Equipments
 1. Arduino Due
-2. Arduino Ethernet Shield (W5100) with SD card slot. Make sure the W5100 or whatever supports at least 4 simultaneous socket connections. A UDP connection is used to update time.
+2. Arduino Ethernet Shield (W5100) with SD card slot. Make sure the W5100 or whatever supports at least 4 simultaneous/concurrent socket connections. A UDP connection is used to update time. I hear the new WIFI shield (HDG204) supports 4 sockets. You'll have to change the Ethernet code to support the WIFI shield.
 3. SD card
 
 #Setup
