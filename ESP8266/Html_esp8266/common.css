@@ -1,0 +1,86 @@
+@charset "UTF-8";
+/* CSS Document */
+
+legend {
+	font-size: 1.15em;
+	font-weight: bold;
+	margin: 1.7em 0 .7em 0;	
+	
+}
+
+.buttonHilight {
+	background:#38c !important;
+	
+}
+
+.ui-block-a, .ui-block-b, .ui-block-c {
+	padding: 0 10px 10px 0;
+}
+
+#display_image {
+	width: 100%;
+	height: 150px;
+	box-shadow: 0px 3px 5px #AAA;
+				
+}
+
+#display1, #display2, #display3 {
+	width: 100%;
+	height: 50px;
+	box-shadow: 0px 0px 5px #AAA;
+	background: #EEE;
+	color: #2AD;
+	padding: 7px 0 0 7px;
+	margin: .6em 0;
+}
+
+#display_image img{
+	display: block;
+	margin: 0 auto 0 auto;
+}
+.ui-field-contain {
+	margin-bottom: 20px;	
+	
+	height: 100%;
+}
+
+.ui-field-contain > label {
+	width: 10% !important;
+	padding-left: 10px !important;
+}
+
+#navbar {
+	position:absolute;
+	top: 90px;
+	left: 0;
+	width: 100%;
+	z-index: 100;	
+}
+
+.led-on {
+	margin: 0 4px 0 10px;
+	vertical-align:baseline;
+	display: inline-block;
+	width: 12px;
+	height: 12px;
+	background-color: #F00;
+	border-radius: 50%;
+	box-shadow: #F90 0 -1px 7px 1px, inset #FF0 0 -1px 9px, #F00 0 2px 12px;
+}
+
+.led-off {
+	margin: 0 4px 0 10px;
+	vertical-align:baseline;
+	display: inline-block;
+	width: 12px;
+	height: 12px;
+	background-color: #888;
+	border-radius: 50%;
+	box-shadow: inset #333 0 -1px 5px;
+}
+
+.gauge {
+	position: relative;
+}
+
+			

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <title>Green Controller</title>
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.css" />
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.js"></script>
+    <script src="sha1.js"></script>
+    <script>
+	
+			function loginSubmit() {
+				
+				var user = "&username="+ $('#login input[name=username]').val();
+				var pass = "&password="+sha1( $('#login input[name=password]').val() );
+				
+				nocache = "&nocache=" + Math.random() * 1000000;
+				$.get( "?login=1" + user + pass + nocache,  
+						function(data, status, response) {
+							if (data != null) {
+								var item = $(data).find("response").text();
+								if(item == "login") {
+									location.href= "index.htm"
+								} else {
+									alert("Denied!");
+									$.mobile.loading("hide");	
+								}
+							}
+					
+				});
+				
+				$.mobile.loading("show");
+			}
+		</script>
+    <style>
+		#loginform{
+			width: 90%;
+			background: #EEE;
+			box-shadow: 2px 2px 10px #999;
+			padding: 10px;
+			display: block;
+			margin: 0 auto 0 auto;
+		}
+		
+		@media screen and (min-width: 32em) {
+    		#loginform{
+				width: 400px;
+			}
+		}
+
+		
+	</style>
+    </head>
+    <body>
+        <div data-role="page" id="login">
+            <div data-role="header" data-theme="b">
+                <h1>Login</h1>
+            </div>
+            
+            <div data-role="content" id="content">
+            	<form id="loginform">
+                    <input type="text" name="username" placeholder="Username">
+                	<input type="password" name="password" placeholder="Password">
+                    <br>
+                    <input type="button" value="Submit" onClick="loginSubmit()" data-theme="b">
+                </form>
+                
+                
+            </div>
+        </div>        
+    </body>
+</html>

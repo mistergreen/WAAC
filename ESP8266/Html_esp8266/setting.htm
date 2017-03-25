@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>WWW Settings</title>
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+        <link rel="stylesheet" href="common.css" />
+		<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+        <script src="common.js"></script>
+
+        <script language="javascript" type="text/javascript">
+		
+			$(document).on('pageshow',function(event) {
+					
+				$.mobile.loading("show");
+				
+					//get data from the server
+					nocache = "&nocache=" + Math.random() * 1000000;
+						$.get( "?getsetting" + nocache,  function(data) {
+						
+							$.mobile.loading("hide");
+								//****** grab device specific data & populate fields ********
+								console.log(data);
+										$('#email').val($(data).find("email").text());
+										$('#ntp').val($(data).find("ntp").text());
+										$('#timezone').val($(data).find("timezone").text());
+										
+										var email_value = $(data).find("isEmail").text();
+										var ddns_value = $(data).find("isDDNS").text();
+										
+										if(email_value == "1") {
+											//fill out email
+											$( "#tabs" ).tabs({ active: 0 });
+											$('#hour1').val($(data).find("hour").text());
+											$('#minute1').val($(data).find("minute").text());
+											$('#ipAddress').val($(data).find("ipAddress").text());
+											$('#ipHost').val($(data).find("ipHost").text());
+										} 
+										if(ddns_value == "1") {
+											//fill out ddns
+											$( "#tabs" ).tabs({ active: 1 });
+											$('#hour2').val($(data).find("hour").text());
+											$('#minute2').val($(data).find("minute").text());
+											$('#ddnsHost').val($(data).find("ddnsHost").text());
+											$('#ddnsHostName').val($(data).find("ddnsHostName").text());
+											$('#userName').val($(data).find("user").text());
+											$('#password').val($(data).find("password").text());
+										} 
+	
+							
+							}).fail(function( jqXHR, textStatus, errorThrown ) {
+								alert("Unsuccessful. See console.log for info.");
+								console.log( "error: " +":"+textStatus +":"+errorThrown);
+						}); // xml function
+						
+			$("#hour1, #minute1").keyup(function() {
+	
+				if($("#hour2").val() != "" || $("#minute2").val() != "") {
+					alert("You have Update DDNS filled out. Fill out one or the other, not both.");	
+				}
+			});
+			
+			$("#hour2, #minute2").keyup(function() {
+				if($("#hour1").val() != "" || $("#minute1").val() != "") {
+					alert("You have Email IP filled out. Fill out one or the other, not both.");	
+				}
+			});
+			
+				
+			});
+	
+	
+			function validate() {
+	
+				var str = "";
+				str += "email=" + $("#email").val() +"&";
+				str += "ntp=" + $("#ntp").val() +"&";
+				str += "timezone=" + $("#timezone").val() +"&";
+				if($("#hour1").val() != "" || $("#minute1").val() != "") {
+					str += "hour="+ $("#hour1").val() +"&minute="+ $("#minute1").val() + "&ipaddress=" + $("#ipAddress").val() + "&iphost=" + $("#ipHost").val()+"&istype=1";
+				} else if($("#hour2").val() != "" || $("#minute2").val() != "") {
+					str += "hour="+ $("#hour2").val() +"&minute="+ $("#minute2").val() + "&ddnshost=" + $("#ddnsHost").val() + "&ddnshostname=" + $("#ddnsHostName").val()+"&istype=2"+ "&user=" + $("#userName").val() + "&password=" + $("#password").val();
+				}
+				
+				$.get( "?savesetting&" + str, function(data) {
+					if(data != null) {
+						//on complete save, go back to home
+						if($(data).find("response").text() == "success") {
+							location.href="index.htm";
+						}
+					}
+					
+				}).fail(function( jqXHR, textStatus, errorThrown ) {
+					alert("Saving was unsuccessful. See console.log for info.");
+					console.log( "error: " +":"+textStatus +":"+errorThrown);
+				});
+				
+			}// end function
+			
+				
+		function clearOut(inId) {
+				if(confirm("Are you sure?")) {
+					if(inId == 1) {
+						$("#hour"+inId+", #minute"+inId).val("");
+						$("#ipAddress").val("");
+						$("#ipHost").val("");
+					} else if(inId == 2) {
+						$("#hour"+inId+", #minute"+inId).val("");
+						$("#ddnsHost").val("");
+						$("#ddnsHostName").val("");
+						$("#userName").val("");
+						$("#password").val("");
+					}
+	
+					
+				}
+		}
+			
+		function testEmail() {
+			$.mobile.loading("show");
+			$.get( "?testemail&email=" + $("#email").val()+"&subject=email test&message=email test", function(data) {
+					if(data != null) {
+						$.mobile.loading("hide");
+						if($(data).find("response").text() == "success") {
+							console.log("email sent");
+						} else {
+							console.log("error");
+						}
+					}
+				}).fail(function( jqXHR, textStatus, errorThrown ) {
+					$.mobile.loading("hide");
+					alert("Testing was unsuccessful. See console.log for info.");
+					console.log( "error: " +":"+textStatus +":"+errorThrown);
+				});
+		}
+		
+		function testIP() {
+			var str = "";
+			str += "?testip&ipaddress=" + $("#ipAddress").val() + "&iphost=" + $("#ipHost").val();
+			$.mobile.loading("show");
+			$.get( "?testip&" + str, function(data) {
+					if(data != null) {
+						$.mobile.loading("hide");
+						if($(data).find("response").text() == "success") {
+							$("#display1").html("Your IP: "+$(data).find("ip").text());
+						} else {
+							$("#display1").html("Error...");
+						}
+					}
+					
+				}).fail(function( jqXHR, textStatus, errorThrown ) {
+					$.mobile.loading("hide");
+					alert("Testing was unsuccessful. See console.log for info.");
+					console.log( "error: " +":"+textStatus +":"+errorThrown);
+				});
+		}
+		
+		function testDDNS() {
+			var str = "";
+			str += "?testddns&ddnshost=" + $("#ddnsHost").val() + "&ddnshostname=" + $("#ddnsHostName").val() + "&user=" + $("#userName").val() + "&password=" + $("#password").val();
+			$.mobile.loading("show");			
+			$.get( str, function(data) {
+					if(data != null) {
+						$.mobile.loading("hide");
+						if($(data).find("response").text() == "success") {
+							$("#display2").html("Successfully contact & update server...");
+						} else {
+							$("#display2").html("Error...");
+						}
+					}
+					
+				}).fail(function( jqXHR, textStatus, errorThrown ) {
+					$.mobile.loading("hide");
+					alert("Testing was unsuccessful. See console.log for info.");
+					console.log( "error: " +":"+textStatus +":"+errorThrown);
+				});
+		}
+		
+		function testNTP() {
+			var str = "";
+			str += "?testntp=" + $("#ntp").val() + "&timezone=" + $("#timezone").val();
+			$.mobile.loading("show");			
+			$.get( str, function(data) {
+					if(data != null) {
+						$.mobile.loading("hide");
+						if($(data).find("response").text() == "success") {
+							$("#display3").html("Successfully contacted NTP server...<p>Time: "+$(data).find("time").text()+"</p>");
+							
+						} else {
+							$("#display3").html("Error...");
+						}
+					}
+					
+				}).fail(function( jqXHR, textStatus, errorThrown ) {
+					$.mobile.loading("hide");
+					alert("Testing was unsuccessful. See console.log for info.");
+					console.log( "error: " +":"+textStatus +":"+errorThrown);
+				});
+		}
+		
+		
+		
+	
+		</script>
+         <style>
+			
+			
+		</style>
+
+    </head>
+<body>        
+<div data-role="page">
+            <div data-role="header" data-theme="b">
+                <a href="index.htm" data-ajax="false" data-icon="arrow-l" class="ui-btn-left">Back</a>
+        		<h1>WWW SETTINGS</h1>
+            </div>
+            
+            <div data-role="content" id="content" class="ui-content">
+                
+                    <div class="ui-grid-a ui-responsive ui-body ui-body-a">
+                        <div class="ui-block-a">
+                            <input name="email" type="email" id="email" placeholder="Email" value="" maxlength="45" /> 
+                            <label for="email">Email for alerts and IP notifications</label>
+                            
+                            <p>
+                         <a href="#" onClick="testEmail()" data-icon="refresh" data-role="button" data-inline="true" data-theme="b">TEST EMAIL</a>
+                         </p>
+                         </div>
+                         
+                    </div><br><br>
+                    <div data-role="header" data-theme="a" class="ui-header ui-bar-a" role="banner">
+                        <h1 class="ui-title" role="heading" aria-level="1">Public IP Management</h1>
+                    </div>
+                   
+<div data-role="tabs" id="tabs" class="ui-body ui-body-a">
+    <div data-role="navbar">
+        <ul>
+ 			<li><a href="#emailUpdate" data-ajax="false" class="ui-btn-active" data-theme="c">EMAIL MY IP</a></li>
+            <li><a href="#update" data-ajax="false" data-theme="c">UPDATE DDNS</a></li>
+        </ul>
+    </div>
+    <div id="emailUpdate" class="ui-body ui-body-a">
+    	<legend>Check IP Interval</legend>
+        <div class="ui-grid-c">
+            <div class = "ui-block-a">
+                 <input name="hour1" type="number" id="hour1" placeholder="Hour" value="" data-inline="true"/>
+            </div>
+            <div class = "ui-block-b">
+                 <input name="minute1" type="number" id="minute1" placeholder="Minute" value="" data-inline="true"/>
+            </div>
+        </div>
+        <legend>IP Server Configuration</legend>
+        <div class="ui-grid-a">
+            <div class = "ui-block-a">
+                 <input name="ipAddress" type="text" id="ipAddress" placeholder="IP Server Address" value="" maxlength="45"/>
+            	<label for="ipAddress">Recommended api.ipify.org</label>
+            </div>
+        </div>
+        <div class="ui-grid-a ui-responsive">
+            <div class = "ui-block-a">
+                 <input name="ipHost" type="text" id="ipHost" placeholder="IP Server Host" value="" maxlength="45"/>
+            	<label for="ipHost">Recommended api.ipify.org</label>
+            </div>
+            
+            <div class = "ui-block-b">
+            	<div id="display1"></div>
+            </div>
+            
+        </div>
+        <p>
+        <a href="#" onClick="clearOut(1)" data-icon="delete" data-role="button" data-inline="true" data-theme="b">RESET</a>
+        <a href="#" onClick="testIP()" data-icon="refresh" data-role="button" data-inline="true" data-theme="b">TEST SERVER</a>
+        </p>
+    </div>
+    <div id="update" class="ui-body ui-body-a">
+        <legend>Update DDNS Interval</legend>
+        <div class="ui-grid-c">
+            <div class = "ui-block-a">
+                 <input name="hour2" type="number" id="hour2" placeholder="Hour" value="" />
+            </div>
+            <div class = "ui-block-b">
+                 <input name="minute2" type="number" id="minute2" placeholder="Minute" value="" />
+            </div>
+ 
+        </div>
+         <legend>DDNS Server Configuration</legend>
+        <div class="ui-grid-a">
+            <div class = "ui-block-a">
+                 <input name="ddnsHost" type="text" id="ddnsHost" placeholder="DDNS Host" value="" maxlength="45"/>
+            	<label for="ddnsHost">Recommended dynupdate.no-ip.com</label>
+            </div>
+        </div>
+        <div class="ui-grid-a">
+            <div class = "ui-block-a">
+                 <input name="ddnsHostName" type="text" id="ddnsHostName" placeholder="DDNS Host Name" value="" maxlength="45"/>
+            	<label for="ipHost">eg. controller.ddns.net</label>
+            </div>  
+        </div>
+        <div class="ui-grid-a">
+            <div class = "ui-block-a">
+                 <input name="userName" type="text" id="userName" placeholder="User Name" value="" maxlength="45"/> 	
+            </div>  
+        </div>
+        <div class="ui-grid-a ui-responsive" >
+            <div class = "ui-block-a">
+                 <input name="password" type="password" id="password" placeholder="Password" value="" maxlength="45"/> 	
+            </div>  
+            <div class = "ui-block-b">
+            	<div id="display2"></div>
+            </div>
+        </div>
+        
+        
+        
+        <p>
+        <a href="#" onClick="clearOut(2)" data-icon="delete" data-role="button" data-inline="true" data-theme="b">RESET</a>
+        <a href="#" onClick="testDDNS()" data-icon="refresh" data-role="button" data-inline="true" data-theme="b">TEST SERVER</a>
+        </p>
+    </div>
+</div>
+<br><br>
+			<div data-role="header" data-theme="a" class="ui-header ui-bar-a" role="banner">
+				<h1 class="ui-title" role="heading" aria-level="1">Network Time Server</h1>
+			</div>
+
+             <div class="ui-grid-a ui-responsive ui-body ui-body-a">
+                        <div class="ui-block-a">
+                            <input name="ntp" id="ntp" placeholder="Server IP" value="" maxlength="45" /> 
+                            <label for="ntp">Sync time every 18 hours</label>
+                            <br>
+                            <input name="timezone" id="timezone" placeholder="Time Zone" value="" maxlength="45" /> 
+                            <label for="timezone">1 Europe, -5 East Coast, -9 West Coast </label>
+                            
+                            <p>
+                         <a href="#" onClick="testNTP()" data-icon="refresh" data-role="button" data-inline="true" data-theme="b">TEST SERVER</a>
+                         </p>
+                         </div>
+                         <div class ="ui-block-b">
+                            <div id="display3"></div>
+                        </div>
+                         
+             </div>
+                          
+ 
+            </div>
+            
+
+           	<div data-role="footer" data-position="fixed" data-type="horizontal" data-theme="b" data-tap-toggle="false">
+                <div style="text-align: center">
+                    <a href="#" class="ui-btn ui-icon-check ui-btn-icon-left" onClick="validate()">SAVE</a>
+                    <a href="index.htm" data-ajax="false" class="ui-btn ui-icon-minus ui-btn-icon-left">CANCEL</a>
+                    
+                </div>
+    		</div>
+</div>
+
+
+</body>
+</html>
+
