@@ -39,8 +39,8 @@ This is a plug and play system where you add and control devices through a brows
 <li>Copy all .html, .js, .css files onto the SD card</li>
 <li>Library files go into the Arduino Library folder</li>
 <li>Install the hardware package describe here https://www.wemos.cc/tutorial/get-started-arduino.html
-<li>Install WAAC_8266 onto the WEMOS</li>
-<li>If you want additional digital output pins, combine the WEMOS with an Arduino Mega. The WEMOS communicates with the Arduino via Serial3.</li>
+<li>Install <a href="https://github.com/mistergreen/WAAC/tree/master/ESP8266/WAAC_8266">WAAC_8266</a> onto the WEMOS</li>
+<li>If you want additional digital output pins, combine the WEMOS with an Arduino Mega. The WEMOS communicates with the Arduino via Serial3. Install <a href="https://github.com/mistergreen/WAAC/tree/master/ESP8266/WAAC_Arduino_addon">WAAC_Arduino_addon</a> onto the Arduino</li>
 </ol>
 
 <h2>Running</h2>
