@@ -14,31 +14,40 @@ This is a plug and play system where you add and control devices through a brows
 
 
 <h2><a href="https://github.com/mistergreen/WAAC/tree/master/Arduino_Due">Required Equipments for the Arduino version</a></h2>
-1. Arduino Due
-2. Arduino Ethernet Shield (W5100) with SD card slot. Make sure the W5100 or whatever supports at least 4 simultaneous/concurrent socket connections. A UDP connection is used to update time. I hear the new WIFI shield (HDG204) supports 4 sockets. You'll have to change the Ethernet code to support the WIFI shield.
-3. SD card
+<ol>
+<li>Arduino Due</li>
+<li>Arduino Ethernet Shield (W5100) with SD card slot. Make sure the W5100 or whatever supports at least 4 simultaneous/concurrent socket connections. A UDP connection is used to update time. I hear the new WIFI shield (HDG204) supports 4 sockets. You'll have to change the Ethernet code to support the WIFI shield.</li>
+<li>SD card</li>
+</ol>
 
-<h2><a href="https://github.com/mistergreen/WAAC/tree/master/Arduino_Due">Required Equipments for the ESP8266 version</a></h2>
-1. WEMOS D1 mini
-2. WEMOS SD shield
-3. SD card
-4. Bidirectional logic converter
-5. (optional) Arduino Mega, 5v to 3.3V voltage step down
-
+<h2><a href="https://github.com/mistergreen/WAAC/tree/master/ESP8266">Required Equipments for the ESP8266 version</a></h2>
+<ol>
+<li>WEMOS D1 mini</li>
+<li>WEMOS SD shield</li>
+<li>SD card</li>
+<li>Bidirectional logic converter</li>
+<li>(optional) Arduino Mega, 5v to 3.3V voltage step down</li>
+</ol>
 
 <h2>Setup (Arduino)</h2>
-1. Copy all .html, .js, .css files onto the SD card
-2. Library files go into the Arduino Library folder
+<ol>
+<li>Copy all .html, .js, .css files onto the SD card</li>
+<li>Library files go into the Arduino Library folder</li>
+</ol>
 
 <h2>Setup (ESP8266)</h2>
-1. Copy all .html, .js, .css files onto the SD card
-2. Library files go into the Arduino Library folder
-
+<ol>
+<li>Copy all .html, .js, .css files onto the SD card</li>
+<li>Library files go into the Arduino Library folder</li>
+<li>Install the hardware package describe here https://www.wemos.cc/tutorial/get-started-arduino.html
+</ol>
 
 <h2>Running</h2>
-1. Wait 10 seconds for the Aduino to setup before browsing
-2. Find the local network IP, (default) 192.168.1.177:8080 in a browser
-3. Login (default) user: admin pass: waac
+<ol>
+<li>Wait 10 seconds for the Aduino to setup before browsing</li>
+<li>Find the local network IP, (default) 192.168.1.177:8080 in a browser</li>
+<li>Login (default) user: admin pass: waac</li>
+</ol>
 
 <h2>Quick Links</h2>
 * <a href="http://aquatictechtank.net/viewforum.php?f=48">Support</a>
