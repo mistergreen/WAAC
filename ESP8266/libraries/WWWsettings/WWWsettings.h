@@ -108,7 +108,8 @@ class WWWsettings
         thisClassObj->email(in_subject, in_message);
     }
     
-
+    void setDayLightSaving(boolean val);
+    uint8_t getDayLightSaving();
     
     
   private:
@@ -136,6 +137,7 @@ class WWWsettings
     unsigned long waitTime;
     long twoAM;
     int timeZone;
+    uint8_t dayLightSaving;
     
     uint8_t hour;
     uint8_t minute;

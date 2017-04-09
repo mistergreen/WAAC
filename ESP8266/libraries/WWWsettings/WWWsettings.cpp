@@ -20,6 +20,7 @@ WWWsettings::WWWsettings()
     twoAM = convertToSeconds(18,0,0);
     syncOnce = false;
     //strcpy(toEmail, "");
+    dayLightSaving = 0;
     
 }
 
@@ -72,8 +73,9 @@ void WWWsettings::splitIP(char *inString, uint8_t *inArray) {
 }
 
 time_t WWWsettings::testNTP() {
-
-     return getNtpTime();
+    time_t time = getNtpTime();
+    setTime(time);
+    return time;
 }
 
 /*-------- NTP code ----------*/
@@ -95,10 +97,10 @@ time_t WWWsettings::getNtpTime()
         secsSince1900 |= (unsigned long)packetBuffer[41] << 16;
         secsSince1900 |= (unsigned long)packetBuffer[42] << 8;
         secsSince1900 |= (unsigned long)packetBuffer[43];
-        return secsSince1900 - 2208988800UL + timeZone * SECS_PER_HOUR;
+        return secsSince1900 - 2208988800UL + (timeZone + dayLightSaving) * SECS_PER_HOUR;
     }
  }
-        Serial.println("No NTP Response :-(");
+        Serial.println("No NTP Response");
         return 0; // return 0 if unable to get the time
 
     
@@ -434,14 +436,14 @@ void WWWsettings::getEvent(char *string) {
 //don't declare static in method cpp, only h
 char * WWWsettings::getToEmail() {
     return WWWsettings::toEmail;
-    Serial.println("---to email");
-    Serial.println(WWWsettings::toEmail);
+    //Serial.println("---to email");
+    //Serial.println(WWWsettings::toEmail);
 }
 
 void WWWsettings::setToEmail(char *in_email) {
     strcpy(WWWsettings::toEmail, in_email);
-    Serial.println("***to email");
-    Serial.println(WWWsettings::toEmail);
+    //Serial.println("***to email");
+    //Serial.println(WWWsettings::toEmail);
 }
 
 char * WWWsettings::getFromEmail() {
@@ -564,6 +566,19 @@ void WWWsettings::setDDNSIpState(boolean in_state){
 
 boolean WWWsettings::getDDNSIpState() {
     return isDDNSIp;
+}
+
+void WWWsettings::setDayLightSaving(boolean val) {
+    if(val)
+        dayLightSaving = 1;
+    else
+        dayLightSaving = 0;
+    
+}
+
+uint8_t WWWsettings::getDayLightSaving() {
+    
+    return dayLightSaving;
 }
 
 

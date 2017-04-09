@@ -28,6 +28,15 @@
 										
 										var email_value = $(data).find("isEmail").text();
 										var ddns_value = $(data).find("isDDNS").text();
+										var daylight = $(data).find("daylight").text();
+									
+										if(daylight == "0") {
+											$('#daylight').prop("checked", false).checkboxradio('refresh');
+										} else {
+											$('#daylight').prop("checked", true).checkboxradio('refresh');
+										}
+		
+							
 										
 										if(email_value == "1") {
 											//fill out email
@@ -72,8 +81,11 @@
 	
 	
 			function validate() {
-	
+				
+				var tempDaylight = $("#daylight").prop('checked')===true?1:0;
+				
 				var str = "";
+				str += "daylight=" + tempDaylight +"&";
 				str += "email=" + $("#email").val() +"&";
 				str += "ntp=" + $("#ntp").val() +"&";
 				str += "timezone=" + $("#timezone").val() +"&";
@@ -179,7 +191,10 @@
 		
 		function testNTP() {
 			var str = "";
-			str += "?testntp=" + $("#ntp").val() + "&timezone=" + $("#timezone").val();
+			
+			var temp = $("#daylight").prop('checked')===true?1:0;
+			
+			str += "?testntp=" + $("#ntp").val() + "&timezone=" + $("#timezone").val()+"&daylight="+temp;
 			$.mobile.loading("show");			
 			$.get( str, function(data) {
 					if(data != null) {
@@ -331,9 +346,12 @@
                             <br>
                             <input name="timezone" id="timezone" placeholder="Time Zone" value="" maxlength="45" /> 
                             <label for="timezone">1 Europe, -5 East Coast, -9 West Coast </label>
-                            
+                            <br>
+                            <input name="daylight" id="daylight" type="checkbox">
+							<label for="daylight">Add Daylight Saving</label>
+                           
                             <p>
-                         <a href="#" onClick="testNTP()" data-icon="refresh" data-role="button" data-inline="true" data-theme="b">TEST SERVER</a>
+                         <a href="#" onClick="testNTP()" data-icon="refresh" data-role="button" data-inline="true" data-theme="b">TEST SERVER + SET TIME</a>
                          </p>
                          </div>
                          <div class ="ui-block-b">

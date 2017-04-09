@@ -7,7 +7,7 @@
 
 #include "ArduinoRelay.h"
 #include "DeviceDelegate.h"
-#include <Time.h>
+#include <TimeLib.h>
 
 ArduinoRelay::ArduinoRelay(char *in_name, int in_pin, int in_dependent_device_id) : Relay(in_name, in_pin, in_dependent_device_id)
 {

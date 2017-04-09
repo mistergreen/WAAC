@@ -8,7 +8,7 @@
 
 #include "Relay.h"
 #include "DeviceDelegate.h"
-#include <Time.h>
+#include <TimeLib.h>
 
 Relay::Relay(char *in_name, int in_pin, int in_dependent_device_id) : Device()
 {
@@ -236,7 +236,7 @@ void Relay::switchOn()
 {
     // address is defined in the device cpp file
     //Serial.println("switching on");
-    if(deviceState) {
+    if(invert) {
         digitalWrite(pin,LOW);
     } else {
         digitalWrite(pin,HIGH);
@@ -251,11 +251,10 @@ void Relay::switchOff()
     // address is defined in the device cpp file
     //Serial.println("switching off");
 
-
-    if(deviceState) {
-        digitalWrite(pin,LOW);
-    } else {
+    if(invert) {
         digitalWrite(pin,HIGH);
+    } else {
+        digitalWrite(pin,LOW);
     }
 
     deviceState = false;
