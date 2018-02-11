@@ -1,5 +1,6 @@
-<h2>Required Equipments for the ESP32</h2>
 This is still work in progress. I haven’t fully debug this. I’ve added a flow sensor component to the core code.
+
+<h2>Required Equipments for the ESP32</h2>
 <ol>
 <li>ESP32 - I’m using WEMOS lolin32</li>
 <li>SD card reader</li>
