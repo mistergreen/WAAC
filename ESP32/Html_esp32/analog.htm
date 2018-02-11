@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Analog Input</title>
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+        <link rel="stylesheet" href="common.css" />
+		<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+        <script src="common.js"></script>
+
+        <script language="javascript" type="text/javascript">
+		
+			$(document).on('pageshow',function(event) {
+					var deviceId = localStorage.getItem("deviceId");
+					var deviceType = localStorage.getItem("deviceType");
+					$.mobile.loading("show");
+					//get data from the server
+					nocache = "&nocache=" + Math.random() * 1000000;
+					var imageStr="";
+					
+						$.get( "?deviceid="+ deviceId +"&devicetype=" + deviceType + nocache,  
+							function(data) {
+                                $.mobile.loading("hide");
+                                        // grab images & color list
+                                $(data).find("item").each(function() {
+                                    imageStr += '<option value="'+ $(this).find("image").text()+'">'+ $(this).find("image").text()+'</option>';
+                                });
+
+                                $('#imagemenu').append(imageStr).selectmenu("refresh",true);
+							
+								//****** grab device specific data & populate fields ********
+								if(deviceId != 0) {	
+										$('#name').val(decodeURIComponent($(data).find("deviceName").text()));
+										$('#pin').val($(data).find("pin").text());
+										$('#formula').val($(data).find("formula").text());
+										$('#unit').val(decodeURIComponent($(data).find("unit").text()));
+										var value = $(data).find("state").text();
+									
+										
+										if(value == "0") {
+											$('#status').html('<span class="led-off"></span>OFF');
+										} else {
+											$('#status').html('<span class="led-on"></span>ON');
+										}
+										
+										var imageMenu = $(data).find("deviceImage").text();
+										$('#imagemenu').val(imageMenu).selectmenu("refresh");
+										
+										$('#min').val(parseFloat($(data).find("min").text()));
+										$('#max').val(parseFloat($(data).find("max").text()));
+	
+										
+										$("#higher").attr("max", parseFloat($(data).find("max").text())).attr("min", parseFloat($(data).find("min").text())).val(parseFloat($(data).find("higher").text())).slider("refresh");
+										
+										$("#lower").attr("max", parseFloat($(data).find("max").text())).attr("min", parseFloat($(data).find("min").text())).val(parseFloat($(data).find("lower").text())).slider("refresh");
+										
+										
+										if($(data).find("conditiontype").text() == "and") {
+											$("#and").attr("checked",true);
+										} else if($(data).find("conditiontype").text() == "greater") {
+											$("#greater").attr("checked",true);
+											
+											$("a.ui-slider-handle:last-of-type").addClass("buttonHilight");
+											 $("a.ui-slider-handle:first-of-type").removeClass("buttonHilight");
+											 $( "#slider" ).rangeslider({
+												highlight: false
+											});
+						
+										} else if($(data).find("conditiontype").text() == "lesser") {
+											$("#lesser").attr("checked",true);
+											
+											$("a.ui-slider-handle:first-of-type").addClass("buttonHilight");	
+											$("a.ui-slider-handle:last-of-type").removeClass("buttonHilight");
+											$( "#slider" ).rangeslider({
+												highlight: false
+											});
+											
+										} else {
+											$("#not").attr("checked",true);
+											$( "#slider" ).rangeslider({
+												highlight: false
+											});
+										}
+										
+										$("input[name='slidertype']").checkboxradio("refresh");
+										
+										$('#readout').html(decodeURIComponent($(data).find("readout").text()));
+										
+					
+								}
+								
+	
+							
+							}).fail(function( jqXHR, textStatus, errorThrown ) {
+								alert("Unsuccessful. See console.log for info.");
+								console.log( "error: " +":"+textStatus +":"+errorThrown);
+						}); // xml function
+					
+				$("#imagemenu").change(function() {
+					var str = $(this).val();
+					
+					$("#display_image img").attr("src", "images/"+str);
+					
+				});
+				
+				$("#max, #min").change(function() {
+		
+					var maxValue = $("#max").val();
+					var minValue = $("#min").val();
+					var h = $("#higher").val();
+					var l = $("#lower").val();
+					
+					$("#higher").attr("max", maxValue).attr("min", minValue).val(h).slider("refresh");
+										
+					$("#lower").attr("max", maxValue).attr("min", minValue).val(l).slider("refresh");
+										
+				});
+				
+				$('input[name="slidertype"]').change(function() {
+			
+					if ($(this).val() == "and") {
+						$("a.ui-slider-handle:last-of-type").removeClass("buttonHilight");
+						$("a.ui-slider-handle:first-of-type").removeClass("buttonHilight");
+						
+						$( "#slider" ).rangeslider({
+							highlight: true
+						});
+				
+					} else if ($(this).val() == "greater") {
+						$("a.ui-slider-handle:last-of-type").addClass("buttonHilight");
+						 $("a.ui-slider-handle:first-of-type").removeClass("buttonHilight");
+						 $( "#slider" ).rangeslider({
+							highlight: false
+						});
+		
+					} else if ($(this).val() == "lesser") {
+						$("a.ui-slider-handle:first-of-type").addClass("buttonHilight");	
+						$("a.ui-slider-handle:last-of-type").removeClass("buttonHilight");
+						$( "#slider" ).rangeslider({
+							highlight: false
+						});
+						
+					} else if ($(this).val() == "not") {
+						$("a.ui-slider-handle:last-of-type").removeClass("buttonHilight");
+						$("a.ui-slider-handle:first-of-type").removeClass("buttonHilight");
+						$( "#slider" ).rangeslider({
+							highlight: false
+						});
+						
+					}
+					
+				});
+				
+			
+				
+			});
+	
+	
+			function validate() {
+	
+				var deviceId = localStorage.getItem("deviceId");
+				var deviceType = localStorage.getItem("deviceType");
+				var str = "";
+				
+				var imageStyle = $("#imagemenu option:selected").val();
+
+				str += "name=" + $("#name").val() + "&pin=" + $("#pin").val() + "&image=" + imageStyle +"&";
+				
+				str +=  "unit=" + encodeURIComponent($("#unit").val()) +"&formula=" + $("#formula").val() + "&";
+				
+				str += "min="+ $("#min").val() +"&max="+ $("#max").val() + "&lower=" + $("#lower").val() + "&higher=" + $("#higher").val();
+				
+				str +=  "&conditiontype=" + $("input[name='slidertype']:checked").val();
+		//console.log(str);
+				$.get( "?savedevice="+ deviceId +"&devicetype="+ deviceType + "&"+ str, function(data) {
+					if(data != null) {
+						//on complete save, go back to home
+						if($(data).find("response").text() == "success") {
+							location.href="index.htm";
+						}
+					}
+					
+				}).fail(function( jqXHR, textStatus, errorThrown ) {
+					alert("Saving was unsuccessful. See console.log for info.");
+					console.log( "error: " +":"+textStatus +":"+errorThrown);
+				});
+				
+			}// end function
+			
+	
+		</script>
+         <style>
+
+			#minField div.ui-input-text, #maxField div.ui-input-text {
+				width: 50px !important
+			}
+			#minField {
+				
+				position: absolute;
+				left: 5px;
+				top: 0px;
+			}
+			#maxField {
+				position: absolute;
+				right: 5px;
+				top: 0px;
+			}
+			
+			
+		</style>
+
+    </head>
+<body>        
+<div data-role="page" id="relay_device">
+            <div data-role="header" data-theme="b">
+                <a href="index.htm" data-ajax="false" data-icon="arrow-l" class="ui-btn-left">Back</a>
+        		<h1>Analog Input</h1>
+            </div>
+            
+            <div data-role="content" id="content" class="ui-content">
+<form method="get" id="one-form">
+	
+	<div class="ui-grid-a ui-responsive">
+        <div class="ui-block-a">
+            <input name="name" type="text" id="name" placeholder="Name" value=""  maxlength="25"/> 
+            <input name="pin" type="text" id="pin" placeholder="PIN" value=""  />
+
+            <p>
+            <legend>Device Readout</legend>
+            <span id="readout"></span>
+            </p>
+            <label for="formula" style="font-size: .9em; color: #666;" >Use 'x' as output value: eg. 32+x*5/8</label>
+            <input name="formula" type="text" id="formula" placeholder="TRANSFORM FORMULA" value="" maxlength="45" />
+            
+            <input name="unit" type="text" id="unit" placeholder="UNIT OF MEASUREMENT" value="" maxlength="15" />
+           
+            
+         </div>
+         <div class="ui-block-b">
+            <select name="imagemenu" id="imagemenu">
+              <option value="none.jpg">Image</option>
+            </select>
+            <div id="display_image"><img src="" align="center"></div>
+            <p>
+             <fieldset data-role="controlgroup" data-theme="b" data-type="horizontal">
+            	<legend>Slider type</legend>
+                <input type="radio" name="slidertype" id="and" value="and" checked="checked">
+                <label for="and">AND</label>
+                <input type="radio" name="slidertype" id="greater" value="greater">
+                <label for="greater">GREATER</label>
+                <input type="radio" name="slidertype" id="lesser" value="lesser">
+                <label for="lesser">LESSER</label>
+                <input type="radio" name="slidertype" id="not" value="not">
+                <label for="not">NOT</label>
+            </fieldset>
+            </p>
+            
+                       
+            <p>
+            <legend>Device Status</legend>
+            <span id="status"><span class="led-off"></span>OFF</span>
+            </p>
+            	
+
+         </div>
+         
+	</div>
+  
+    <legend>Parameter Slider</legend>
+    
+    <div data-role="rangeslider" id="slider">
+      <input name="lower" id="lower" min="0" max="150" step=".1" value="0" type="range" />
+      <input name="higher" id="higher" min="0" max="150" step=".1" value="10" type="range" />
+    </div>
+    
+   <div align="center" style="background: #EEE; padding: 15px; position:relative;"><b>Slider Range</b>
+        <div id="minField"><input name="min" id="min" value="0" type="text" placeholder="Min"/></div>
+    	<div id="maxField"><input name="max" id="max" value="150" type="text" placeholder="Max"/></div>
+   </div>
+  
+  </form>
+           		     
+                  
+            </div>
+           	<div data-role="footer" data-position="fixed" data-type="horizontal" data-theme="b" data-tap-toggle="false">
+                <div style="text-align: center">
+                    <a href="#" class="ui-btn ui-icon-check ui-btn-icon-left" onClick="validate()">SAVE</a>
+                    <a href="#" data-ajax="false" class="ui-btn ui-icon-minus ui-btn-icon-left" onClick="cancel()">CANCEL</a>
+                    <a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="deleteDevice()">DELETE</a>
+                </div>
+    		</div>
+</div>
+
+
+</body>
+</html>
+
