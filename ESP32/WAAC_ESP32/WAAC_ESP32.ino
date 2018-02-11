@@ -116,8 +116,8 @@ WWWsettings wwws;
 
 /************* website login **************/
 // wifi
-char ssid[] = "WATERFALL"; //  your network SSID (name)
-char password[] = "quynhnhi";    // your network password (use for WPA, or use as key for WEP)
+char ssid[] = "NETWORKNAME"; //  your network SSID (name)
+char password[] = "networkpassword";    // your network password (use for WPA, or use as key for WEP)
 
 // site login
 char username[] = "admin";
