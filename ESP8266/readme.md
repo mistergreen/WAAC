@@ -1,5 +1,23 @@
 I'm going to drop this project. The arduino was used as an add-on to expand the ESP8266 digital pins. The ESP32 is more useable now and I'll go that direction instead.
 
+<h2>Features</h2>
+<ol>
+<li>NTP time sync</li>
+<li>Email Alerts</li>
+<li>Youtube streaming video connection</li>
+<li>Public IP Management</li>
+</ol>
+
+<h2>Supported Device</h2>
+<ol>
+<li>Analog Input</li>
+<li>Digital Relay</li>
+<li>PWM (12 bit)</li>
+<li>PWM (PCA9685 I2C Servo Driver - 12 bit)</li>
+<li>One Wire Sensor (DS18B20 temperature probe)</li>
+</ol>
+
+
 <h2><a href="https://github.com/mistergreen/WAAC/tree/master/ESP8266">Required Equipments for the ESP8266 version</a></h2>
 <ol>
 <li>WEMOS D1 mini</li>
