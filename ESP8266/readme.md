@@ -12,7 +12,7 @@ I'm going to drop this project. The arduino was used as an add-on to expand the 
 <ol>
 <li>Analog Input</li>
 <li>Digital Relay</li>
-<li>PWM (12 bit)</li>
+<li>PWM (10 bit)</li>
 <li>PWM (PCA9685 I2C Servo Driver - 12 bit)</li>
 <li>One Wire Sensor (DS18B20 temperature probe)</li>
 </ol>
