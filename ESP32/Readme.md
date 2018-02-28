@@ -10,7 +10,7 @@ This is still work in progress. I haven’t fully debug this. I’ve added a flo
 <h2>Supported Device</h2>
 <ol>
 <li>Analog Input</li>
-<li>Digital Relay</li>
+<li>Digital Output</li>
 <li>Flow Sensor (Hall sensor)</li>
 <li>PWM (12 bit)</li>
 <li>PWM (PCA9685 I2C Servo Driver - 12 bit)</li>
