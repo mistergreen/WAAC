@@ -32,6 +32,6 @@ This is still work in progress. I haven’t fully debug this. I’ve added a flo
 
 <h2>Running</h2>
 <ol>
-<li>Static IP doesn’t work for the ESP32 at the moment. You’ll have to find the IP in the serial read out or through your router.</li>
+<li>log on at 192.168.1.177. Static IP works with the 3/2018 ESP32 master</li>
 <li>Login (default) user: admin pass: waac</li>
 </ol>
