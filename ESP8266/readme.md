@@ -37,6 +37,7 @@ I'm going to drop this project. The arduino was used as an add-on to expand the 
 
 <h2>Running</h2>
 <ol>
+<li>Change the network name and password to your network in the main .ino file</li>
 <li>Wait 10 seconds to setup before browsing</li>
 <li>Find the local network IP, (default) 192.168.1.177:8080 in a browser</li>
 <li>Login (default) user: admin pass: waac</li>
