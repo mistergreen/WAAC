@@ -13,4 +13,4 @@ This is a plug and play system where you add and control devices through a brows
 * <a href="http://aquatictechtank.net/viewforum.php?f=48">Support</a>
 
 <h2>Donation</h2>
-<a href='https://pledgie.com/campaigns/32780'><img alt='Click here to lend your support to: Support WAAC and make a donation at pledgie.com !' src='https://pledgie.com/campaigns/32780.png?skin_name=chrome' border='0' ></a>
+<a href="https://www.patreon.com/bePatron?u=9754566" data-patreon-widget-type="become-patron-button">Become a Patron!</a>
