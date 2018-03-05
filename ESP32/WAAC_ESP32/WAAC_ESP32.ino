@@ -110,10 +110,8 @@ WWWsettings wwws;
 
 /************* website login **************/
 // wifi
-<<<<<<< HEAD
 char ssid[] = “yournetwork”; //  your network SSID (name)
-char password[] = “password”;    // your network password (use for WPA, or use as key for WEP)
->>>>>>> origin/master
+char password[] = “yourpassword”;    // your network password (use for WPA, or use as key for WEP)
 
 // site login
 char username[] = "admin";
