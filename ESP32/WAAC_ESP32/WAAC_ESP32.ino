@@ -91,13 +91,13 @@ const char *deviceStyle[12][2] = {
 /************* network & server configuration ***************/
 
 // Static IP doesn't look like it works for the ESP32 at this point
-/*
-IPAddress ip(192,168,1,129);
+// should work in the newest master
+IPAddress ip(192,168,1,177);
 IPAddress gateway(192,168,1,1);	
 IPAddress subnet(255, 255, 255, 0);
-IPAddress primaryDNS(8, 8, 8, 8); //optional
-IPAddress secondaryDNS(8, 8, 4, 4); //optional
-*/
+//IPAddress primaryDNS(8, 8, 8, 8); //optional
+//IPAddress secondaryDNS(8, 8, 4, 4); //optional
+
 
 // Initialize the Ethernet server library
 // with the IP address and port you want to use 
@@ -116,8 +116,8 @@ WWWsettings wwws;
 
 /************* website login **************/
 // wifi
-char ssid[] = "WATERFALL"; //  your network SSID (name)
-char password[] = "quynhnhi";    // your network password (use for WPA, or use as key for WEP)
+char ssid[] = “yournetwork”; //  your network SSID (name)
+char password[] = “password”;    // your network password (use for WPA, or use as key for WEP)
 
 // site login
 char username[] = "admin";
@@ -138,14 +138,14 @@ void setup()
   //************ wifi *******************
   // Static IP doesn't look like it works for the ESP32 at this point
 //if (!WiFi.config(ip, gateway, subnet, primaryDNS, secondaryDNS)) {
-  /*
+
   if (!WiFi.config(ip, gateway, subnet, gateway)) {
     Serial.println("STA Failed to configure");
   }
 
   Serial.print("Connecting to ");
   Serial.println(ssid);
-  */
+
   
   WiFi.begin(ssid, password);
   
