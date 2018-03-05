@@ -46,13 +46,8 @@
 #include "WebParser.h"
 #include "WWWsettings.h"
 
-
-// pin 10-12 & 4 are off limits SPI & SD card
-
-
 /************* time **************/
 
-//tmElements_t tm;
 
 const char *dayName[8] = {"", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
@@ -61,7 +56,7 @@ const char *monthName[13] = {"", "January", "February", "March", "April", "May",
 
 /************* Device menu **************/
 // { device type (must be unique & same as classType/Name), description, html form to configure it }
-const char *deviceMenu[10][3] = {
+const char *deviceMenu[9][3] = {
                         {"AdaFruitPWM8","AdaFruit PWM 12-bit, 8 channel", "adapwm8.htm"},
                         {"Alert","Email Alerts", "alert.htm"},
                         {"Analog","Analog Sensors", "analog.htm"},
@@ -69,7 +64,6 @@ const char *deviceMenu[10][3] = {
                         {"OneWireSensor", "OneWire Dallas/Maxim", "onewire.htm"},
                         {"PWM4","ESP PWM, 4 channels", "pwm4.htm"},
                         {"Relay","Native Digital out", "relay.htm"},
-                        {"ArduinoRelay","Arduino Digital out", "relay.htm"},
                         {"Video", "Yout-tube Stream", "video.htm"},
                         {NULL}
                        };
@@ -119,9 +113,6 @@ WWWsettings wwws;
 <<<<<<< HEAD
 char ssid[] = “yournetwork”; //  your network SSID (name)
 char password[] = “password”;    // your network password (use for WPA, or use as key for WEP)
-=======
-char ssid[] = "NETWORKNAME"; //  your network SSID (name)
-char password[] = "networkpassword";    // your network password (use for WPA, or use as key for WEP)
 >>>>>>> origin/master
 
 // site login
