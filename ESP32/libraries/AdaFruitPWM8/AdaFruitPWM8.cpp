@@ -15,7 +15,7 @@
 #include <TimeLib.h>
 
 
-AdaFruitPWM8::AdaFruitPWM8(char *in_name, int in_dependent_device_id, uint8_t insda, uint8_t inscl) : Device()
+AdaFruitPWM8::AdaFruitPWM8(char *in_name, int in_dependent_device_id, int insda, int inscl) : Device()
 {
     // Device() call super to init vars
     dependentDeviceId = in_dependent_device_id;
@@ -44,19 +44,22 @@ AdaFruitPWM8::AdaFruitPWM8(char *in_name, int in_dependent_device_id, uint8_t in
     pwmObj = Adafruit_PWMServoDriver();
     pwmObj.begin();
     pwmObj.setPWMFreq(1600);
-    //ESP32 compiler def reads as ESP8266 too!
+
     SDA = insda;
     SCL = inscl;
+
+
 #ifdef ESP8266
     //setup I2C
     Wire.pins(SDA, SCL);
     //Wire.pins(2, 14);   // ESP8266 can use any two pins, such as SDA to #2 and SCL to #14
 
 #elif ESP32
-    SDA = insda;
-    SCL = inscl;
-    //setup I2C
-    Wire.begin(SDA, SCL);
+   
+    //setup I2C, ESP32 default is pin #21 SDA, 22 SCL
+    if(SDA > UNSET)
+        Wire.begin(SDA, SCL);     // no Wire.pins(1,2) for esp32
+   
 #endif
     
     hasEvent = false;
@@ -465,7 +468,9 @@ void AdaFruitPWM8::setI2C(int insda, int inscl) {
         Wire.pins(SDA, SCL);
 #elif ESP32
     //setup I2C
-    Wire.begin(SDA, SCL);
+
+    if(SDA > UNSET)
+        Wire.begin(SDA, SCL);     // no Wire.pins(1,2) for esp32
 #endif
 
     

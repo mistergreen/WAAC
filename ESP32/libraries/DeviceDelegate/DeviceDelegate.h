@@ -3,7 +3,7 @@
 
 #ifndef DeviceDelegate_h
 #define DeviceDelegate_h
-#define MAXDEVICE   10
+#define MAXDEVICE   20
 
 
 #include "Arduino.h"

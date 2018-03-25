@@ -18,7 +18,7 @@
 class AdaFruitPWM8 : public Device
 {
   public:
-    AdaFruitPWM8(char *in_name, int in_dependent_device_id, uint8_t insda, uint8_t inscl);
+    AdaFruitPWM8(char *in_name, int in_dependent_device_id, int insda, int inscl);
     ~AdaFruitPWM8(); // destructor
 
     void loop(); // required

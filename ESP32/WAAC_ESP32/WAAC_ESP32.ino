@@ -6,7 +6,7 @@
  * AnalogInput can be converted to digital except pin 34-39
  * 
  */
-
+#define MAXDEVICE   20 //maximum number you can add devices objects. Also defined in deviceDelegate
 #define UNSET       -1
 #define bufferMax   628
 #define queryMax    350
@@ -20,8 +20,6 @@
 #include <TimeLib.h>
 #include <Wire.h>
 
-
-//#include "dtostrf.h"
 
 //devices - add any necessary libs for devices here!
 //for generic device using digial pins or analog
@@ -41,6 +39,8 @@
 #include "PWM4.h"
 #include "rBase64.h"
 #include "Relay.h" 
+#include "RelayMCP.h" 
+#include "RelayPCA.h" 
 #include "Shunt.h" 
 #include "Video.h"
 #include "WebParser.h"
@@ -56,7 +56,7 @@ const char *monthName[13] = {"", "January", "February", "March", "April", "May",
 
 /************* Device menu **************/
 // { device type (must be unique & same as classType/Name), description, html form to configure it }
-const char *deviceMenu[9][3] = {
+const char *deviceMenu[11][3] = {
                         {"AdaFruitPWM8","AdaFruit PWM 12-bit, 8 channel", "adapwm8.htm"},
                         {"Alert","Email Alerts", "alert.htm"},
                         {"Analog","Analog Sensors", "analog.htm"},
@@ -64,6 +64,8 @@ const char *deviceMenu[9][3] = {
                         {"OneWireSensor", "OneWire Dallas/Maxim", "onewire.htm"},
                         {"PWM4","ESP PWM, 4 channels", "pwm4.htm"},
                         {"Relay","Native Digital out", "relay.htm"},
+                        {"RelayPCA","PCA9685 Digital out", "relay_i2c.htm"},
+                        {"RelayMCP","MCP23017 Digital out", "relay_i2c.htm"},
                         {"Video", "Yout-tube Stream", "video.htm"},
                         {NULL}
                        };
@@ -110,8 +112,8 @@ WWWsettings wwws;
 
 /************* website login **************/
 // wifi
-char ssid[] = “yournetwork”; //  your network SSID (name)
-char password[] = “yourpassword”;    // your network password (use for WPA, or use as key for WEP)
+char ssid[] = "WATERFALL"; //  your network SSID (name)
+char password[] = "quynhnhi";    // your network password (use for WPA, or use as key for WEP)
 
 // site login
 char username[] = "admin";
@@ -216,7 +218,7 @@ int convertPin(char *pin){
     return A16;
   } else if(webParser.contains(pin, "A17")) {
     return A17;
-  }
+  } 
    
     //Serial.print("can't find pin: ");
     //Serial.println(atoi(pin));
@@ -737,11 +739,18 @@ void parseReceivedRequest(WiFiClient client)
             webParser.clearBuffer(param_value, queryMax);
             webParser.parseQuery(queryBuffer, "devicetype", param_value);
           
-            if(webParser.compare(param_value, "Relay") || webParser.compare(param_value, "ArduinoRelay")) {
+            if(webParser.compare(param_value, "Relay")) {
                 
               relayAjaxOutput(client, device);
-              
-            } else if(webParser.compare(param_value, "OneWireSensor")) 
+       
+            } 
+            else if(webParser.compare(param_value, "RelayPCA") || webParser.compare(param_value, "RelayMCP")) 
+            {
+               
+              relayPCAajaxOutput(client, device);
+               
+            } 
+            else if(webParser.compare(param_value, "OneWireSensor")) 
             {
                
               oneWireAjaxOutput(client, device);
@@ -842,9 +851,14 @@ void parseReceivedRequest(WiFiClient client)
                saveRelay(device);
           
           } 
-          else if(webParser.compare(param_value, "ArduinoRelay"))
+          else if(webParser.compare(param_value, "RelayPCA"))
           {
-               saveRelay(device);
+               saveRelayPCA(device);
+          
+          } 
+          else if(webParser.compare(param_value, "RelayMCP"))
+          {
+               saveRelayMCP(device);
           
           } 
           else if(webParser.compare(param_value, "OneWireSensor")) 
@@ -884,7 +898,7 @@ void parseReceivedRequest(WiFiClient client)
           //****************************************create new object ******************************
           //Serial.print("xxxxxxx created device xxxxxxxx");
           //don't allow more than 10 devices
-          if(deviceDelegate.getDeviceCount() >= 10) return;
+          if(deviceDelegate.getDeviceCount() >= MAXDEVICE) return;
           
           webParser.clearBuffer(param_value, queryMax);
           webParser.parseQuery(queryBuffer, "devicetype", param_value);
@@ -892,6 +906,12 @@ void parseReceivedRequest(WiFiClient client)
           if(webParser.compare(param_value, "Relay")) {
               createRelay();
           } 
+          else if(webParser.compare(param_value, "RelayPCA")) {
+              createRelayPCA();
+          }
+          else if(webParser.compare(param_value, "RelayMCP")) {
+              createRelayMCP();
+          }
           else if(webParser.compare(param_value, "AdaFruitPWM8")) {
               createAdaFruit8PWM();
           }

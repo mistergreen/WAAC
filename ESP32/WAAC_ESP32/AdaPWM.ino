@@ -223,14 +223,29 @@ void createAdaFruit8PWM() {
         char tempDependent[5];
         webParser.parseQuery(queryBuffer, "dependent", tempDependent);
 
-        char tempSDA[5];
+        int sda, scl;
+        
+        char tempSDA[5] = {};
         webParser.parseQuery(queryBuffer, "sda", tempSDA);
 
-        char tempCLK[5];
-        webParser.parseQuery(queryBuffer, "scl", tempCLK);
+        if(tempSDA[0] == '\0') {
+          sda = UNSET;
+        } else {
+          sda = convertPin(tempSDA);
+        }
+        
+        char tempSCL[5] = {};
+        webParser.parseQuery(queryBuffer, "scl", tempSCL);
+
+        if(tempSCL[0] == '\0') {
+          scl = UNSET;
+        } else {
+          scl = convertPin(tempSCL);
+        }
+        
         
         //***********create device
-        AdaFruitPWM8 *temp = new AdaFruitPWM8(param_value, atoi(tempDependent), convertPin(tempSDA), convertPin(tempCLK));
+        AdaFruitPWM8 *temp = new AdaFruitPWM8(param_value, atoi(tempDependent), sda, scl);
         deviceDelegate.addDevice( temp );
         //***********
         
