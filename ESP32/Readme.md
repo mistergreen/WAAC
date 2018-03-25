@@ -13,7 +13,6 @@ This is still work in progress. I haven’t fully debug this. I’ve added a flo
 <li>Digital Output</li>
 <li>PCA9685 Digital Output</li>
 <li>MCP23017 Digital Output</li>
-<li>MCP Digital Output</li>
 <li>Flow Sensor (Hall sensor)</li>
 <li>PWM (12 bit)</li>
 <li>PWM (PCA9685 I2C Servo Driver - 12 bit)</li>
