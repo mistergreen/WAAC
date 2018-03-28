@@ -61,7 +61,7 @@ const char *monthName[13] = {"", "January", "February", "March", "April", "May",
 /************* Device menu **************/
 // { device type (must be unique & same as classType/Name), description, html form to configure it }
 const char *deviceMenu[13][3] = {
-                        {"AdaFruitPWM8","AdaFruit PWM 12-bit, 8 channel", "adapwm8.htm"},
+                        {"AdaFruitPWM8","PCA9685 PWM 12-bit, 8 channel", "adapwm8.htm"},
                         {"Alert","Email Alerts", "alert.htm"},
                         {"Analog","Analog Sensors", "analog.htm"},
                         {"HallSensor","Flow Hall Sensors", "hall.htm"},

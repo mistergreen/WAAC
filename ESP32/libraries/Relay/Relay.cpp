@@ -159,7 +159,6 @@ void Relay::setEvent(char *in_string)
 #ifdef ESP8266
     for (uint8_t l=0; l < timedIndexCounter; l++) {
         
-     //Serial.println(timedIndexCounter);
         //start
         
         int tempArr1[3] = {0};
@@ -172,6 +171,36 @@ void Relay::setEvent(char *in_string)
         
         //duration
 
+        int tempArr2[3] = {0};
+        stripTime(events[j], tempArr2);
+        hourDuration[l] = tempArr2[0];
+        minuteDuration[l] = tempArr2[1];
+        secondDuration[l] = tempArr2[2];
+        j++;
+        
+        
+        //dow
+        strcpy(dow[l],events[j]);
+        j++;
+        
+        yield();
+        
+    }
+#elif ESP32
+    for (uint8_t l=0; l < timedIndexCounter; l++) {
+
+        //start
+        
+        int tempArr1[3] = {0};
+        stripTime(events[j], tempArr1);
+        hour[l] = tempArr1[0];
+        minute[l] = tempArr1[1];
+        second[l] = tempArr1[2];
+        j++;
+        
+        
+        //duration
+        
         int tempArr2[3] = {0};
         stripTime(events[j], tempArr2);
         hourDuration[l] = tempArr2[0];

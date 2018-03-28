@@ -253,7 +253,8 @@ void PWM4::setEvent(char *in_string)
     
     int j = 0;
     timedIndexCounter = i/3;
-
+    
+#ifdef ESP8266
     for (int l=0; l < timedIndexCounter; l++) {
         
         int tempArr1[3] = {0};
@@ -277,10 +278,38 @@ void PWM4::setEvent(char *in_string)
             color[k].pwm[l] = tempArr3[k];
         }
         j++;
-
+        yield();
+    }
+#elif ESP32
+    for (int l=0; l < timedIndexCounter; l++) {
+        
+        int tempArr1[3] = {0};
+        stripTime(events[j], tempArr1);
+        hour[l] = tempArr1[0];
+        minute[l] = tempArr1[1];
+        second[l] = tempArr1[2];
+        
+        j++;
+        
+        int tempArr2[3] = {0};
+        stripTime(events[j], tempArr2);
+        hourDuration[l] = tempArr2[0];
+        minuteDuration[l] = tempArr2[1];
+        secondDuration[l] = tempArr2[2];
+        j++;
+        
+        int tempArr3[CHANNEL] = {0};
+        stripTime(events[j], tempArr3);
+        for(int k=0; k < CHANNEL; k++) {
+            color[k].pwm[l] = tempArr3[k];
+        }
+        j++;
+        
     }
 
-    /* for Arduino sscanf but the top code will work for anybody
+#else
+
+    //for Arduino sscanf but the top code will work for anybody
     for (int l=0; l < timedIndexCounter; l++) {
         
         Serial.println(events[j]);
@@ -296,11 +325,7 @@ void PWM4::setEvent(char *in_string)
         j++;
         
     }
-    */
-    
 
-    
-    
 
 }
 

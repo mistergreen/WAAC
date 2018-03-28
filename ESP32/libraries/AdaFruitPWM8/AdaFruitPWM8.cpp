@@ -323,6 +323,33 @@ void AdaFruitPWM8::setEvent(char *in_string)
      
         yield();
     }
+#elif ESP32
+    for (int l=0; l < timedIndexCounter; l++) {
+        
+        int tempArr1[3] = {0};
+        stripTime(events[j], tempArr1);
+        hour[l] = tempArr1[0];
+        minute[l] = tempArr1[1];
+        second[l] = tempArr1[2];
+        
+        
+        j++;
+        
+        int tempArr2[3] = {0};
+        stripTime(events[j], tempArr2);
+        hourDuration[l] = tempArr2[0];
+        minuteDuration[l] = tempArr2[1];
+        secondDuration[l] = tempArr2[2];
+        j++;
+        
+        int tempArr3[CHANNEL8] = {0};
+        stripTime(events[j], tempArr3);
+        for(int k=0; k < CHANNEL8; k++) {
+            color[k].pwm[l] = tempArr3[k];
+        }
+        j++;
+
+    }
 #else
     for (int l=0; l < timedIndexCounter; l++) {
         
