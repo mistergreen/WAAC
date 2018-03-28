@@ -38,7 +38,7 @@ void pwm4AjaxOutput(WiFiClient client, Device *device) {
         client.print(device->getDependentDevice());
         client.print(F("</dependent>"));
         client.print(F("<event>"));
-        char string[queryMax];
+        char string[queryMax] = {'\0'};
         device->getEvent(string);
         client.print(string);
         client.print(F("</event>"));

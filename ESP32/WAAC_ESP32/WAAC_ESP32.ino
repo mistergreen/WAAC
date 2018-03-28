@@ -34,8 +34,12 @@
 #include "Analog.h"
 #include "DeviceDelegate.h"
 #include "HallSensor.h"
+#include "Input.h"
+#include "InputMCP.h"
+#include "MCPhelper.h"
 #include "OneWire.h"
 #include "OneWireSensor.h"
+#include "PCAhelper.h"
 #include "PWM4.h"
 #include "rBase64.h"
 #include "Relay.h" 
@@ -56,11 +60,13 @@ const char *monthName[13] = {"", "January", "February", "March", "April", "May",
 
 /************* Device menu **************/
 // { device type (must be unique & same as classType/Name), description, html form to configure it }
-const char *deviceMenu[11][3] = {
+const char *deviceMenu[13][3] = {
                         {"AdaFruitPWM8","AdaFruit PWM 12-bit, 8 channel", "adapwm8.htm"},
                         {"Alert","Email Alerts", "alert.htm"},
                         {"Analog","Analog Sensors", "analog.htm"},
                         {"HallSensor","Flow Hall Sensors", "hall.htm"},
+                        {"Input","Native Digital Input", "input.htm"},
+                        {"InputMCP","MCP23017 Digital Input", "input_i2c.htm"},
                         {"OneWireSensor", "OneWire Dallas/Maxim", "onewire.htm"},
                         {"PWM4","ESP PWM, 4 channels", "pwm4.htm"},
                         {"Relay","Native Digital out", "relay.htm"},
@@ -744,16 +750,34 @@ void parseReceivedRequest(WiFiClient client)
               relayAjaxOutput(client, device);
        
             } 
-            else if(webParser.compare(param_value, "RelayPCA") || webParser.compare(param_value, "RelayMCP")) 
+            else if(webParser.compare(param_value, "RelayPCA")) 
             {
                
               relayPCAajaxOutput(client, device);
+               
+            } 
+            else if(webParser.compare(param_value, "RelayMCP")) 
+            {
+               Serial.println("crash1");
+              relayMCPajaxOutput(client, device);
                
             } 
             else if(webParser.compare(param_value, "OneWireSensor")) 
             {
                
               oneWireAjaxOutput(client, device);
+               
+            } 
+            else if(webParser.compare(param_value, "Input")) 
+            {
+               
+              inputAjaxOutput(client, device);
+               
+            } 
+            else if(webParser.compare(param_value, "InputMCP")) 
+            {
+               
+              inputMCPajaxOutput(client, device);
                
             } 
             else if(webParser.compare(param_value, "PWM4")) 
@@ -842,7 +866,9 @@ void parseReceivedRequest(WiFiClient client)
           char color[7];
           findColor(param_value, color);
           device->setDeviceColor(color);
-
+          
+          //no need for Input - the top params cover it all
+          
           webParser.clearBuffer(param_value, queryMax);
           webParser.parseQuery(queryBuffer, "devicetype", param_value);
           
@@ -854,6 +880,11 @@ void parseReceivedRequest(WiFiClient client)
           else if(webParser.compare(param_value, "RelayPCA"))
           {
                saveRelayPCA(device);
+          
+          } 
+           else if(webParser.compare(param_value, "InputMCP"))
+          {
+               saveInputMCP(device);
           
           } 
           else if(webParser.compare(param_value, "RelayMCP"))
@@ -906,6 +937,12 @@ void parseReceivedRequest(WiFiClient client)
           if(webParser.compare(param_value, "Relay")) {
               createRelay();
           } 
+          else if(webParser.compare(param_value, "Input")) {
+              createInput();
+          }
+          else if(webParser.compare(param_value, "InputMCP")) {
+              createInputMCP();
+          }
           else if(webParser.compare(param_value, "RelayPCA")) {
               createRelayPCA();
           }
