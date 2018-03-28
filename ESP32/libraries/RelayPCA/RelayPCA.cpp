@@ -10,11 +10,12 @@
 #include "RelayPCA.h"
 #include "DeviceDelegate.h"
 #include "Relay.h"
+#include "PCAhelper.h"
 #include <TimeLib.h>
 #include <Wire.h>
 
 
-RelayPCA::RelayPCA(char *in_name, int in_pin, int in_dependent_device_id) : Relay(in_name, in_pin, in_dependent_device_id)
+RelayPCA::RelayPCA(char *in_name, int in_pin, int in_dependent_device_id) : Relay()
 {
     // Device() call super to init vars
     dependentDeviceId = in_dependent_device_id;
@@ -33,9 +34,9 @@ RelayPCA::RelayPCA(char *in_name, int in_pin, int in_dependent_device_id) : Rela
     timedIndexCounter = 0;
     onceFlag = false;
 
-    pwmObj = Adafruit_PWMServoDriver();
-    pwmObj.begin();
-    pwmObj.setPWMFreq(1600);
+    if(!PCAhelper::isSet) {
+        PCAhelper::init();
+    }
 
 
 }
@@ -72,10 +73,10 @@ void RelayPCA::switchOn()
     //Serial.println("switching on");
     if(invert) {
         //LOW
-        pwmObj.setPin(pin, 0, false);
+        PCAhelper::pwm.setPin(pin, 0, false);
     } else {
         //HIGH
-        pwmObj.setPin(pin, 4095, false);
+        PCAhelper::pwm.setPin(pin, 4095, false);
     }
 
    
@@ -88,9 +89,9 @@ void RelayPCA::switchOff()
     //Serial.println("switching off");
 
     if(invert) {
-        pwmObj.setPin(pin, 4095, false);
+        PCAhelper::pwm.setPin(pin, 4095, false);
     } else {
-        pwmObj.setPin(pin, 0, false);
+        PCAhelper::pwm.setPin(pin, 0, false);
     }
 
     deviceState = false;

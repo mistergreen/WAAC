@@ -10,6 +10,7 @@
 
 #include <Arduino.h>
 #include "AdaFruitPWM8.h"
+#include "PCAhelper.h"
 #include <Wire.h>
 #include <DeviceDelegate.h>
 #include <TimeLib.h>
@@ -38,12 +39,10 @@ AdaFruitPWM8::AdaFruitPWM8(char *in_name, int in_dependent_device_id, int insda,
     pin = 0;
     oneTime = false;
     
-    // setup adafruit obj
-   // pwmObj = new Adafruit_PWMServoDriver();
-    
-    pwmObj = Adafruit_PWMServoDriver();
-    pwmObj.begin();
-    pwmObj.setPWMFreq(1600);
+
+    if(!PCAhelper::isSet) {
+        PCAhelper::init();
+    }
 
     SDA = insda;
     SCL = inscl;
@@ -71,8 +70,8 @@ AdaFruitPWM8::~AdaFruitPWM8() {
     //clean up
     switchOff();
     
-    //delete pwmObj;
-    //pwmObj = NULL; // dont need too. NULL to pointer
+    //delete PCAhelper::pwm;
+    //PCAhelper::pwm = NULL; // dont need too. NULL to pointer
     
     //need clean up the struct?
     //colorAux = NULL;
@@ -197,7 +196,7 @@ void AdaFruitPWM8::loop()
                         if(eventTime == durationTime) {
                             
                             for(uint8_t k=0; k < CHANNEL8; k++) {
-                                pwmObj.setPin(color[k].pin, color[k].pwm[i], false);
+                                PCAhelper::pwm.setPin(color[k].pin, color[k].pwm[i], false);
                             }
                             
                             
@@ -225,7 +224,7 @@ void AdaFruitPWM8::loop()
                                         color[k].currentColor = color[k].initColor + colorDif * percent;
                                     }
 
-                                    pwmObj.setPin(color[k].pin, color[k].currentColor, false);
+                                    PCAhelper::pwm.setPin(color[k].pin, color[k].currentColor, false);
                                     color[k].colorStartTime += colorInterval;
                                 }
                                 
@@ -241,7 +240,7 @@ void AdaFruitPWM8::loop()
                             if(color[k].pin > UNSET) {
                                 color[k].currentColor = color[k].pwm[i];
                                 color[k].initColor = color[k].currentColor;
-                                pwmObj.setPin(color[k].pin, color[k].currentColor, false);
+                                PCAhelper::pwm.setPin(color[k].pin, color[k].currentColor, false);
 
                             }
                             
@@ -397,7 +396,7 @@ void AdaFruitPWM8::setSuspendTime(boolean in_suspend) {
     //reset leds
     for(uint8_t k=0; k < CHANNEL8; k++) {
         if(color[k].pin > UNSET) {
-             pwmObj.setPin(color[k].pin, color[k].currentColor, false);
+             PCAhelper::pwm.setPin(color[k].pin, color[k].currentColor, false);
         }
     }
     
@@ -413,7 +412,7 @@ void AdaFruitPWM8::switchOn()
    
     for(uint8_t k=0; k <  CHANNEL8; k++) {
         if(color[k].pin > UNSET) {
-            pwmObj.setPin(color[k].pin, 4095, false);
+            PCAhelper::pwm.setPin(color[k].pin, 4095, false);
         }
     }
     
@@ -427,7 +426,7 @@ void AdaFruitPWM8::switchOff()
     
     for(uint8_t k=0; k < CHANNEL8;k++) {
         if(color[k].pin > UNSET) {
-            pwmObj.setPin(color[k].pin, 0, false);
+            PCAhelper::pwm.setPin(color[k].pin, 0, false);
         }
     }
 
@@ -450,7 +449,7 @@ void AdaFruitPWM8::setPWMs(int in_red, int in_green, int in_blue, int in_white, 
     
     for(uint8_t k=0; k < CHANNEL8; k++) {
         if(color[k].pin > UNSET) {
-            pwmObj.setPin(color[k].pin, tempColor[k], false);
+            PCAhelper::pwm.setPin(color[k].pin, tempColor[k], false);
             //Serial.println(color[k].pin);
             //Serial.println(tempColor[k]);
             //Serial.println("------");

@@ -9,13 +9,15 @@
 
 #include "RelayMCP.h"
 #include "DeviceDelegate.h"
+#include "MCPhelper.h"
 #include "Relay.h"
 #include <TimeLib.h>
 #include <Wire.h>
 
 
-RelayMCP::RelayMCP(char *in_name, int in_pin, int in_dependent_device_id) : Relay(in_name, in_pin, in_dependent_device_id)
+RelayMCP::RelayMCP(char *in_name, int in_pin, int in_dependent_device_id) : Relay()
 {
+    //Serial.println("MCP created");
     // Device() call super to init vars
     dependentDeviceId = in_dependent_device_id;
     //find dependent device once - not all the time
@@ -37,10 +39,15 @@ RelayMCP::RelayMCP(char *in_name, int in_pin, int in_dependent_device_id) : Rela
     // GPA0 = #21 alias 0
     // GPB0 = #1 alias 8
     // GPB1 = #2 alias 9
+    // Looks like you can only begin() once or it'll blow up
+    // maybe do it once in a static class
+    if(!MCPhelper::isSet) {
+        MCPhelper::init();
+    }
 
-    mcp = Adafruit_MCP23017();
-    mcp.begin();      // use default address 0
-    mcp.pinMode(pin, OUTPUT); 
+    MCPhelper::mcp.pinMode(pin, OUTPUT);
+    MCPhelper::mcp.pullUp(pin, LOW); // in case it was set HIGH previously
+
 
 }
 
@@ -76,10 +83,10 @@ void RelayMCP::switchOn()
     //Serial.println("switching on");
     if(invert) {
         //LOW
-        mcp.digitalWrite(pin, LOW);
+        MCPhelper::mcp.digitalWrite(pin, LOW);
     } else {
         //HIGH
-        mcp.digitalWrite(pin, HIGH);
+        MCPhelper::mcp.digitalWrite(pin, HIGH);
     }
 
    
@@ -92,9 +99,9 @@ void RelayMCP::switchOff()
     //Serial.println("switching off");
 
     if(invert) {
-        mcp.digitalWrite(pin, HIGH);
+        MCPhelper::mcp.digitalWrite(pin, HIGH);
     } else {
-        mcp.digitalWrite(pin, LOW);
+        MCPhelper::mcp.digitalWrite(pin, LOW);
     }
 
     deviceState = false;

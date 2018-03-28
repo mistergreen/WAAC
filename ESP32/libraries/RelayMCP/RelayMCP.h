@@ -37,7 +37,7 @@ class RelayMCP : public Relay
 
     int SDA;
     int SCL;
-    Adafruit_MCP23017 mcp; // automatic memory
+    //Adafruit_MCP23017 mcp; // automatic memory
 
     
 };//need ; at the end of a class def

@@ -14,6 +14,7 @@
 class Relay : public Device
 {
   public:
+    Relay();
     Relay(char *in_name, int in_pin, int in_dependent_device_id);
     ~Relay() {}; // destructor
 

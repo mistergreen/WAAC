@@ -10,6 +10,13 @@
 #include "DeviceDelegate.h"
 #include <TimeLib.h>
 
+Relay::Relay() : Device()
+{
+    isDay = false; // isDay is the day an event is to occur
+    timedIndexCounter = 0;
+    onceFlag = false;
+}
+
 Relay::Relay(char *in_name, int in_pin, int in_dependent_device_id) : Device()
 {
     // Device() call super to init vars
@@ -122,13 +129,13 @@ void Relay::loop()
 
 void Relay::setEvent(char *in_string)
 {
-   // Serial.println("in event");
+    Serial.println("in event");
     //Serial.println(in_string);
     if(in_string[0] == '\0') return;
     // start time, duration, dow
     // "8:00:00,1:00:00,1111111,9:30:00,1:30:01,1101111,15:34:02,1:05:02,1010101"
     //you can only add up to 4 events- each event is -on and duration -off pairs
-
+    Serial.println("out event");
     char events[12][67];
     
     //parse incoming string *** MAKE ROOM FOR THE NUL TERMINATOR in the string!
@@ -145,8 +152,9 @@ void Relay::setEvent(char *in_string)
     //char *token_s;
     //int temp[3];
     
-    timedIndexCounter = i/3;
-
+    timedIndexCounter = uint8_t(i/3);
+    Serial.println("timedIndexCounter");
+    Serial.println(timedIndexCounter);
     
 #ifdef ESP8266
     for (uint8_t l=0; l < timedIndexCounter; l++) {
@@ -200,7 +208,12 @@ void Relay::setEvent(char *in_string)
 void Relay::getEvent(char *string) {
     //manipulat incoming string rather than returning. Saves memory?
     if(timedIndexCounter > 0) {
-   
+        Serial.println("crash with event");
+        Serial.println("timedIndexCounter");
+        Serial.println(timedIndexCounter);
+        
+        
+        
         char buf[104];
         sprintf(buf, "%02d:%02d:%02d,%02d:%02d:%02d,%s", hour[0],minute[0],second[0],hourDuration[0],minuteDuration[0],secondDuration[0],dow[0]);
         strcpy(string, buf);
@@ -210,7 +223,8 @@ void Relay::getEvent(char *string) {
             strcat(string,buf);
         }
     } else {
-        string[0] = '\0';
+        Serial.println("crash no event");
+        // strcpy(string, '\0');
     }
 }
 

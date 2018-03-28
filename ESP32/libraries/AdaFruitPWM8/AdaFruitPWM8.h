@@ -13,7 +13,7 @@
 
 #include "Arduino.h"
 #include <Device.h>
-#include <Adafruit_PWMServoDriver.h>
+//#include <Adafruit_PWMServoDriver.h>
 
 class AdaFruitPWM8 : public Device
 {
@@ -61,7 +61,9 @@ class AdaFruitPWM8 : public Device
     colorAux color[CHANNEL8];
     
     //Adafruit_PWMServoDriver *pwmObj; //new() allocated memory
-    Adafruit_PWMServoDriver pwmObj; // automatic memory
+    //Adafruit_PWMServoDriver pwmObj; // automatic memory
+    //using PCAhelper.h instead
+    
     boolean isDay;
     uint8_t timedIndexCounter;
     

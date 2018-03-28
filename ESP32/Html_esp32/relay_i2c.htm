@@ -20,6 +20,8 @@
 				
 				$.mobile.loading("show");
 				
+                    $('#deviceType').text('-'+deviceType);
+                
 					//get data from the server
 					nocache = "&nocache=" + Math.random() * 1000000;
 					//var request = new XMLHttpRequest();
@@ -235,7 +237,7 @@
 <div data-role="page" id="relay_device">
             <div data-role="header" data-theme="b">
                 <a href="index.htm" data-ajax="false" data-icon="arrow-l" class="ui-btn-left">Back</a>
-        		<h1>Relay</h1>
+        		<h1>Relay<span id="deviceType"></span></h1>
             </div>
             
             <div data-role="content" id="content" class="ui-content">
