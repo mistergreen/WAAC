@@ -1,6 +1,7 @@
 This is still work in progress. I haven’t fully debug this. I'll try to add more device components to the core code.
 <h2>Features</h2>
 <ol>
+<li>Login Feature</li>
 <li>NTP time sync</li>
 <li>Email Alerts</li>
 <li>Youtube streaming video connection</li>
