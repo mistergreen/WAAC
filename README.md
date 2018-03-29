@@ -1,6 +1,6 @@
 # WAAC - Web-enabled Arduino Aquarium Controller
 
-There are a few things I need to finish but if you would like to contribute, please do.
+There are a few things I need to finish but if you would like to contribute, please do. My main focus is on the <a href="https://github.com/mistergreen/WAAC/tree/master/ESP32">ESP32</a> at the moment. It's cheap and powerful.
 Here are videos of the development
 https://www.youtube.com/playlist?list=PLBa21usjmOFKCHJmGBnlkjP8v2rVpoFGZ
 
