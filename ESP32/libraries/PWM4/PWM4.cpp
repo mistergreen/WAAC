@@ -325,7 +325,7 @@ void PWM4::setEvent(char *in_string)
         j++;
         
     }
-
+#endif
 
 }
 
