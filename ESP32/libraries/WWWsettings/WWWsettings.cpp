@@ -235,18 +235,19 @@ void WWWsettings::email(char *in_subject, char *in_message) {
             client.println();
             
     }
-        
-        while (client.connected()) { //connected or data available
-            if(client.available()) {
-                char c = client.read();
-                Serial.print(c);
-            }
+    /*    
+    while (client.connected()) { //connected or data available
+        if(client.available()) {
+            char c = client.read();
+            Serial.print(c);
         }
-        
-        Serial.println("disconnecting.");
-        
-        
-        client.stop(); // close up after disconnect the socket
+    }
+    */
+   
+    Serial.println("disconnecting.");
+    
+    
+    client.stop(); // close up after disconnect the socket
 
 }
 

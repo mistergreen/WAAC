@@ -5,10 +5,10 @@ void testEmail(WiFiClient client) {
   
       char subject[55] = {'\0'};
       char message[100] = {'\0'};
-
-      webParser.parseQuery(queryBuffer, "email", param_value);
+      char email[55] = {'\0'};
+      webParser.parseQuery(queryBuffer, "email", email);
       if(param_value[0] != '\0') {  
-        wwws.setToEmail(param_value);
+        wwws.setToEmail(email);
       }
       
       webParser.parseQuery(queryBuffer, "subject", subject);
@@ -18,7 +18,18 @@ void testEmail(WiFiClient client) {
       wwws.email(subject, message);
       
       successAjax(client);
-      
+
+      /*
+       * 
+d
+php mail sent
+0
+
+disconnecting.
+success ajax
+
+
+       */
   
 }
 
