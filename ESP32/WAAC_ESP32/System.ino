@@ -7,7 +7,8 @@ void testEmail(WiFiClient client) {
       char message[100] = {'\0'};
       char email[55] = {'\0'};
       webParser.parseQuery(queryBuffer, "email", email);
-      if(param_value[0] != '\0') {  
+      //set email if it's not empty
+      if(email[0] != '\0') {  
         wwws.setToEmail(email);
       }
       
@@ -19,17 +20,6 @@ void testEmail(WiFiClient client) {
       
       successAjax(client);
 
-      /*
-       * 
-d
-php mail sent
-0
-
-disconnecting.
-success ajax
-
-
-       */
   
 }
 

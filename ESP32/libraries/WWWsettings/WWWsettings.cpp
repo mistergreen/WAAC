@@ -243,6 +243,28 @@ void WWWsettings::email(char *in_subject, char *in_message) {
         }
     }
     */
+
+    waitTime = millis();
+    while (!client.available())
+    {
+        if((millis() - waitTime) > 10000) {
+            client.stop();
+            Serial.println("\r\n email Timeout");
+            break;
+           
+        }
+    }
+
+
+    while (client.available())
+    {
+        char c = client.read();
+        Serial.print(c);
+
+    }
+
+
+
    
     Serial.println("disconnecting.");
     
