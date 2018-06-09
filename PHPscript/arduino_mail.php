@@ -9,7 +9,6 @@ $headers = "From: arduino@2noodles.com". "\r\n"; // change the domain to your do
 
 if($key == "greencontroller") {
 	
-	//mail($to,$subject,$txt,$headers);
 
 	if(mail($to,$subject,$txt,$headers)) {
 		echo "mail sent";
@@ -17,7 +16,6 @@ if($key == "greencontroller") {
 	} else {
 		echo "can't send mail";
 		echo " to: " . $to;
-
 	}
 
 	
