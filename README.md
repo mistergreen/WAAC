@@ -10,4 +10,4 @@ This is a plug and play system where you add and control devices through a brows
 
 
 <h2>Donation</h2>
-<a href="https://www.patreon.com/bePatron?u=9754566" data-patreon-widget-type="become-patron-button">Become a Patron!</a>
+<a href="https://www.patreon.com/minhtruong" data-patreon-widget-type="become-patron-button">Become a Patron!</a>
