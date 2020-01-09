@@ -10,16 +10,28 @@
 #define UNSET       -1
 #define bufferMax   628
 #define queryMax    350
-#define SDCARD_CS   5 // SS pin
+
+// Define SPIFFS to use it
+#define USE_SPIFFS
 
 #include <WiFi.h>
 #include <WiFiUdp.h>
 
 #include <SPI.h>
-#include <SD.h>
 #include <TimeLib.h>
 #include <Wire.h>
 
+
+// Load the selected file system
+#ifdef USE_SPIFFS
+  #include <SPIFFS.h>
+  #define FS_HANDLER SPIFFS
+  #define FS_PARAM   true
+#else
+  #include <SD.h>
+  #define FS_HANDLER SD
+  #define FS_PARAM   5 // SS pin
+#endif
 
 //devices - add any necessary libs for devices here!
 //for generic device using digial pins or analog
@@ -167,17 +179,22 @@ void setup()
   
 
    //************ initialize SD card *******************
-  
-  //Serial.println("Initializing SD card...");
-  if (!SD.begin(SDCARD_CS)) {
-        Serial.println("ERROR - SD card initialization failed!");
+
+#ifdef USE_SPIFFS
+  Serial.println ("Initializing SPIFFS...");
+#else
+  Serial.println ("Initializing SD card...");
+#endif 
+
+  if (!FS_HANDLER.begin(FS_PARAM)) {
+        Serial.println("ERROR - File system initialization failed!");
         return;    // init failed
   }
   //Serial.println("SUCCESS - SD card initialized.");
-    // check for index.htm file
-    //it's picky with file extension, only 3 letters
-
-  if (!SD.exists("/index.htm")) {
+    
+  // check for index.htm file
+  //it's picky with file extension, only 3 letters
+  if (!FS_HANDLER.exists("/index.htm")) {
         Serial.println("ERROR - Can't find index.htm file!");
         return;  // can't find index file
   }
@@ -318,10 +335,19 @@ void renderHtmlPage(char *page, WiFiClient client)
         int clientCount = 0;
         unsigned long lastPosition = 0;
         char file[25];
-        strcpy(file, "/");
+
+        // If the file is not starting with a / then add it at the beginning.
+        if (page[0] != '/') {
+          strcpy(file, "/");
+        }
+        else {
+          strcpy(file, "");
+        }
+
+        // Then add the page name.
         strcat(file, page);
         
-        File myFile = SD.open(file);        // open web page file
+        File myFile = FS_HANDLER.open(file);        // open web page file
         if (myFile) {
              // send a standard http response header
              client.println(F("HTTP/1.1 200 OK"));
