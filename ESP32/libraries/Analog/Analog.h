@@ -9,10 +9,10 @@
 
 
 #include <Device.h>
-#include <Sensor.h>
+#include <SensorWaac.h>
 
 
-class Analog : public Device, public Sensor
+class Analog : public Device, public SensorWaac
 {
   public:
     Analog(char *in_name, uint8_t in_pin);

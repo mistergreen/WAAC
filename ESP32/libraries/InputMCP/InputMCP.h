@@ -10,11 +10,11 @@
 
 
 #include <Device.h>
-#include <Sensor.h>
+#include <SensorWaac.h>
 #include "Adafruit_MCP23017.h"
 
 
-class InputMCP : public Device, public Sensor
+class InputMCP : public Device, public SensorWaac
 {
   public:
     InputMCP(char *in_name, uint8_t in_pin);

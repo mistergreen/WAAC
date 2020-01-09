@@ -6,7 +6,7 @@
 #include "shunt.h"
 
 
-HallSensor::HallSensor(char *in_name, uint8_t in_pin) : Device(), Sensor()
+HallSensor::HallSensor(char *in_name, uint8_t in_pin) : Device(), SensorWaac()
 {
     //deviceID is automatically set my deviceDeleGate
 

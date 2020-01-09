@@ -4,7 +4,7 @@
 #include "Analog.h"
 #include "shunt.h"
 
-Analog::Analog(char *in_name, uint8_t in_pin) : Device(), Sensor()
+Analog::Analog(char *in_name, uint8_t in_pin) : Device(), SensorWaac()
 {
     //deviceID is automatically set my deviceDeleGate
 

@@ -7,7 +7,7 @@
 #include <Arduino.h>
 #include "Input.h"
 
-Input::Input(char *in_name, uint8_t in_pin) : Device(), Sensor()
+Input::Input(char *in_name, uint8_t in_pin) : Device(), SensorWaac()
 {
     //deviceID is automatically set my deviceDeleGate
 

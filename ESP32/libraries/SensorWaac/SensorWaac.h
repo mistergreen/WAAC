@@ -1,15 +1,15 @@
 // © 2noodles llc
 // minh@2noodles.com
 
-#ifndef Sensor_h
-#define Sensor_h
+#ifndef SensorWaac_h
+#define SensorWaac_h
 
 #include <Arduino.h>
 
-class Sensor
+class SensorWaac
 {
   public:
-    Sensor();
+    SensorWaac();
     
     void setLowerTarget(float in_target);
     float getLowerTarget();

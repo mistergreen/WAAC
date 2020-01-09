@@ -13,9 +13,9 @@
 
 
 #include <Device.h>
-#include <Sensor.h>
+#include <SensorWaac.h>
 
-class HallSensor : public Device, public Sensor
+class HallSensor : public Device, public SensorWaac
 {
   public:
     HallSensor(char *in_name, uint8_t in_pin);

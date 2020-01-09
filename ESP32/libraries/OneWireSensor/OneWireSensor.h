@@ -10,10 +10,10 @@
 
 #include <Arduino.h>
 #include <Device.h>
-#include <Sensor.h>
+#include <SensorWaac.h>
 #include <OneWire.h>
 
-class OneWireSensor : public Device, public Sensor
+class OneWireSensor : public Device, public SensorWaac
 {
   public:
     OneWireSensor(char *in_name, uint8_t in_pin, float in_min, float in_max);

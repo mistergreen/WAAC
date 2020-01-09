@@ -10,10 +10,10 @@
 
 
 #include <Device.h>
-#include <Sensor.h>
+#include <SensorWaac.h>
 
 
-class Input : public Device, public Sensor
+class Input : public Device, public SensorWaac
 {
   public:
     Input(char *in_name, uint8_t in_pin);

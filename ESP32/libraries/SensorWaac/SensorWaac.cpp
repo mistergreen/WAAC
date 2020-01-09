@@ -1,14 +1,14 @@
 //Base Class
-//never use by itself. It needs to be included in a Sensor class
+//never use by itself. It needs to be included in a SensorWaac class
 // © 2noodles llc
 // minh@2noodles.com
 
 
-#include "Sensor.h"
+#include "SensorWaac.h"
 //#include "shunt.h"
 //#include "dtostrf.h"
 
-Sensor::Sensor()
+SensorWaac::SensorWaac()
 {
 
     lowerTarget = 40.0;
@@ -22,47 +22,47 @@ Sensor::Sensor()
 }
 
 
-void Sensor::setLowerTarget(float in_target) {
+void SensorWaac::setLowerTarget(float in_target) {
     lowerTarget = in_target;
 }
 
-float Sensor::getLowerTarget() {
+float SensorWaac::getLowerTarget() {
     return lowerTarget;
 }
 
-void Sensor::setHigherTarget(float in_target) {
+void SensorWaac::setHigherTarget(float in_target) {
     higherTarget = in_target;
 }
 
-float Sensor::getHigherTarget() {
+float SensorWaac::getHigherTarget() {
     return higherTarget;
 }
 
-void Sensor::setConditionType(char *string) {
+void SensorWaac::setConditionType(char *string) {
     Serial.print("set: ");
     Serial.println(string);
     strcpy(conditionType, string);
     
 }
 
-char * Sensor::getConditionType() {
+char * SensorWaac::getConditionType() {
     Serial.print("get: ");
     Serial.println(conditionType);
     return conditionType;
 }
 
 
-void Sensor::setFormula(char *in_formula) {
+void SensorWaac::setFormula(char *in_formula) {
     strcpy(formula, in_formula);
 }
 
 
-char * Sensor::getFormula() {
+char * SensorWaac::getFormula() {
     return formula;
     
 }
 
-void Sensor::searchAndReplace(char *var, char *replace)
+void SensorWaac::searchAndReplace(char *var, char *replace)
 {
     //Serial.println("new formula ");
     //Serial.println(newFormula);
@@ -77,7 +77,7 @@ void Sensor::searchAndReplace(char *var, char *replace)
 }
 
 
-char * Sensor::replace_str(char *str, char *orig, char *rep)
+char * SensorWaac::replace_str(char *str, char *orig, char *rep)
 {
     replaceBuffer[70];
     char *p;
@@ -93,7 +93,7 @@ char * Sensor::replace_str(char *str, char *orig, char *rep)
     return replaceBuffer;
 }
 
-float Sensor::getNewValue() {
+float SensorWaac::getNewValue() {
 
     float temp = 0.0;
 
