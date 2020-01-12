@@ -18,6 +18,7 @@
 #include <WiFiUdp.h>
 
 #include <SPI.h>
+#include <Servo.h>
 #include <TimeLib.h>
 #include <Wire.h>
 
@@ -57,6 +58,7 @@
 #include "Relay.h" 
 #include "RelayMCP.h" 
 #include "RelayPCA.h" 
+#include "ServoMotor.h"
 #include "Shunt.h" 
 #include "Video.h"
 #include "WebParser.h"
@@ -72,7 +74,7 @@ const char *monthName[13] = {"", "January", "February", "March", "April", "May",
 
 /************* Device menu **************/
 // { device type (must be unique & same as classType/Name), description, html form to configure it }
-const char *deviceMenu[13][3] = {
+const char *deviceMenu[14][3] = {
                         {"AdaFruitPWM8","PCA9685 PWM 12-bit, 8 channel", "adapwm8.htm"},
                         {"Alert","Email Alerts", "alert.htm"},
                         {"Analog","Analog Sensors", "analog.htm"},
@@ -84,6 +86,7 @@ const char *deviceMenu[13][3] = {
                         {"Relay","Native Digital out", "relay.htm"},
                         {"RelayPCA","PCA9685 Digital out", "relay_i2c.htm"},
                         {"RelayMCP","MCP23017 Digital out", "relay_i2c.htm"},
+                        {"ServoMotor","Servo Motor out", "servo.htm"},
                         {"Video", "Yout-tube Stream", "video.htm"},
                         {NULL}
                        };
@@ -828,6 +831,11 @@ void parseReceivedRequest(WiFiClient client)
                hallAjaxOutput(client, device);
                 
             }
+            else if(webParser.compare(param_value, "ServoMotor")) 
+            {
+               servoAjaxOutput(client, device);
+                
+            }
           }
             
           //menus
@@ -873,7 +881,7 @@ void parseReceivedRequest(WiFiClient client)
       webParser.parseQuery(queryBuffer, "savedevice", param_value);
         
         if(atoi(param_value) > 0) {
-          // Serial.print("xxxxxxx save device xxxxxxxx");
+          //Serial.println("xxxxxxx save device xxxxxxxx");
           //alter existing device
           Device *device = deviceDelegate.findDevice(atoi(param_value));
    
@@ -948,12 +956,17 @@ void parseReceivedRequest(WiFiClient client)
              saveHallSensor(device);
             
           }
+          else if(webParser.compare(param_value, "ServoMotor")) 
+          {
+             saveServoMotor(device);
+            
+          }
           //turn / reset devices back
           device->setSuspendTime(false);
           
         } else {
           //****************************************create new object ******************************
-          //Serial.print("xxxxxxx created device xxxxxxxx");
+          //Serial.println("xxxxxxx created device xxxxxxxx");
           //don't allow more than 10 devices
           if(deviceDelegate.getDeviceCount() >= MAXDEVICE) return;
           
@@ -992,6 +1005,9 @@ void parseReceivedRequest(WiFiClient client)
           }
           else if(webParser.compare(param_value, "HallSensor")) {
               createHallSensor();
+          }
+          else if(webParser.compare(param_value, "ServoMotor")) {
+              createServoMotor();
           }
 
         }
