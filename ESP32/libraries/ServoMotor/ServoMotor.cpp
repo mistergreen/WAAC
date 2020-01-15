@@ -274,3 +274,7 @@ void ServoMotor::trigger()
 	servingTime = 0;
 }
 
+void ServoMotor::toggleState()
+{
+	trigger();
+}

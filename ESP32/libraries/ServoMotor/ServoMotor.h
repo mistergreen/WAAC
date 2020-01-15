@@ -24,6 +24,7 @@ class ServoMotor : public Device
 
     void loop(); // required
     virtual void trigger();
+	virtual void toggleState();
     
     void setEvent(char *in_string); // override
     void getEvent(char *string); // override
