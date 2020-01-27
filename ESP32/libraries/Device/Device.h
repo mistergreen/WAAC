@@ -6,6 +6,7 @@
 #define Device_h
 
 #include "Arduino.h"
+#include "ArduinoJson.h"
 
 class Device
 {
@@ -39,10 +40,6 @@ class Device
     void setUnit(char *in_unit);
     char * getUnit();
 
-    float min;
-    float max;
-    char unit[35];
-
     //
 
     void stripTime(char *inString, int *inArray);
@@ -69,6 +66,14 @@ class Device
     
     bool getSuspendTime();
     
+    long convertToSeconds(int in_hour, int in_minute, int in_second);
+      
+    int deviceId;
+    float min;
+    float max;
+    char unit[35];
+    
+  protected:
     int pin;
     char classType[20];
     char deviceName[35];
@@ -81,9 +86,16 @@ class Device
     bool deviceState;
     bool suspendTime;
     
-    int deviceId;
-    long convertToSeconds(int in_hour, int in_minute, int in_second);
-
+        // It serializes the class into a Json document.
+    void serialize(
+    // Input Json object pointer to be filled with the class information.
+        JsonObject& doc);
+    
+    // It fills the class using the information contained into the document.
+    void deserialize(
+        // Input Json object pointer containing the class information.
+        JsonObject& doc);
+    
   private:
     
     

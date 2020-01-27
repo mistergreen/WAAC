@@ -1,3 +1,4 @@
+
 // © 2noodles llc
 // minh@2noodles.com
 /* NOTES
@@ -13,6 +14,8 @@
 
 // Define SPIFFS to use it
 #define USE_SPIFFS
+
+#include <ArduinoJson.h>
 
 #include <WiFi.h>
 #include <WiFiUdp.h>
@@ -107,14 +110,21 @@ const char *deviceStyle[12][2] = {
                       };
 /************* network & server configuration ***************/
 
-// Static IP doesn't look like it works for the ESP32 at this point
-// should work in the newest master
-IPAddress ip(192,168,1,177);
-IPAddress gateway(192,168,1,1);	
-IPAddress subnet(255, 255, 255, 0);
-//IPAddress primaryDNS(8, 8, 8, 8); //optional
-//IPAddress secondaryDNS(8, 8, 4, 4); //optional
-
+// Our configuration structure.
+//
+// Never use a JsonDocument to store the configuration!
+// A JsonDocument is *not* a permanent storage; it's only a temporary storage
+// used during the serialization phase. See:
+// https://arduinojson.org/v6/faq/why-must-i-create-a-separate-config-object/
+struct Config {
+  char ssid[64];
+  char password[64];
+  int ip[4];
+  int gateway[4];
+  int subnet[4];
+  int timeZone;
+  char ntpServer[32];
+};
 
 // Initialize the Ethernet server library
 // with the IP address and port you want to use 
@@ -132,9 +142,6 @@ File webFile;
 WWWsettings wwws;
 
 /************* website login **************/
-// wifi
-char ssid[] = "YourNetworkName"; //  your network SSID (name)
-char password[] = "networkPassword";    // your network password (use for WPA, or use as key for WEP)
 
 // site login
 char username[] = "admin";
@@ -143,45 +150,20 @@ char loginpass[] = "waac";
 
 unsigned long arduinoSession = 1;
 
-  
+
+const char *configFile = "/settings.json";  // <- SD library uses 8.3 filenames
+Config config;                         // <- global configuration object
+
+const char *devicesFile = "/devices.json";
+
 /****************************************** sketch Logic **********************************************************/
 
 void setup() 
 {
- 
   // start serial port:
   Serial.begin(115200);
 
-  //************ wifi *******************
-  // Static IP doesn't look like it works for the ESP32 at this point
-//if (!WiFi.config(ip, gateway, subnet, primaryDNS, secondaryDNS)) {
-
-  if (!WiFi.config(ip, gateway, subnet, gateway)) {
-    Serial.println("STA Failed to configure");
-  }
-
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-
-  
-  WiFi.begin(ssid, password);
-  
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-
-  Serial.println("Connected to wifi");
-  printWifiStatus();
-
-  // set up server for the rest of the sockets
-  server.begin();
-  
-  //set up upd first so it gets sockets #0
-  wwws.begin();
-  
-
-   //************ initialize SD card *******************
+  //************ initialize SD card *******************
 
 #ifdef USE_SPIFFS
   Serial.println ("Initializing SPIFFS...");
@@ -202,10 +184,50 @@ void setup()
         return;  // can't find index file
   }
   Serial.println("SUCCESS - Found index.htm file.");
- 
- 
-  
 
+  // Dump config file
+  Serial.println(F("Print config file..."));
+  printFile(configFile);
+
+  // Should load default config if run for the first time
+  Serial.println(F("Loading configuration..."));
+  loadConfiguration(configFile, config);
+
+  // Set the IP from the configuration
+  IPAddress ip(config.ip[0], config.ip[1], config.ip[2], config.ip[3]);
+  IPAddress gateway(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3]); 
+  IPAddress subnet(config.subnet[0], config.subnet[1], config.subnet[2], config.subnet[3]);
+  //IPAddress primaryDNS(8, 8, 8, 8); //optional
+  //IPAddress secondaryDNS(8, 8, 4, 4); //optional
+
+
+  //************ wifi *******************
+  // Static IP doesn't look like it works for the ESP32 at this point
+  //if (!WiFi.config(ip, gateway, subnet, primaryDNS, secondaryDNS)) {
+
+  if (!WiFi.config(ip, gateway, subnet, gateway)) {
+    Serial.println("STA Failed to configure");
+  }
+
+  Serial.print("Connecting to ");
+  Serial.println(config.ssid);
+
+  WiFi.begin(config.ssid, config.password);
+  
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("Connected to wifi");
+  printWifiStatus();
+
+  // set up server for the rest of the sockets
+  server.begin();
+  
+  //set up upd first so it gets sockets #0
+  wwws.begin(config.timeZone, config.ntpServer);
+ 
   //delay(10000);
   
   //sync time to NTP
@@ -214,6 +236,8 @@ void setup()
   Serial.print("memory ");
   Serial.println(freeMemory());
   
+  // Load all stored devices.
+  loadDevices(devicesFile);
 }
 
 
@@ -650,13 +674,12 @@ void parseReceivedRequest(WiFiClient client)
     // ***************** SAVE Settings ********************
     else if(webParser.contains(queryBuffer, "savesetting"))
     {
-      saveSetting(client);
+      saveSetting(client, config);
         
     } 
      // ***************** LOAD Settings ********************
     else if(webParser.contains(queryBuffer, "getsetting"))
     {
-     
        getSetting(client);
 
     } 
@@ -1009,8 +1032,10 @@ void parseReceivedRequest(WiFiClient client)
           else if(webParser.compare(param_value, "ServoMotor")) {
               createServoMotor();
           }
-
         }
+        
+        saveDevices(devicesFile);
+        
         //response back to client on success of saving or creating
         successAjax(client);
     }
@@ -1088,6 +1113,3 @@ void ShowSockStatus() {
   }
   */
 }
-
-
-

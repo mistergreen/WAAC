@@ -122,7 +122,7 @@ void testDNS(WiFiClient client) {
       }
 }
 
-void saveSetting(WiFiClient client) {
+void saveSetting(WiFiClient client, Config config) {
       webParser.clearBuffer(param_value, queryMax);
       webParser.parseQuery(queryBuffer, "email", param_value);
       wwws.setToEmail(param_value);
@@ -144,7 +144,7 @@ void saveSetting(WiFiClient client) {
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "iphost", param_value);
         wwws.setNetworkHost(param_value);
-      } else if(atoi(param_value) == 2) {
+    } else if(atoi(param_value) == 2) {
         wwws.setDDNSIpState(true);
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "ddnshost", param_value);
@@ -161,20 +161,26 @@ void saveSetting(WiFiClient client) {
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "password", param_value);
         wwws.setPassword(param_value);
-      }
+    }
       
-        webParser.clearBuffer(param_value, queryMax);
-        webParser.parseQuery(queryBuffer, "ntp", param_value);
-        wwws.setNTPServer(param_value);
-        
-        webParser.clearBuffer(param_value, queryMax);
-        webParser.parseQuery(queryBuffer, "timezone", param_value);
-        wwws.setTimeZone(atoi(param_value));
-        
+    webParser.clearBuffer(param_value, queryMax);
+    webParser.parseQuery(queryBuffer, "ntp", param_value);
+    wwws.setNTPServer(param_value);
+    
+    strlcpy(param_value,              // <- destination
+      config.ntpServer ,              // <- source
+      sizeof(param_value));     // <- destination's capacity
+    
+    webParser.clearBuffer(param_value, queryMax);
+    webParser.parseQuery(queryBuffer, "timezone", param_value);
+    wwws.setTimeZone(atoi(param_value));
+    
+    config.timeZone = wwws.getTimeZone();
+
+    saveConfiguration(configFile, config);
       
-      
-      //ajax requires a response or will throw a connection lost
-     successAjax(client);
+    //ajax requires a response or will throw a connection lost
+    successAjax(client);
 }
 
 void getSetting(WiFiClient client) {
@@ -238,5 +244,3 @@ void getSetting(WiFiClient client) {
       
       client.print(F("</setting>"));
 }
-
-

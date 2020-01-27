@@ -89,4 +89,33 @@ void saveServoMotor(Device *device) {
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "moveAngle", param_value);
         static_cast<ServoMotor*>(device)->setMoveAngle(atoi(param_value));
+/*
+        char filename[] = "/devices.json";
+          // Delete existing file, otherwise the configuration is appended to the file
+          FS_HANDLER.remove(filename);
+        
+          // Open file for writing
+          File file = FS_HANDLER.open(filename, FILE_WRITE);
+          if (!file) {
+            Serial.println(F("Failed to create file"));
+            return;
+          }
+        
+          // Allocate a temporary JsonDocument
+          // Don't forget to change the capacity to match your requirements.
+          // Use arduinojson.org/assistant to compute the capacity.
+          StaticJsonDocument<256> doc;
+        
+          JsonObject obj1 = doc.createNestedObject();
+
+          static_cast<ServoMotor*>(device)->serialize(obj1);
+        
+          // Serialize JSON to file
+          if (serializeJson(doc, file) == 0) {
+            Serial.println(F("Failed to write to file"));
+          }
+        
+          // Close the file
+          file.close();
+*/
 }

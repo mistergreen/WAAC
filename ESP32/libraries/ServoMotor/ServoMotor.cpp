@@ -36,17 +36,17 @@ ServoMotor::ServoMotor(char *in_name, int in_pin, int in_dependent_device_id, in
     strcpy(classType,"ServoMotor");
 
     pin = in_pin;
-	// Connect the servo library to the selected pin.
-	servo.attach(pin);
+    // Connect the servo library to the selected pin.
+    servo.attach(pin);
 
     isDay = false; // isDay is the day an event is to occur
     timedIndexCounter = 0;
     
-	stopAngle = stop_angle;
-	moveAngle = move_angle;
-	secondDuration = second_duration;
-	servingTime = 0;
-	servo.write(stopAngle);
+    stopAngle = stop_angle;
+    moveAngle = move_angle;
+    secondDuration = second_duration;
+    servingTime = 0;
+    servo.write(stopAngle);
 }
 
 
@@ -101,7 +101,7 @@ void ServoMotor::loop()
                     }
                     
                 }
-				// if no dependent				
+				// if no dependent
 				else {
 					// Check that it is the time to trigger.
                     if(currentTime == eventTime && servingTime != currentTime) {
@@ -256,7 +256,7 @@ void ServoMotor::setStopAngle(uint8_t angle) {
 }
 
 uint8_t ServoMotor::getMoveAngle() {
-	return moveAngle;
+    return moveAngle;
 }
 
 void ServoMotor::setMoveAngle(uint8_t angle) {
@@ -268,13 +268,50 @@ void ServoMotor::trigger()
 {
     // Trigger the servo motor.
     Serial.println("switching on");
-	servo.write(moveAngle);
-	delay(secondDuration);
-	servo.write(stopAngle);
-	servingTime = 0;
+    servo.write(moveAngle);
+    delay(secondDuration);
+    servo.write(stopAngle);
+    servingTime = 0;
 }
 
 void ServoMotor::toggleState()
 {
-	trigger();
+    trigger();
+}
+
+
+void ServoMotor::serialize(JsonObject& doc)
+{
+    // First call father serialization
+    Device::serialize(doc);
+
+    doc["stopAngle"] = stopAngle;
+    doc["moveAngle"] = moveAngle;
+    doc["secondDuration"] = secondDuration;
+    doc["timedIndexCounter"] = timedIndexCounter;
+    doc["servingTime"] = servingTime;
+    
+    // 64 characters per event + carriage return
+    char event[67*4];
+    getEvent(event);
+    doc["event"] = event;
+}
+
+void ServoMotor::deserialize(
+    JsonObject& doc)
+{
+   // First call father deserialization
+    Device::deserialize(doc);
+    
+    stopAngle = doc["stopAngle"];
+    moveAngle = doc["moveAngle"];
+    secondDuration = doc["secondDuration"];
+    timedIndexCounter = doc["timedIndexCounter"];
+    servingTime = doc["servingTime"];
+    
+    // 64 characters per event + carriage return
+    char event[67*4];
+    strcpy (event, doc["event"]);
+    
+    setEvent(event);
 }

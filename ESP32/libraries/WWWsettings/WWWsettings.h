@@ -20,6 +20,13 @@ class WWWsettings
     WWWsettings();
     void begin();
 
+    // Class setup with parameters passing
+    void begin(
+        // The time zone to set.
+        int time_zone,
+        // The ntp server name.
+        char *ntp_server);
+
     void check();
    
     void email(char *in_subject, char *in_message);
