@@ -19,6 +19,11 @@ ServoMotor::ServoMotor() : Device()
 	stopAngle = 0;
 	moveAngle = 0;
 	secondDuration = 0;
+    
+    memset(hour, 0, sizeof(int)*5);
+    memset(minute, 0, sizeof(int)*5);
+    memset(second, 0, sizeof(int)*5);
+    memset(dow, 0, sizeof(char)*5*8);
 }
 
 ServoMotor::ServoMotor(char *in_name, int in_pin, int in_dependent_device_id, int stop_angle, int move_angle, int second_duration) : Device()
@@ -46,6 +51,14 @@ ServoMotor::ServoMotor(char *in_name, int in_pin, int in_dependent_device_id, in
     moveAngle = move_angle;
     secondDuration = second_duration;
     servingTime = 0;
+    
+    memset(hour, 0, sizeof(int)*5);
+    memset(minute, 0, sizeof(int)*5);
+    memset(second, 0, sizeof(int)*5);
+    memset(dow, 0, sizeof(char)*5*8);
+    
+    Serial.print("Setting angle: ");
+    Serial.println(stopAngle);
     servo.write(stopAngle);
 }
 
@@ -253,6 +266,7 @@ uint8_t ServoMotor::getStopAngle() {
 
 void ServoMotor::setStopAngle(uint8_t angle) {
     stopAngle = angle;
+    servo.write(stopAngle);
 }
 
 uint8_t ServoMotor::getMoveAngle() {
@@ -268,8 +282,12 @@ void ServoMotor::trigger()
 {
     // Trigger the servo motor.
     Serial.println("switching on");
+    Serial.print("Setting angle: ");
+    Serial.println(moveAngle);
     servo.write(moveAngle);
     delay(secondDuration);
+    Serial.print("Setting angle: ");
+    Serial.println(stopAngle);
     servo.write(stopAngle);
     servingTime = 0;
 }
@@ -314,4 +332,11 @@ void ServoMotor::deserialize(
     strcpy (event, doc["event"]);
     
     setEvent(event);
+    
+        // Connect the servo library to the selected pin.
+    servo.attach(pin);
+    
+    Serial.print("Setting angle: ");
+    Serial.println(stopAngle);
+    servo.write(stopAngle);
 }

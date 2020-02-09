@@ -168,6 +168,7 @@ void Device::deserialize(
     strcpy(deviceName, doc["deviceName"]);
     strcpy(classType, doc["classType"]);
     strcpy(deviceColor, doc["deviceColor"]);
+    strcpy(imageName, doc["imageName"]);
 
     deviceState = doc["deviceState"];
     suspendTime = doc["suspendTime"];
