@@ -41,8 +41,6 @@ ServoMotor::ServoMotor(char *in_name, int in_pin, int in_dependent_device_id, in
     strcpy(classType,"ServoMotor");
 
     pin = in_pin;
-    // Connect the servo library to the selected pin.
-    servo.attach(pin);
 
     isDay = false; // isDay is the day an event is to occur
     timedIndexCounter = 0;
@@ -57,8 +55,10 @@ ServoMotor::ServoMotor(char *in_name, int in_pin, int in_dependent_device_id, in
     memset(second, 0, sizeof(int)*5);
     memset(dow, 0, sizeof(char)*5*8);
     
+    // Connect the servo library to the selected pin.
     Serial.print("Setting angle: ");
     Serial.println(stopAngle);
+    servo.attach(pin);
     servo.write(stopAngle);
 }
 
@@ -141,6 +141,7 @@ void ServoMotor::setEvent(char *in_string)
     //you can only add up to 4 events- each event is -on and duration -off pairs
     Serial.println("out event");
     char events[8][67];
+    memset(events, 0, sizeof(char)*8*67);
     
     //parse incoming string *** MAKE ROOM FOR THE NUL TERMINATOR in the string!
     char *tok1;
@@ -224,6 +225,8 @@ void ServoMotor::getEvent(char *string) {
         Serial.println(timedIndexCounter);
         
         char buf[104];
+        memset(buf, 0, sizeof(char)*104);
+    
         sprintf(buf, "%02d:%02d:%02d,%s", hour[0],minute[0],second[0],dow[0]);
         strcpy(string, buf);
         
@@ -233,7 +236,7 @@ void ServoMotor::getEvent(char *string) {
         }
     } else {
         Serial.println("crash no event");
-        // strcpy(string, '\0');
+        string[0] = '\0';
     }
 }
 
@@ -306,7 +309,6 @@ void ServoMotor::serialize(JsonObject& doc)
     doc["stopAngle"] = stopAngle;
     doc["moveAngle"] = moveAngle;
     doc["secondDuration"] = secondDuration;
-    doc["timedIndexCounter"] = timedIndexCounter;
     doc["servingTime"] = servingTime;
     
     // 64 characters per event + carriage return
@@ -324,7 +326,6 @@ void ServoMotor::deserialize(
     stopAngle = doc["stopAngle"];
     moveAngle = doc["moveAngle"];
     secondDuration = doc["secondDuration"];
-    timedIndexCounter = doc["timedIndexCounter"];
     servingTime = doc["servingTime"];
     
     // 64 characters per event + carriage return

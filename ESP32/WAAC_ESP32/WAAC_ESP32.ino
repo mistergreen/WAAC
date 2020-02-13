@@ -222,6 +222,9 @@ void setup()
   Serial.println("Connected to wifi");
   printWifiStatus();
 
+  // Load all stored devices.
+  loadDevices(devicesFile);
+
   // set up server for the rest of the sockets
   server.begin();
   
@@ -235,9 +238,6 @@ void setup()
   
   Serial.print("memory ");
   Serial.println(freeMemory());
-  
-  // Load all stored devices.
-  loadDevices(devicesFile);
 }
 
 

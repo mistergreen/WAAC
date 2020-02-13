@@ -15,6 +15,8 @@
 class RelayMCP : public Relay
 {
   public:
+    // Empty constructor.
+    RelayMCP();
     RelayMCP(char *in_name, int in_pin, int in_dependent_device_id);
     ~RelayMCP() {}; // destructor
 
@@ -23,17 +25,20 @@ class RelayMCP : public Relay
     void getI2C(int *inArray);
     void setI2C(int insda, int inscl);
     
+    // It serializes the class into a Json document.
+    void serialize(
+    // Input Json object pointer to be filled with the class information.
+        JsonObject& doc);
+    
+    // It fills the class using the information contained into the document.
+    void deserialize(
+        // Input Json object pointer containing the class information.
+        JsonObject& doc);
+    
   private:
     boolean isDay;
     boolean onceFlag;
     uint8_t timedIndexCounter;
-    int hour[5];
-    int minute[5];
-    int second[5];
-    int hourDuration[5];
-    int minuteDuration[5];
-    int secondDuration[5];
-    char dow[5][8];
 
     int SDA;
     int SCL;

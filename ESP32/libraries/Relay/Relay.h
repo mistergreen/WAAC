@@ -36,6 +36,16 @@ class Relay : public Device
     boolean getInvert();
     void setInvert(boolean state);
     
+    // It serializes the class into a Json document.
+    void serialize(
+    // Input Json object pointer to be filled with the class information.
+        JsonObject& doc);
+    
+    // It fills the class using the information contained into the document.
+    void deserialize(
+        // Input Json object pointer containing the class information.
+        JsonObject& doc);
+    
   private:
     boolean isDay;
     boolean onceFlag;

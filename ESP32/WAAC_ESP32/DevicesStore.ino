@@ -49,6 +49,30 @@ void loadDevices(const char *filename) {
         temp->deserialize(obj);
         deviceDelegate.addDevice( temp );
       }
+      else if (strcmp("Relay", obj["classType"]) == 0)
+      {
+        Serial.println ("Creating Relay");
+        
+        Relay *temp = new Relay();
+        temp->deserialize(obj);
+        deviceDelegate.addDevice( temp );
+      }
+      else if (strcmp("RelayMCP", obj["classType"]) == 0)
+      {
+        Serial.println ("Creating RelayMCP");
+        
+        RelayMCP *temp = new RelayMCP();
+        temp->deserialize(obj);
+        deviceDelegate.addDevice( temp );
+      }
+      else if (strcmp("RelayPCA", obj["classType"]) == 0)
+      {
+        Serial.println ("Creating RelayPCA");
+        
+        RelayPCA *temp = new RelayPCA();
+        temp->deserialize(obj);
+        deviceDelegate.addDevice( temp );
+      }
     }
   }
     
@@ -92,11 +116,35 @@ void saveDevices(const char *filename) {
     // Find the right device.
     if (strcmp("ServoMotor", className) == 0)
     {
-      Serial.println ("Serializing");
+      Serial.println ("Serializing Servo Motor");
       
       JsonObject obj = doc.createNestedObject();
       
       static_cast<ServoMotor*>(deviceDelegate.devices[i])->serialize(obj);
+    }
+    else if (strcmp("Relay", className) == 0)
+    {
+      Serial.println ("Serializing Relay");
+      
+      JsonObject obj = doc.createNestedObject();
+      
+      static_cast<Relay*>(deviceDelegate.devices[i])->serialize(obj);
+    }
+    else if (strcmp("RelayMCP", className) == 0)
+    {
+      Serial.println ("Serializing RelayMCP");
+      
+      JsonObject obj = doc.createNestedObject();
+      
+      static_cast<RelayMCP*>(deviceDelegate.devices[i])->serialize(obj);
+    }
+    else if (strcmp("RelayPCA", className) == 0)
+    {
+      Serial.println ("Serializing RelayPCA");
+      
+      JsonObject obj = doc.createNestedObject();
+      
+      static_cast<RelayPCA*>(deviceDelegate.devices[i])->serialize(obj);
     }
   }
 
