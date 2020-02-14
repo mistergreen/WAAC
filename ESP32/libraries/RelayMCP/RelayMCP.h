@@ -10,9 +10,10 @@
 
 #include "Arduino.h"
 #include "Relay.h" 
+#include "Storable.h"
 #include "Adafruit_MCP23017.h"
 
-class RelayMCP : public Relay
+class RelayMCP : public Relay, public Storable
 {
   public:
     // Empty constructor.

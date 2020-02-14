@@ -507,3 +507,24 @@ void AdaFruitPWM8::getI2C(int *inArray) {
     inArray[1] = SCL;
     
 }
+
+void AdaFruitPWM8::serialize(JsonObject& doc)
+{
+    // First call father serialization
+    Device::serialize(doc);
+    
+    doc["SDA"] = SDA;
+    doc["SCL"] = SCL;
+    
+    // MISSING COLORS STORAGE
+
+}
+
+void AdaFruitPWM8::deserialize(
+    JsonObject& doc)
+{
+   // First call father deserialization
+    Device::deserialize(doc);
+
+    setI2C(doc["SDA"], doc["SCL"]);
+}

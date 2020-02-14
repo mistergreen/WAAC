@@ -12,11 +12,12 @@
 
 #include "Arduino.h"
 #include "Device.h" 
+#include "Storable.h"
 
 #include "Servo.h"
 #include "ArduinoJson.h"
 
-class ServoMotor : public Device
+class ServoMotor : public Device, public Storable
 {
   public:
     ServoMotor();

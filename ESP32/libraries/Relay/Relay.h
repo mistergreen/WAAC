@@ -9,9 +9,10 @@
 #define Relay_h
 
 #include "Arduino.h"
-#include "Device.h" 
+#include "Device.h"
+#include "Storable.h"
 
-class Relay : public Device
+class Relay : public Device, public Storable
 {
   public:
     Relay();

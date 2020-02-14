@@ -5,8 +5,8 @@
 #ifndef Device_h
 #define Device_h
 
+#include "Storable.h"
 #include "Arduino.h"
-#include "ArduinoJson.h"
 
 class Device
 {

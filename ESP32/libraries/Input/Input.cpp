@@ -73,3 +73,19 @@ void Input::loop() {
 
 }
 
+void Input::serialize(JsonObject& doc)
+{
+    // First call father serialization
+    Device::serialize(doc);
+    
+    SensorWaac::serialize(doc);
+}
+
+void Input::deserialize(
+    JsonObject& doc)
+{
+   // First call father deserialization
+    Device::deserialize(doc);
+    
+    SensorWaac::deserialize(doc);
+}
