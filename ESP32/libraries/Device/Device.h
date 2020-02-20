@@ -8,7 +8,7 @@
 #include "Storable.h"
 #include "Arduino.h"
 
-class Device
+class Device : public Storable
 {
   public:
     Device();

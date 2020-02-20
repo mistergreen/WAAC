@@ -20,6 +20,8 @@ ServoMotor::ServoMotor() : Device()
 	moveAngle = 0;
 	secondDuration = 0;
     
+    dependentDeviceObject = NULL;
+    
     memset(hour, 0, sizeof(int)*5);
     memset(minute, 0, sizeof(int)*5);
     memset(second, 0, sizeof(int)*5);
@@ -73,6 +75,7 @@ void ServoMotor::loop()
                 boolean temp = dependentDeviceObject->getDeviceState();
                 
                 if(temp) {
+                    Serial.println("Trigger by dependent device");
                     trigger();
                 }
             }
@@ -108,6 +111,8 @@ void ServoMotor::loop()
                         boolean temp = dependentDeviceObject->getDeviceState();
                         
                         if(temp) {
+                            Serial.println("Trigger by time - no dependent device");
+
 							servingTime = currentTime;
 							trigger();
                         }
@@ -118,6 +123,8 @@ void ServoMotor::loop()
 				else {
 					// Check that it is the time to trigger.
                     if(currentTime == eventTime && servingTime != currentTime) {
+                        Serial.println("Trigger by time - no dependent device");
+                        
 						servingTime = currentTime;
                         trigger();
                     }

@@ -3,22 +3,13 @@
 // Andrea Villa
 // villa.andrea@gmail.com
 
-// Compute the required size
-// 25 expected fields + names with 15 characters + events (350 max chars to be calculated better) + 5 additional strings of 64 characters (servo motor example).
-// The size may need to be enlarged for other objects.
-static const int sDEVICES_DOC_SIZE = JSON_ARRAY_SIZE(11) + JSON_OBJECT_SIZE(1) + (JSON_OBJECT_SIZE(25) + 200 + 4 * 64);
-  
+ 
 // Loads the configuration from a file
 void loadDevices(const char *filename) {
   Serial.println ("Loading Devices");
 
   // Open file for reading
   File file = FS_HANDLER.open(filename);
-
-  // Allocate a temporary JsonDocument
-  // Don't forget to change the capacity to match your requirements.
-  // Use arduinojson.org/v6/assistant to compute the capacity.
-  StaticJsonDocument<sDEVICES_DOC_SIZE> doc;
 
   // Deserialize the JSON document
   DeserializationError error = deserializeJson(doc, file);
@@ -96,11 +87,6 @@ void saveDevices(const char *filename) {
     return;
   }
 
-  // Allocate a temporary JsonDocument
-  // Don't forget to change the capacity to match your requirements.
-  // Use arduinojson.org/assistant to compute the capacity.
-  StaticJsonDocument<sDEVICES_DOC_SIZE> doc;
-
   // First store the number of devices.
   JsonObject mainObj = doc.createNestedObject();
 
@@ -112,40 +98,13 @@ void saveDevices(const char *filename) {
 
     // Get the class neame for  the correct casting.
     char* className = deviceDelegate.devices[i]->getClassName();
-    
-    // Find the right device.
-    if (strcmp("ServoMotor", className) == 0)
-    {
-      Serial.println ("Serializing Servo Motor");
+
+    Serial.print ("Serializing ");
+    Serial.println (className);
+
+    JsonObject obj = doc.createNestedObject();
       
-      JsonObject obj = doc.createNestedObject();
-      
-      static_cast<ServoMotor*>(deviceDelegate.devices[i])->serialize(obj);
-    }
-    else if (strcmp("Relay", className) == 0)
-    {
-      Serial.println ("Serializing Relay");
-      
-      JsonObject obj = doc.createNestedObject();
-      
-      static_cast<Relay*>(deviceDelegate.devices[i])->serialize(obj);
-    }
-    else if (strcmp("RelayMCP", className) == 0)
-    {
-      Serial.println ("Serializing RelayMCP");
-      
-      JsonObject obj = doc.createNestedObject();
-      
-      static_cast<RelayMCP*>(deviceDelegate.devices[i])->serialize(obj);
-    }
-    else if (strcmp("RelayPCA", className) == 0)
-    {
-      Serial.println ("Serializing RelayPCA");
-      
-      JsonObject obj = doc.createNestedObject();
-      
-      static_cast<RelayPCA*>(deviceDelegate.devices[i])->serialize(obj);
-    }
+    static_cast<Storable*>(deviceDelegate.devices[i])->serialize(obj);
   }
 
   // Serialize JSON to file
