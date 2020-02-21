@@ -6,7 +6,7 @@ This is still work in progress. I haven’t fully debug this. I'll try to add mo
 <li>Email Alerts</li>
 <li>Youtube streaming video connection</li>
 <li>Public IP Management</li>
-<li>Serialize/Save Relay setting configuration in case of power loss</li>
+<li>Serialize/Save device setting configurationa in case of power loss</li>
 </ol>
 
 <h2>Supported Device</h2>
