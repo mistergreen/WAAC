@@ -37,6 +37,6 @@ This is still work in progress. I haven’t fully debug this. I'll try to add mo
 <h2>Running</h2>
 <ol>
 <li>Change the network name and password to your network in the main .ino file</li>
-<li>Browse to 192.168.1.177. Static IP works with the 3/2018 ESP32 master</li>
+<li>Browse to 192.168.1.177. Static IP works with the 3/2018 ESP32 master. You might want to change the IP based on your router</li>
 <li>Login (default) user: admin pass: waac</li>
 </ol>
