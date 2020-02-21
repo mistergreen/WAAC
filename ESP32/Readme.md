@@ -27,12 +27,14 @@ This is still work in progress. I haven’t fully debug this. I'll try to add mo
 <li>SD card reader</li>
 <li>SD card</li>
 </ol>
+* WAAC supports SPIFFS so an SD might not be necessary for your needs.
 
 <h2>Setup</h2>
 <ol>
 <li>Copy all .html, .js, .css files onto the SD card</li>
 <li>Library files go into the Arduino Library folder</li>
 </ol>
+* WAAC supports SPIFFS so flash the necessary files into memory.
 
 <h2>Running</h2>
 <ol>
