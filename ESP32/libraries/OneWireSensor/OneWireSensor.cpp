@@ -4,9 +4,9 @@
 #include "OneWireSensor.h"
 //#include <dtostrf.h> // dosn't need this helper
 #include <OneWire.h>
-#include <Sensor.h>
+#include <SensorWaac.h>
 
-OneWireSensor::OneWireSensor(char *in_name, uint8_t in_pin, float in_min, float in_max) : Device(), Sensor()
+OneWireSensor::OneWireSensor(char *in_name, uint8_t in_pin, float in_min, float in_max) : Device(), SensorWaac()
 {
     min = in_min;
     max = in_max;

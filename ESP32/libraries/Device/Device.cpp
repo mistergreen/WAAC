@@ -142,3 +142,38 @@ void Device::setDeviceState(bool state) {
     deviceState = state;
 }
 
+void Device::serialize(JsonObject& doc)
+{
+    // Set the values in the document
+    //doc["number"] = number;
+    doc["pin"] = pin;
+    doc["classType"] = classType;
+    doc["deviceName"] = deviceName;
+    doc["imageName"] = imageName;
+    doc["deviceColor"] = deviceColor;
+    doc["deviceState"] = deviceState;
+    doc["suspendTime"] = suspendTime;
+    doc["deviceId"] = deviceId;
+    doc["min"] = min;
+    doc["max"] = max;
+    doc["unit"] = unit;
+}
+
+void Device::deserialize(
+    JsonObject& doc)
+{
+    pin = doc["pin"];
+    
+    strcpy(classType, doc["classType"]);
+    strcpy(deviceName, doc["deviceName"]);
+    strcpy(classType, doc["classType"]);
+    strcpy(deviceColor, doc["deviceColor"]);
+    strcpy(imageName, doc["imageName"]);
+
+    deviceState = doc["deviceState"];
+    suspendTime = doc["suspendTime"];
+    deviceId = doc["deviceId"];
+    min = doc["min"];
+    max = doc["max"];
+    strcpy(unit, doc["unit"]);
+}

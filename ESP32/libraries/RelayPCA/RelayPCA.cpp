@@ -15,6 +15,13 @@
 #include <Wire.h>
 
 
+RelayPCA::RelayPCA() : Relay()
+{
+    if(!PCAhelper::isSet) {
+        PCAhelper::init();
+    }
+}
+
 RelayPCA::RelayPCA(char *in_name, int in_pin, int in_dependent_device_id) : Relay()
 {
     // Device() call super to init vars
@@ -37,8 +44,6 @@ RelayPCA::RelayPCA(char *in_name, int in_pin, int in_dependent_device_id) : Rela
     if(!PCAhelper::isSet) {
         PCAhelper::init();
     }
-
-
 }
 
 void RelayPCA::setI2C(int insda, int inscl) 
@@ -97,3 +102,25 @@ void RelayPCA::switchOff()
     deviceState = false;
 }
 
+void RelayPCA::serialize(JsonObject& doc)
+{
+    // First call father serialization
+    Device::serialize(doc);
+    
+    Relay::serialize(doc);
+    
+    doc["SDA"] = SDA;
+    doc["SCL"] = SCL;
+
+}
+
+void RelayPCA::deserialize(
+    JsonObject& doc)
+{
+   // First call father deserialization
+    Device::deserialize(doc);
+    
+    Relay::deserialize(doc);
+
+    setI2C(doc["SDA"], doc["SCL"]);
+}

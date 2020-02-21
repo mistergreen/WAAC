@@ -9,7 +9,7 @@
 #include "InputMCP.h"
 #include "MCPhelper.h"
 
-InputMCP::InputMCP(char *in_name, uint8_t in_pin) : Device(), Sensor()
+InputMCP::InputMCP(char *in_name, uint8_t in_pin) : Device(), SensorWaac()
 {
     //deviceID is automatically set my deviceDeleGate
 
@@ -110,6 +110,32 @@ void InputMCP::getI2C(int *inArray) {
     inArray[0] = SDA;
     inArray[1] = SCL;
     
+}
+
+void InputMCP::serialize(JsonObject& doc)
+{
+    // First call father serialization
+    Device::serialize(doc);
+    
+    SensorWaac::serialize(doc);
+    
+    doc["SDA"] = SDA;
+    doc["SCL"] = SCL;
+
+}
+
+void InputMCP::deserialize(
+    JsonObject& doc)
+{
+   // First call father deserialization
+    Device::deserialize(doc);
+    
+    SensorWaac::deserialize(doc);
+    
+    MCPhelper::mcp.pinMode(pin, OUTPUT);
+    MCPhelper::mcp.pullUp(pin, LOW); // in case it was set HIGH previously
+    
+    setI2C(doc["SDA"], doc["SCL"]);
 }
 
 

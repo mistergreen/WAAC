@@ -1,3 +1,4 @@
+
 // © 2noodles llc
 // minh@2noodles.com
 /* NOTES
@@ -10,16 +11,31 @@
 #define UNSET       -1
 #define bufferMax   628
 #define queryMax    350
-#define SDCARD_CS   5 // SS pin
+
+// Define SPIFFS to use it
+#define USE_SPIFFS
+
+#include <ArduinoJson.h>
 
 #include <WiFi.h>
 #include <WiFiUdp.h>
 
 #include <SPI.h>
-#include <SD.h>
+#include <Servo.h>
 #include <TimeLib.h>
 #include <Wire.h>
 
+
+// Load the selected file system
+#ifdef USE_SPIFFS
+  #include <SPIFFS.h>
+  #define FS_HANDLER SPIFFS
+  #define FS_PARAM   true
+#else
+  #include <SD.h>
+  #define FS_HANDLER SD
+  #define FS_PARAM   5 // SS pin
+#endif
 
 //devices - add any necessary libs for devices here!
 //for generic device using digial pins or analog
@@ -45,6 +61,7 @@
 #include "Relay.h" 
 #include "RelayMCP.h" 
 #include "RelayPCA.h" 
+#include "ServoMotor.h"
 #include "Shunt.h" 
 #include "Video.h"
 #include "WebParser.h"
@@ -60,7 +77,7 @@ const char *monthName[13] = {"", "January", "February", "March", "April", "May",
 
 /************* Device menu **************/
 // { device type (must be unique & same as classType/Name), description, html form to configure it }
-const char *deviceMenu[13][3] = {
+const char *deviceMenu[14][3] = {
                         {"AdaFruitPWM8","PCA9685 PWM 12-bit, 8 channel", "adapwm8.htm"},
                         {"Alert","Email Alerts", "alert.htm"},
                         {"Analog","Analog Sensors", "analog.htm"},
@@ -72,6 +89,7 @@ const char *deviceMenu[13][3] = {
                         {"Relay","Native Digital out", "relay.htm"},
                         {"RelayPCA","PCA9685 Digital out", "relay_i2c.htm"},
                         {"RelayMCP","MCP23017 Digital out", "relay_i2c.htm"},
+                        {"ServoMotor","Servo Motor out", "servo.htm"},
                         {"Video", "Yout-tube Stream", "video.htm"},
                         {NULL}
                        };
@@ -92,14 +110,21 @@ const char *deviceStyle[12][2] = {
                       };
 /************* network & server configuration ***************/
 
-// Static IP doesn't look like it works for the ESP32 at this point
-// should work in the newest master
-IPAddress ip(192,168,1,177);
-IPAddress gateway(192,168,1,1);	
-IPAddress subnet(255, 255, 255, 0);
-//IPAddress primaryDNS(8, 8, 8, 8); //optional
-//IPAddress secondaryDNS(8, 8, 4, 4); //optional
-
+// Our configuration structure.
+//
+// Never use a JsonDocument to store the configuration!
+// A JsonDocument is *not* a permanent storage; it's only a temporary storage
+// used during the serialization phase. See:
+// https://arduinojson.org/v6/faq/why-must-i-create-a-separate-config-object/
+struct Config {
+  char ssid[64];
+  char password[64];
+  int ip[4];
+  int gateway[4];
+  int subnet[4];
+  int timeZone;
+  char ntpServer[32];
+};
 
 // Initialize the Ethernet server library
 // with the IP address and port you want to use 
@@ -117,9 +142,6 @@ File webFile;
 WWWsettings wwws;
 
 /************* website login **************/
-// wifi
-char ssid[] = "YourNetworkName"; //  your network SSID (name)
-char password[] = "networkPassword";    // your network password (use for WPA, or use as key for WEP)
 
 // site login
 char username[] = "admin";
@@ -128,28 +150,78 @@ char loginpass[] = "waac";
 
 unsigned long arduinoSession = 1;
 
-  
+
+const char *configFile = "/settings.json";  // <- SD library uses 8.3 filenames
+Config config;                         // <- global configuration object
+
+const char *devicesFile = "/devices.json";
+
 /****************************************** sketch Logic **********************************************************/
+// Compute the required size
+// 25 expected fields + names with 15 characters + events (200 max chars TO BE CHECKED!) + 4 additional strings of 64 characters (servo motor example).
+// The size may need to be enlarged for other objects.
+static const int sDEVICES_DOC_SIZE = JSON_ARRAY_SIZE(11) + JSON_OBJECT_SIZE(1) + (JSON_OBJECT_SIZE(25) + 200 + 4 * 64);
+
+// Allocate the JsonDocument
+// Don't forget to change the capacity to match your requirements.
+// Use arduinojson.org/assistant to compute the capacity.
+StaticJsonDocument<sDEVICES_DOC_SIZE> doc;
 
 void setup() 
 {
- 
   // start serial port:
   Serial.begin(115200);
 
+  //************ initialize SD card *******************
+
+#ifdef USE_SPIFFS
+  Serial.println ("Initializing SPIFFS...");
+#else
+  Serial.println ("Initializing SD card...");
+#endif 
+
+  if (!FS_HANDLER.begin(FS_PARAM)) {
+        Serial.println("ERROR - File system initialization failed!");
+        return;    // init failed
+  }
+  //Serial.println("SUCCESS - SD card initialized.");
+    
+  // check for index.htm file
+  //it's picky with file extension, only 3 letters
+  if (!FS_HANDLER.exists("/index.htm")) {
+        Serial.println("ERROR - Can't find index.htm file!");
+        return;  // can't find index file
+  }
+  Serial.println("SUCCESS - Found index.htm file.");
+
+  // Dump config file
+  Serial.println(F("Print config file..."));
+  printFile(configFile);
+
+  // Should load default config if run for the first time
+  Serial.println(F("Loading configuration..."));
+  loadConfiguration(configFile, config);
+
+  // Set the IP from the configuration
+  IPAddress ip(config.ip[0], config.ip[1], config.ip[2], config.ip[3]);
+  IPAddress gateway(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3]); 
+  IPAddress subnet(config.subnet[0], config.subnet[1], config.subnet[2], config.subnet[3]);
+  //IPAddress primaryDNS(8, 8, 8, 8); //optional
+  //IPAddress secondaryDNS(8, 8, 4, 4); //optional
+
+
   //************ wifi *******************
   // Static IP doesn't look like it works for the ESP32 at this point
-//if (!WiFi.config(ip, gateway, subnet, primaryDNS, secondaryDNS)) {
+  //if (!WiFi.config(ip, gateway, subnet, primaryDNS, secondaryDNS)) {
 
   if (!WiFi.config(ip, gateway, subnet, gateway)) {
     Serial.println("STA Failed to configure");
   }
 
   Serial.print("Connecting to ");
-  Serial.println(ssid);
+  Serial.println(config.ssid);
 
-  
-  WiFi.begin(ssid, password);
+  WiFi.begin(config.ssid, config.password);
   
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -159,33 +231,15 @@ void setup()
   Serial.println("Connected to wifi");
   printWifiStatus();
 
+  // Load all stored devices.
+  loadDevices(devicesFile);
+
   // set up server for the rest of the sockets
   server.begin();
   
   //set up upd first so it gets sockets #0
-  wwws.begin();
-  
-
-   //************ initialize SD card *******************
-  
-  //Serial.println("Initializing SD card...");
-  if (!SD.begin(SDCARD_CS)) {
-        Serial.println("ERROR - SD card initialization failed!");
-        return;    // init failed
-  }
-  //Serial.println("SUCCESS - SD card initialized.");
-    // check for index.htm file
-    //it's picky with file extension, only 3 letters
-
-  if (!SD.exists("/index.htm")) {
-        Serial.println("ERROR - Can't find index.htm file!");
-        return;  // can't find index file
-  }
-  Serial.println("SUCCESS - Found index.htm file.");
+  wwws.begin(config.timeZone, config.ntpServer);
  
- 
-  
-
   //delay(10000);
   
   //sync time to NTP
@@ -193,7 +247,6 @@ void setup()
   
   Serial.print("memory ");
   Serial.println(freeMemory());
-  
 }
 
 
@@ -318,10 +371,19 @@ void renderHtmlPage(char *page, WiFiClient client)
         int clientCount = 0;
         unsigned long lastPosition = 0;
         char file[25];
-        strcpy(file, "/");
+
+        // If the file is not starting with a / then add it at the beginning.
+        if (page[0] != '/') {
+          strcpy(file, "/");
+        }
+        else {
+          strcpy(file, "");
+        }
+
+        // Then add the page name.
         strcat(file, page);
         
-        File myFile = SD.open(file);        // open web page file
+        File myFile = FS_HANDLER.open(file);        // open web page file
         if (myFile) {
              // send a standard http response header
              client.println(F("HTTP/1.1 200 OK"));
@@ -621,13 +683,12 @@ void parseReceivedRequest(WiFiClient client)
     // ***************** SAVE Settings ********************
     else if(webParser.contains(queryBuffer, "savesetting"))
     {
-      saveSetting(client);
+      saveSetting(client, config);
         
     } 
      // ***************** LOAD Settings ********************
     else if(webParser.contains(queryBuffer, "getsetting"))
     {
-     
        getSetting(client);
 
     } 
@@ -802,6 +863,11 @@ void parseReceivedRequest(WiFiClient client)
                hallAjaxOutput(client, device);
                 
             }
+            else if(webParser.compare(param_value, "ServoMotor")) 
+            {
+               servoAjaxOutput(client, device);
+                
+            }
           }
             
           //menus
@@ -847,7 +913,7 @@ void parseReceivedRequest(WiFiClient client)
       webParser.parseQuery(queryBuffer, "savedevice", param_value);
         
         if(atoi(param_value) > 0) {
-          // Serial.print("xxxxxxx save device xxxxxxxx");
+          //Serial.println("xxxxxxx save device xxxxxxxx");
           //alter existing device
           Device *device = deviceDelegate.findDevice(atoi(param_value));
    
@@ -922,12 +988,17 @@ void parseReceivedRequest(WiFiClient client)
              saveHallSensor(device);
             
           }
+          else if(webParser.compare(param_value, "ServoMotor")) 
+          {
+             saveServoMotor(device);
+            
+          }
           //turn / reset devices back
           device->setSuspendTime(false);
           
         } else {
           //****************************************create new object ******************************
-          //Serial.print("xxxxxxx created device xxxxxxxx");
+          //Serial.println("xxxxxxx created device xxxxxxxx");
           //don't allow more than 10 devices
           if(deviceDelegate.getDeviceCount() >= MAXDEVICE) return;
           
@@ -967,8 +1038,13 @@ void parseReceivedRequest(WiFiClient client)
           else if(webParser.compare(param_value, "HallSensor")) {
               createHallSensor();
           }
-
+          else if(webParser.compare(param_value, "ServoMotor")) {
+              createServoMotor();
+          }
         }
+        
+        saveDevices(devicesFile);
+        
         //response back to client on success of saving or creating
         successAjax(client);
     }
@@ -1046,6 +1122,3 @@ void ShowSockStatus() {
   }
   */
 }
-
-
-

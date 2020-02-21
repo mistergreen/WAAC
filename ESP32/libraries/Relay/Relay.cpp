@@ -328,3 +328,32 @@ void Relay::setInvert(boolean state) {
     invert = state;
 }
 
+void Relay::serialize(JsonObject& doc)
+{
+    // First call father serialization
+    Device::serialize(doc);
+    
+    doc["invert"] = invert;
+    
+    // 64 characters per event + carriage return
+    char event[67*12];
+    getEvent(event);
+    doc["event"] = event;
+}
+
+void Relay::deserialize(
+    JsonObject& doc)
+{
+   // First call father deserialization
+    Device::deserialize(doc);
+    
+    invert = doc["invert"];
+    
+    // 64 characters per event + carriage return
+    char event[67*12];
+    strcpy (event, doc["event"]);
+    
+    setEvent(event);
+    
+    pinMode(pin, OUTPUT);
+}

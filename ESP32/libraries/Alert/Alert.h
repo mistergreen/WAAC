@@ -10,12 +10,23 @@
 #define Alert_h
 
 #include "Device.h"
+#include "Storable.h"
 
 class Alert : public Device
 {
   public:
     Alert(char *in_name, int in_dependent_device_id);
     ~Alert(); // destructor
+    
+    // It serializes the class into a Json document.
+    void serialize(
+    // Input Json object pointer to be filled with the class information.
+        JsonObject& doc);
+    
+    // It fills the class using the information contained into the document.
+    void deserialize(
+        // Input Json object pointer containing the class information.
+        JsonObject& doc);
 
     void loop(); // required
     

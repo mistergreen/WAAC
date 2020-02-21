@@ -6,7 +6,7 @@
 #include "shunt.h"
 
 
-HallSensor::HallSensor(char *in_name, uint8_t in_pin) : Device(), Sensor()
+HallSensor::HallSensor(char *in_name, uint8_t in_pin) : Device(), SensorWaac()
 {
     //deviceID is automatically set my deviceDeleGate
 
@@ -136,7 +136,21 @@ void HallSensor::loop() {
     }
 }
 
+void HallSensor::serialize(JsonObject& doc)
+{
+    // First call father serialization
+    Device::serialize(doc);
+    
+    SensorWaac::serialize(doc);
 
+}
 
-
+void HallSensor::deserialize(
+    JsonObject& doc)
+{
+   // First call father deserialization
+    Device::deserialize(doc);
+    
+    SensorWaac::deserialize(doc);
+}
 

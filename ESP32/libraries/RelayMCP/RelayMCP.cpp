@@ -15,6 +15,19 @@
 #include <Wire.h>
 
 
+RelayMCP::RelayMCP() : Relay()
+{
+    //pin config
+    // GPA0 = #21 alias 0
+    // GPB0 = #1 alias 8
+    // GPB1 = #2 alias 9
+    // Looks like you can only begin() once or it'll blow up
+    // maybe do it once in a static class
+    if(!MCPhelper::isSet) {
+        MCPhelper::init();
+    }
+}
+
 RelayMCP::RelayMCP(char *in_name, int in_pin, int in_dependent_device_id) : Relay()
 {
     //Serial.println("MCP created");
@@ -47,8 +60,6 @@ RelayMCP::RelayMCP(char *in_name, int in_pin, int in_dependent_device_id) : Rela
 
     MCPhelper::mcp.pinMode(pin, OUTPUT);
     MCPhelper::mcp.pullUp(pin, LOW); // in case it was set HIGH previously
-
-
 }
 
 void RelayMCP::setI2C(int insda, int inscl) 
@@ -105,5 +116,31 @@ void RelayMCP::switchOff()
     }
 
     deviceState = false;
+}
+
+void RelayMCP::serialize(JsonObject& doc)
+{
+    // First call father serialization
+    Device::serialize(doc);
+    
+    Relay::serialize(doc);
+    
+    doc["SDA"] = SDA;
+    doc["SCL"] = SCL;
+
+}
+
+void RelayMCP::deserialize(
+    JsonObject& doc)
+{
+   // First call father deserialization
+    Device::deserialize(doc);
+    
+    Relay::deserialize(doc);
+    
+    MCPhelper::mcp.pinMode(pin, OUTPUT);
+    MCPhelper::mcp.pullUp(pin, LOW); // in case it was set HIGH previously
+    
+    setI2C(doc["SDA"], doc["SCL"]);
 }
 

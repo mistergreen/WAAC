@@ -13,14 +13,26 @@
 
 
 #include <Device.h>
-#include <Sensor.h>
+#include <SensorWaac.h>
+#include <Storable.h>
 
-class HallSensor : public Device, public Sensor
+
+class HallSensor : public Device, public SensorWaac
 {
   public:
     HallSensor(char *in_name, uint8_t in_pin);
     ~HallSensor(); // destructor
 
+    // It serializes the class into a Json document.
+    void serialize(
+    // Input Json object pointer to be filled with the class information.
+        JsonObject& doc);
+    
+    // It fills the class using the information contained into the document.
+    void deserialize(
+        // Input Json object pointer containing the class information.
+        JsonObject& doc);
+        
     void loop(); // required
     void setup(void (*ISR_callback)(void), int value);
     const char * read(); // override

@@ -45,8 +45,27 @@ void WWWsettings::begin()
     //timeServerIp(ipArray[0], ipArray[1], ipArray[2], ipArray[3]);
     //need to only do it once so you don't eat up all of the sockets
     Udp.begin(localPort);
-    
 }
+
+void WWWsettings::begin(
+    // The time zone to set.
+    int time_zone,
+    // The ntp server name.
+    char *ntp_server) {
+        timeZone = time_zone;
+        strcpy(NTPServer, ntp_server); 
+        isDDNSIp = false;
+        isEmailIp = false;
+        intervalTime = 0;
+        previousTime = 0;
+        hour = 12;
+        minute = 0;
+        interval = 0;
+        
+        //timeServerIp(ipArray[0], ipArray[1], ipArray[2], ipArray[3]);
+        //need to only do it once so you don't eat up all of the sockets
+        Udp.begin(localPort);
+    }
 
 void WWWsettings::syncNTP() {
     thisClassObj = this;
