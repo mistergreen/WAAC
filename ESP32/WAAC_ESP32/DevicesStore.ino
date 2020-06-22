@@ -64,6 +64,14 @@ void loadDevices(const char *filename) {
         temp->deserialize(obj);
         deviceDelegate.addDevice( temp );
       }
+      else if (strcmp("OneWireSensor", obj["classType"]) == 0)
+      {
+        Serial.println ("Creating OneWireSensor");
+        
+        OneWireSensor *temp = new OneWireSensor();
+        temp->deserialize(obj);
+        deviceDelegate.addDevice( temp );
+      }
     }
   }
     
@@ -86,6 +94,8 @@ void saveDevices(const char *filename) {
     Serial.println(F("Failed to create file"));
     return;
   }
+
+  doc.clear();
 
   // First store the number of devices.
   JsonObject mainObj = doc.createNestedObject();

@@ -43,6 +43,8 @@ class ServoMotor : public Device, public Storable
     uint8_t getMoveAngle();
     void setMoveAngle(uint8_t angle);
     
+    void setPin(int in_pin);
+    
     // It serializes the class into a Json document.
     void serialize(
     // Input Json object pointer to be filled with the class information.

@@ -6,6 +6,11 @@
 #include <OneWire.h>
 #include <SensorWaac.h>
 
+OneWireSensor::OneWireSensor() : Device(), SensorWaac()
+{
+    strcpy(temperature, "000");
+}
+
 OneWireSensor::OneWireSensor(char *in_name, uint8_t in_pin, float in_min, float in_max) : Device(), SensorWaac()
 {
     min = in_min;
@@ -150,5 +155,25 @@ bool OneWireSensor::getF() {
     return fahrenheit;
 }
 
+void OneWireSensor::serialize(JsonObject& doc)
+{
+    // First call father serialization
+    Device::serialize(doc);
+    SensorWaac::serialize(doc);
+    
+    doc["fahrenheit"] = fahrenheit;
+}
 
+void OneWireSensor::deserialize(
+    JsonObject& doc)
+{
+   // First call father deserialization
+    Device::deserialize(doc);
+    SensorWaac::deserialize(doc);
+    
+    //Onewire instance
+    ds = new OneWire(pin);
+    
+    fahrenheit = doc["fahrenheit"];
+}
 

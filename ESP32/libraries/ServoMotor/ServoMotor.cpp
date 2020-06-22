@@ -286,6 +286,13 @@ uint8_t ServoMotor::getMoveAngle() {
 void ServoMotor::setMoveAngle(uint8_t angle) {
     moveAngle = angle;
 }
+
+void ServoMotor::setPin(int in_pin) {
+    Device::setPin(in_pin);
+    
+    // Connect the servo library to the selected pin.
+    servo.attach(pin);
+}
 	
 
 void ServoMotor::trigger()
@@ -341,7 +348,7 @@ void ServoMotor::deserialize(
     
     setEvent(event);
     
-        // Connect the servo library to the selected pin.
+    // Connect the servo library to the selected pin.
     servo.attach(pin);
     
     Serial.print("Setting angle: ");

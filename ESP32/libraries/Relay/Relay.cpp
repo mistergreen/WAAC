@@ -104,12 +104,12 @@ void Relay::loop()
                     
                 } else {
                     // if no dependent
-                    if(currentTime == eventTime && onceFlag == false) {
+                    if(currentTime >= eventTime && currentTime <= durationTime && onceFlag == false) {
                         //some relays require a low signal. To support this, set DeviceState to the opposite
                         onceFlag = true;
                         switchOn();
                         
-                    } else if(currentTime == durationTime && onceFlag == true) {
+                    } else if(currentTime > durationTime && onceFlag == true) {
                         onceFlag = false;
                         switchOff();
                         

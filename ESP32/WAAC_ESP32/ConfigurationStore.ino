@@ -92,19 +92,19 @@ void saveConfiguration(const char *filename, const Config &config) {
   doc["ntpServer"] = config.ntpServer;
   doc["timeZone"] = config.timeZone;
 
-  JsonArray ip = doc["ip"];
+  JsonArray ip = doc["ip"].to<JsonArray>();
   ip.add(config.ip[0]);
   ip.add(config.ip[1]);
   ip.add(config.ip[2]);
   ip.add(config.ip[3]);
   
-  JsonArray gateway = doc["gateway"];
+  JsonArray gateway = doc["gateway"].to<JsonArray>();
   gateway.add(config.gateway[0]);
   gateway.add(config.gateway[1]);
   gateway.add(config.gateway[2]);
   gateway.add(config.gateway[3]);
   
-  JsonArray subnet = doc["subnet"];
+  JsonArray subnet = doc["subnet"].to<JsonArray>();
   subnet.add(config.subnet[0]);
   subnet.add(config.subnet[1]);
   subnet.add(config.subnet[2]);
