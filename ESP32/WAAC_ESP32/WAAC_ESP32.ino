@@ -160,7 +160,7 @@ const char *devicesFile = "/devices.json";
 // Compute the required size
 // 25 expected fields + names with 15 characters + events (200 max chars TO BE CHECKED!) + 4 additional strings of 64 characters (servo motor example).
 // The size may need to be enlarged for other objects.
-static const int sDEVICES_DOC_SIZE = JSON_ARRAY_SIZE(11) + JSON_OBJECT_SIZE(1) + (JSON_OBJECT_SIZE(25) + 200 + 4 * 64);
+static const int sDEVICES_DOC_SIZE = JSON_ARRAY_SIZE(11) + JSON_OBJECT_SIZE(1) + (JSON_OBJECT_SIZE(25) + 200 + 4 * 64)*2;
 
 // Allocate the JsonDocument
 // Don't forget to change the capacity to match your requirements.

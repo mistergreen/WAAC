@@ -40,7 +40,10 @@ float OneWireSensor::getNewValue() {
     
     if ( !ds->search(addr)) {
         //no more sensors on chain, reset search
+        Serial.println(" No more addresses.");
+        Serial.println();
         ds->reset_search();
+        delay(250);
         return -1000;
     }
     
@@ -57,7 +60,7 @@ float OneWireSensor::getNewValue() {
     ds->reset();
     ds->select(addr);
     ds->write(0x44,1); // start conversion, with parasite power on at the end
-    
+
     byte present = ds->reset();
     ds->select(addr);
     ds->write(0xBE); // Read Scratchpad
