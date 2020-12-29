@@ -101,5 +101,24 @@ float SensorWaac::getNewValue() {
     
 }
 
+void SensorWaac::serialize(JsonObject& doc)
+{
+    doc["formula"] = formula;
+    
+    doc["lowerTarget"] = lowerTarget;
+    doc["higherTarget"] = higherTarget;
 
+    doc["conditionType"] = conditionType;
+
+}
+
+void SensorWaac::deserialize(
+    JsonObject& doc)
+{
+    strcpy(formula, doc["formula"]);
+    strcpy(conditionType, doc["conditionType"]);
+    
+    lowerTarget = doc["lowerTarget"];
+    higherTarget = doc["higherTarget"];
+}
 

@@ -6,6 +6,11 @@
 #include <OneWire.h>
 #include <SensorWaac.h>
 
+OneWireSensor::OneWireSensor() : Device(), SensorWaac()
+{
+    strcpy(temperature, "000");
+}
+
 OneWireSensor::OneWireSensor(char *in_name, uint8_t in_pin, float in_min, float in_max) : Device(), SensorWaac()
 {
     min = in_min;
@@ -35,7 +40,10 @@ float OneWireSensor::getNewValue() {
     
     if ( !ds->search(addr)) {
         //no more sensors on chain, reset search
+        Serial.println(" No more addresses.");
+        Serial.println();
         ds->reset_search();
+        delay(250);
         return -1000;
     }
     
@@ -52,7 +60,7 @@ float OneWireSensor::getNewValue() {
     ds->reset();
     ds->select(addr);
     ds->write(0x44,1); // start conversion, with parasite power on at the end
-    
+
     byte present = ds->reset();
     ds->select(addr);
     ds->write(0xBE); // Read Scratchpad
@@ -150,5 +158,25 @@ bool OneWireSensor::getF() {
     return fahrenheit;
 }
 
+void OneWireSensor::serialize(JsonObject& doc)
+{
+    // First call father serialization
+    Device::serialize(doc);
+    SensorWaac::serialize(doc);
+    
+    doc["fahrenheit"] = fahrenheit;
+}
 
+void OneWireSensor::deserialize(
+    JsonObject& doc)
+{
+   // First call father deserialization
+    Device::deserialize(doc);
+    SensorWaac::deserialize(doc);
+    
+    //Onewire instance
+    ds = new OneWire(pin);
+    
+    fahrenheit = doc["fahrenheit"];
+}
 

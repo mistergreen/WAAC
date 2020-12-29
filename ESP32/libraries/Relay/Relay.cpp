@@ -104,12 +104,12 @@ void Relay::loop()
                     
                 } else {
                     // if no dependent
-                    if(currentTime == eventTime && onceFlag == false) {
+                    if(currentTime >= eventTime && currentTime <= durationTime && onceFlag == false) {
                         //some relays require a low signal. To support this, set DeviceState to the opposite
                         onceFlag = true;
                         switchOn();
                         
-                    } else if(currentTime == durationTime && onceFlag == true) {
+                    } else if(currentTime > durationTime && onceFlag == true) {
                         onceFlag = false;
                         switchOff();
                         
@@ -328,3 +328,32 @@ void Relay::setInvert(boolean state) {
     invert = state;
 }
 
+void Relay::serialize(JsonObject& doc)
+{
+    // First call father serialization
+    Device::serialize(doc);
+    
+    doc["invert"] = invert;
+    
+    // 64 characters per event + carriage return
+    char event[67*12];
+    getEvent(event);
+    doc["event"] = event;
+}
+
+void Relay::deserialize(
+    JsonObject& doc)
+{
+   // First call father deserialization
+    Device::deserialize(doc);
+    
+    invert = doc["invert"];
+    
+    // 64 characters per event + carriage return
+    char event[67*12];
+    strcpy (event, doc["event"]);
+    
+    setEvent(event);
+    
+    pinMode(pin, OUTPUT);
+}

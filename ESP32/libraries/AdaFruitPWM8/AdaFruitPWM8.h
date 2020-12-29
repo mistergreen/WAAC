@@ -13,13 +13,24 @@
 
 #include "Arduino.h"
 #include <Device.h>
+#include "Storable.h"
 //#include <Adafruit_PWMServoDriver.h>
 
-class AdaFruitPWM8 : public Device
+class AdaFruitPWM8 : public Device, public Storable
 {
   public:
     AdaFruitPWM8(char *in_name, int in_dependent_device_id, int insda, int inscl);
     ~AdaFruitPWM8(); // destructor
+    
+    // It serializes the class into a Json document.
+    void serialize(
+    // Input Json object pointer to be filled with the class information.
+        JsonObject& doc);
+    
+    // It fills the class using the information contained into the document.
+    void deserialize(
+        // Input Json object pointer containing the class information.
+        JsonObject& doc);
 
     void loop(); // required
     void setSuspendTime(boolean in_suspend); //override

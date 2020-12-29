@@ -19,6 +19,13 @@ ServoMotor::ServoMotor() : Device()
 	stopAngle = 0;
 	moveAngle = 0;
 	secondDuration = 0;
+    
+    dependentDeviceObject = NULL;
+    
+    memset(hour, 0, sizeof(int)*5);
+    memset(minute, 0, sizeof(int)*5);
+    memset(second, 0, sizeof(int)*5);
+    memset(dow, 0, sizeof(char)*5*8);
 }
 
 ServoMotor::ServoMotor(char *in_name, int in_pin, int in_dependent_device_id, int stop_angle, int move_angle, int second_duration) : Device()
@@ -36,17 +43,25 @@ ServoMotor::ServoMotor(char *in_name, int in_pin, int in_dependent_device_id, in
     strcpy(classType,"ServoMotor");
 
     pin = in_pin;
-	// Connect the servo library to the selected pin.
-	servo.attach(pin);
 
     isDay = false; // isDay is the day an event is to occur
     timedIndexCounter = 0;
     
-	stopAngle = stop_angle;
-	moveAngle = move_angle;
-	secondDuration = second_duration;
-	servingTime = 0;
-	servo.write(stopAngle);
+    stopAngle = stop_angle;
+    moveAngle = move_angle;
+    secondDuration = second_duration;
+    servingTime = 0;
+    
+    memset(hour, 0, sizeof(int)*5);
+    memset(minute, 0, sizeof(int)*5);
+    memset(second, 0, sizeof(int)*5);
+    memset(dow, 0, sizeof(char)*5*8);
+    
+    // Connect the servo library to the selected pin.
+    Serial.print("Setting angle: ");
+    Serial.println(stopAngle);
+    servo.attach(pin);
+    servo.write(stopAngle);
 }
 
 
@@ -60,6 +75,7 @@ void ServoMotor::loop()
                 boolean temp = dependentDeviceObject->getDeviceState();
                 
                 if(temp) {
+                    Serial.println("Trigger by dependent device");
                     trigger();
                 }
             }
@@ -95,16 +111,20 @@ void ServoMotor::loop()
                         boolean temp = dependentDeviceObject->getDeviceState();
                         
                         if(temp) {
+                            Serial.println("Trigger by time - no dependent device");
+
 							servingTime = currentTime;
 							trigger();
                         }
                     }
                     
                 }
-				// if no dependent				
+				// if no dependent
 				else {
 					// Check that it is the time to trigger.
                     if(currentTime == eventTime && servingTime != currentTime) {
+                        Serial.println("Trigger by time - no dependent device");
+                        
 						servingTime = currentTime;
                         trigger();
                     }
@@ -128,6 +148,7 @@ void ServoMotor::setEvent(char *in_string)
     //you can only add up to 4 events- each event is -on and duration -off pairs
     Serial.println("out event");
     char events[8][67];
+    memset(events, 0, sizeof(char)*8*67);
     
     //parse incoming string *** MAKE ROOM FOR THE NUL TERMINATOR in the string!
     char *tok1;
@@ -211,6 +232,8 @@ void ServoMotor::getEvent(char *string) {
         Serial.println(timedIndexCounter);
         
         char buf[104];
+        memset(buf, 0, sizeof(char)*104);
+    
         sprintf(buf, "%02d:%02d:%02d,%s", hour[0],minute[0],second[0],dow[0]);
         strcpy(string, buf);
         
@@ -220,7 +243,7 @@ void ServoMotor::getEvent(char *string) {
         }
     } else {
         Serial.println("crash no event");
-        // strcpy(string, '\0');
+        string[0] = '\0';
     }
 }
 
@@ -253,14 +276,22 @@ uint8_t ServoMotor::getStopAngle() {
 
 void ServoMotor::setStopAngle(uint8_t angle) {
     stopAngle = angle;
+    servo.write(stopAngle);
 }
 
 uint8_t ServoMotor::getMoveAngle() {
-	return moveAngle;
+    return moveAngle;
 }
 
 void ServoMotor::setMoveAngle(uint8_t angle) {
     moveAngle = angle;
+}
+
+void ServoMotor::setPin(int in_pin) {
+    Device::setPin(in_pin);
+    
+    // Connect the servo library to the selected pin.
+    servo.attach(pin);
 }
 	
 
@@ -268,13 +299,59 @@ void ServoMotor::trigger()
 {
     // Trigger the servo motor.
     Serial.println("switching on");
-	servo.write(moveAngle);
-	delay(secondDuration);
-	servo.write(stopAngle);
-	servingTime = 0;
+    Serial.print("Setting angle: ");
+    Serial.println(moveAngle);
+    servo.write(moveAngle);
+    delay(secondDuration);
+    Serial.print("Setting angle: ");
+    Serial.println(stopAngle);
+    servo.write(stopAngle);
+    servingTime = 0;
 }
 
 void ServoMotor::toggleState()
 {
-	trigger();
+    trigger();
+}
+
+
+void ServoMotor::serialize(JsonObject& doc)
+{
+    // First call father serialization
+    Device::serialize(doc);
+
+    doc["stopAngle"] = stopAngle;
+    doc["moveAngle"] = moveAngle;
+    doc["secondDuration"] = secondDuration;
+    doc["servingTime"] = servingTime;
+    
+    // 64 characters per event + carriage return
+    char event[67*4];
+    getEvent(event);
+    doc["event"] = event;
+}
+
+void ServoMotor::deserialize(
+    JsonObject& doc)
+{
+   // First call father deserialization
+    Device::deserialize(doc);
+    
+    stopAngle = doc["stopAngle"];
+    moveAngle = doc["moveAngle"];
+    secondDuration = doc["secondDuration"];
+    servingTime = doc["servingTime"];
+    
+    // 64 characters per event + carriage return
+    char event[67*4];
+    strcpy (event, doc["event"]);
+    
+    setEvent(event);
+    
+    // Connect the servo library to the selected pin.
+    servo.attach(pin);
+    
+    Serial.print("Setting angle: ");
+    Serial.println(stopAngle);
+    servo.write(stopAngle);
 }

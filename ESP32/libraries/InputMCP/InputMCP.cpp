@@ -112,4 +112,30 @@ void InputMCP::getI2C(int *inArray) {
     
 }
 
+void InputMCP::serialize(JsonObject& doc)
+{
+    // First call father serialization
+    Device::serialize(doc);
+    
+    SensorWaac::serialize(doc);
+    
+    doc["SDA"] = SDA;
+    doc["SCL"] = SCL;
+
+}
+
+void InputMCP::deserialize(
+    JsonObject& doc)
+{
+   // First call father deserialization
+    Device::deserialize(doc);
+    
+    SensorWaac::deserialize(doc);
+    
+    MCPhelper::mcp.pinMode(pin, OUTPUT);
+    MCPhelper::mcp.pullUp(pin, LOW); // in case it was set HIGH previously
+    
+    setI2C(doc["SDA"], doc["SCL"]);
+}
+
 

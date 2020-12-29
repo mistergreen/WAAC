@@ -147,6 +147,36 @@ void Alert::setMessage(char *in_message) {
     strcpy(message, in_message);
 }
 
+void Alert::serialize(JsonObject& doc)
+{
+    Device::serialize(doc);
+    
+    // Set the values in the document
+    //doc["number"] = number;
+    doc["email"] = email;
+    doc["subject"] = subject;
+    doc["message"] = message;
+    
+    // 6 characters per event
+    char event[6];
+    getEvent(event);
+    doc["event"] = event;
 
+}
 
+void Alert::deserialize(
+    JsonObject& doc)
+{
+    Device::deserialize(doc);
+    
+    strcpy(email, doc["email"]);
+    strcpy(subject, doc["subject"]);
+    strcpy(message, doc["message"]);
+
+    // 6 characters per event
+    char event[6];
+    strcpy (event, doc["event"]);
+    
+    setEvent(event);
+}
 

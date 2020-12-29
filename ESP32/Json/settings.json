@@ -1,0 +1,9 @@
+{
+  "ssid": "",
+  "password": "",
+  "ip": [192, 168, 1, 177],
+  "gateway": [192, 168, 1, 1],
+  "subnet": [255, 255, 255, 0],
+  "timeZone": -5,
+  "ntpServer": "time.google.com"
+}
