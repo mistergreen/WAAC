@@ -8,6 +8,8 @@ https://www.youtube.com/playlist?list=PLBa21usjmOFKCHJmGBnlkjP8v2rVpoFGZ
 <h2>ABOUT</h2>
 This is a plug and play system where you add and control devices through a browser, basically, no coding involved for the <strong>Arduino</strong> and <strong>ESP</strong> micro controllers. It's developed by Minh Truong and copyrighted under 2noodles llc. It is free to use with Copyright restrictions.
 
+We're playing with SPIFFS & saving device settings here.
+https://github.com/mistergreen/WAAC/tree/Serialize-Device-Settings
 
 <h2>Donation</h2>
 <a href="https://www.patreon.com/minhtruong" data-patreon-widget-type="become-patron-button">Become a Patron!</a>

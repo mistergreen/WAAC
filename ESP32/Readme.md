@@ -1,4 +1,8 @@
 This is still work in progress. I haven’t fully debug this. I'll try to add more device components to the core code.
+
+We're playing with SPIFFS & saving device settings here.
+https://github.com/mistergreen/WAAC/tree/Serialize-Device-Settings
+
 <h2>Features</h2>
 <ol>
 <li>User Login</li>
