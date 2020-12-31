@@ -11,6 +11,9 @@
 #include "Arduino.h"
 #include "Device.h"
 #include "Storable.h"
+#include "Scheduler.h"
+#include "DeviceDelegate.h"
+#include <TimeLib.h>
 
 class Relay : public Device, public Storable
 {
@@ -33,7 +36,6 @@ class Relay : public Device, public Storable
     int dependentDeviceId;
     Device *dependentDeviceObject;
     
-    boolean invert;
     boolean getInvert();
     void setInvert(boolean state);
     
@@ -46,18 +48,18 @@ class Relay : public Device, public Storable
     void deserialize(
         // Input Json object pointer containing the class information.
         JsonObject& doc);
+        
+  protected:
+      
+    // It inverts the relay logic.
+    boolean invert;
     
   private:
-    boolean isDay;
-    boolean onceFlag;
-    uint8_t timedIndexCounter;
-    int hour[5];
-    int minute[5];
-    int second[5];
-    int hourDuration[5];
-    int minuteDuration[5];
-    int secondDuration[5];
-    char dow[5][8];
+    // The events scheduler class.
+    Scheduler scheduler;
+    
+    // IT stores the relay status.
+    boolean relayStatus;
     
 };//need ; at the end of a class def
 
