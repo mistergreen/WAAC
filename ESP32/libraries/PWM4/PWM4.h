@@ -6,44 +6,57 @@
 #ifndef PWM4_h
 #define PWM4_h
 
-#define CHANNEL             4
 // use 5000 Hz as a LEDC base frequency
 #define LEDC_BASE_FREQ      5000
 // use bit precission for LEDC timer
 #define LEDC_TIMER_BIT      12
 
 #include "Arduino.h"
-#include "Device.h" 
+#include "Device.h"
+#include "EventHandler.h"
+#include "DeviceDelegate.h"
+#include "TimeLib.h"
 
-class PWM4 : public Device
+class PWM4 : public Device, public EventHandler, public Storable
 {
   public:
-    PWM4(char *in_name, int in_dependent_device_id);
-    ~PWM4(); // destructor
+    PWM4(char *in_name, int in_dependent_device_id, uint8_t channels = 4, char *format = "%d:%d:%d:%d");
 
-    void loop(); // required
-    void setSuspendTime(bool in_suspend); //override
+    ~PWM4(); // destructor
     
     void switchOn();
     void switchOff();
     void toggleState();
-    
-    void setEvent(char *in_string);
-    void getEvent(char *string);
-    
-    int getDependentDevice();
-    void setDependentDevice(int id);
-    
-    int dependentDeviceId;
-    Device *dependentDeviceObject;
-    
+
+    void loop(); // required
+
     void setPins(int red, int green, int blue, int white, int channel0, int channel1, int channel2, int channel3);
     void getPins(int *inPinArray, int *inChannelArray);
     
     void setPWMs(int in_red, int in_green, int in_blue, int in_white);
+
+    // Set the colors for each event.
+    void setEventColors(char *in_string);
+
+    // Get the colors of the events.
+    void getEventColors(char *string);
+
+    // It serializes the class into a Json document.
+    void serialize(
+        // Input Json object pointer to be filled with the class information.
+        JsonObject& doc);
     
-  private:
+    // It fills the class using the information contained into the document.
+    void deserialize(
+        // Input Json object pointer containing the class information.
+        JsonObject& doc);
     
+  protected:
+    // The number of channels
+    const uint8_t NUM_CHANNELS;
+
+    char* channelsFormat;
+
     typedef struct {
         int pwm[4]; // - for each events, value of pwm
         int initColor;
@@ -53,24 +66,30 @@ class PWM4 : public Device
         long colorStartTime;
     } colorAux;
     
-    colorAux color[CHANNEL];
-    
+    colorAux* color;
 
-    bool isDay;
-    uint8_t timedIndexCounter;
-    int hour[5];
-    int minute[5];
-    int second[5];
-    int hourDuration[5];
-    int minuteDuration[5];
-    int secondDuration[5];
+    // It is the action performed during an event.
+    virtual void performActionInEvent();
+
+    // It is the action performed out of an event.
+    virtual void performActionOutEvent();
+
+    // It sets the pin value.
+    virtual void setPin(uint8_t channel, uint16_t color);
+
+  private:
     
+    uint8_t timedIndexCounter;
+
     long initMillis;
-    char dow[8];
-    bool oneTime;
     
     int maxBit = pow(2, LEDC_TIMER_BIT) -1;
     
+    // It is the action performed not during an event by a dependent device.
+    virtual void performActionInEventNoSchedule();
+
+    // It is the action performed out not during an event by a dependent device.
+    virtual void performActionOutEventNoSchedule();
 };
 
 #endif

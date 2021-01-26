@@ -346,19 +346,5 @@ void createAdaFruit8PWM() {
         webParser.parseQuery(queryBuffer, "event", param_value);
 
         deviceDelegate.currentDevice()->setEvent(param_value);
-        /*
-        if(param_value[0] == '\0') {
-          Serial.println("event is a null xxxxxxxxxx");
-          if(param_value != NULL) {
-            Serial.println("param_value is not NULL");
-          }
-          //deviceDelegate.currentDevice()->setHasEvent(false);
-        } else {
-          deviceDelegate.currentDevice()->setEvent(param_value);
-        }
-        
-        Serial.println("ada8 created");
-        */
-
 }
 

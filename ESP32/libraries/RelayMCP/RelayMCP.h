@@ -13,7 +13,7 @@
 #include "Storable.h"
 #include "Adafruit_MCP23017.h"
 
-class RelayMCP : public Relay, public Storable
+class RelayMCP : public Relay
 {
   public:
     // Empty constructor.

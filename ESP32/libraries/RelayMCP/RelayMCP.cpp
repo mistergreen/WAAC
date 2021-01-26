@@ -28,15 +28,9 @@ RelayMCP::RelayMCP() : Relay()
     }
 }
 
-RelayMCP::RelayMCP(char *in_name, int in_pin, int in_dependent_device_id) : Relay()
+RelayMCP::RelayMCP(char *in_name, int in_pin, int in_dependent_device_id)
 {
-    //Serial.println("MCP created");
-    // Device() call super to init vars
-    dependentDeviceId = in_dependent_device_id;
-    //find dependent device once - not all the time
-    setDependentDevice(dependentDeviceId);
-
-    //deviceID is automatically set my deviceDeleGate
+    Relay(in_name, in_pin, in_dependent_device_id);
 
     strcpy(deviceName,in_name);
     //classType inherit from base

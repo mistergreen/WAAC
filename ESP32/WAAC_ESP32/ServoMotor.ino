@@ -19,7 +19,7 @@ void servoAjaxOutput(WiFiClient client, Device *device) {
       client.print(F("</duration>"));
            
       client.print(F("<dependent>"));
-      client.print(device->getDependentDevice());
+      client.print(static_cast<ServoMotor*>(device)->getDependentDevice());
       client.print(F("</dependent>"));
       client.print(F("<event>"));
       char eventString[queryMax] = {'\0'};
@@ -66,17 +66,17 @@ void createServoMotor() {
 
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "event", param_value);
-        deviceDelegate.currentDevice()->setEvent(param_value);
+        temp->setEvent(param_value);
 }
 
 void saveServoMotor(Device *device) {
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "dependent", param_value);
-        device->setDependentDevice(atoi(param_value));
+        static_cast<ServoMotor*>(device)->setDependentDevice(atoi(param_value));
         
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "event", param_value);
-        device->setEvent(param_value);
+        static_cast<ServoMotor*>(device)->setEvent(param_value);
 
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "duration", param_value);

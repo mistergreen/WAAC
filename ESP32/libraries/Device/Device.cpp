@@ -10,9 +10,7 @@
 
 Device::Device()
 {
-    
     deviceState = false;
-    suspendTime = false;
     
     strcpy(imageName,"none.jpg");
     strcpy(deviceColor,"FFFFFF");
@@ -20,7 +18,6 @@ Device::Device()
     min = 0.0;
     max = 100.0;
     strcpy(unit,"");
- 
 }
 
 void Device::setMin(float in_min) {
@@ -120,19 +117,6 @@ int Device::getDeviceId() {
     return deviceId;
     
 }
-//-----------
-
-void Device::setSuspendTime(bool in_suspend) {
-    suspendTime = in_suspend;
-    
-}
-
-bool Device::getSuspendTime() {
-    return suspendTime;
-    
-}
-
-//-----------
 
 bool Device::getDeviceState() {
     return deviceState;
@@ -152,7 +136,6 @@ void Device::serialize(JsonObject& doc)
     doc["imageName"] = imageName;
     doc["deviceColor"] = deviceColor;
     doc["deviceState"] = deviceState;
-    doc["suspendTime"] = suspendTime;
     doc["deviceId"] = deviceId;
     doc["min"] = min;
     doc["max"] = max;
@@ -171,7 +154,6 @@ void Device::deserialize(
     strcpy(imageName, doc["imageName"]);
 
     deviceState = doc["deviceState"];
-    suspendTime = doc["suspendTime"];
     deviceId = doc["deviceId"];
     min = doc["min"];
     max = doc["max"];

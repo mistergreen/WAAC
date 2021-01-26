@@ -11,11 +11,11 @@
 #include "Arduino.h"
 #include "Device.h"
 #include "Storable.h"
-#include "Scheduler.h"
+#include "EventHandler.h"
 #include "DeviceDelegate.h"
 #include <TimeLib.h>
 
-class Relay : public Device, public Storable
+class Relay : public Device, public Storable, public EventHandler
 {
   public:
     Relay();
@@ -26,16 +26,7 @@ class Relay : public Device, public Storable
     virtual void switchOn();
     virtual void switchOff();
     virtual void toggleState();
-    
-    void setEvent(char *in_string); // override
-    void getEvent(char *string); // override
-    
-    int getDependentDevice(); // override
-    void setDependentDevice(int id); // override
-    
-    int dependentDeviceId;
-    Device *dependentDeviceObject;
-    
+   
     boolean getInvert();
     void setInvert(boolean state);
     
@@ -50,16 +41,19 @@ class Relay : public Device, public Storable
         JsonObject& doc);
         
   protected:
-      
+    
+    // It is the action performed during an event.
+    virtual void performActionInEvent();
+
+    // It is the action performed out of an event.
+    virtual void performActionOutEvent();
+
     // It inverts the relay logic.
-    boolean invert;
+    bool invert;
     
   private:
-    // The events scheduler class.
-    Scheduler scheduler;
-    
-    // IT stores the relay status.
-    boolean relayStatus;
+    // It stores the relay status.
+    bool relayStatus;
     
 };//need ; at the end of a class def
 

@@ -3,7 +3,7 @@
 
 void alertAjaxOutput(WiFiClient client, Device *device) {
       client.print(F("<dependent>"));
-      client.print(device->getDependentDevice());
+      client.print(static_cast<Alert*>(device)->getDependentDevice());
       client.print(F("</dependent>"));
       client.print(F("<email>"));
       client.print(static_cast<Alert*>(device)->getEmail());
@@ -37,11 +37,11 @@ void saveAlert(Device *device) {
         
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "dependent", param_value);
-        device->setDependentDevice(atoi(param_value));
+        static_cast<Alert*>(device)->setDependentDevice(atoi(param_value));
         
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "event", param_value);
-        device->setEvent(param_value);
+        static_cast<Alert*>(device)->setEvent(param_value);
         
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "state", param_value);
@@ -80,7 +80,7 @@ void createAlert() {
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "event", param_value);
 
-        deviceDelegate.currentDevice()->setEvent(param_value);
+        temp->setEvent(param_value);
         /*
         if(webParser.compare(param_value, '\0')) {
           //Serial.println("event is a null xxxxxxxxxx");
@@ -112,4 +112,3 @@ void createAlert() {
         static_cast<Alert*>(temp)->setEmail(wwws.getToEmail());
 
 }
-

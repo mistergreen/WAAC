@@ -40,8 +40,8 @@ float OneWireSensor::getNewValue() {
     
     if ( !ds->search(addr)) {
         //no more sensors on chain, reset search
-        Serial.println(" No more addresses.");
-        Serial.println();
+        //Serial.println(" No more addresses.");
+        //Serial.println();
         ds->reset_search();
         delay(250);
         return -1000;

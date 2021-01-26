@@ -35,13 +35,18 @@ void pwm4AjaxOutput(WiFiClient client, Device *device) {
         client.print(F("</pin>"));
             
         client.print(F("<dependent>"));
-        client.print(device->getDependentDevice());
+        client.print(static_cast<PWM4*>(device)->getDependentDevice());
         client.print(F("</dependent>"));
         client.print(F("<event>"));
         char string[queryMax] = {'\0'};
-        device->getEvent(string);
+        static_cast<PWM4*>(device)->getEvent(string);
         client.print(string);
         client.print(F("</event>"));
+        client.print(F("<eventColors>"));
+        char colorsString[queryMax] = {'\0'};
+        static_cast<PWM4*>(device)->getEventColors(colorsString);
+        client.print(colorsString);
+        client.print(F("</eventColors>"));
         int pinArray[4], channelArray[4];
         Serial.println("get PWM4 arduino pins");
         static_cast<PWM4*>(device)->getPins(pinArray,channelArray);
@@ -156,11 +161,15 @@ void savePWM4(Device *device) {
         
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "dependent", param_value);
-        device->setDependentDevice(convertPin(param_value));
+        static_cast<PWM4*>(device)->setDependentDevice(convertPin(param_value));
         
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "event", param_value);
-        device->setEvent(param_value);
+        static_cast<PWM4*>(device)->setEvent(param_value);
+
+        webParser.clearBuffer(param_value, queryMax);
+        webParser.parseQuery(queryBuffer, "eventColors", param_value);
+        static_cast<PWM4*>(device)->setEventColors(param_value);
 }
 
 void createPWM4() {
@@ -267,8 +276,7 @@ void createPWM4() {
         webParser.parseQuery(queryBuffer, "event", param_value);
         static_cast<PWM4*>(temp)->setEvent(param_value);
         
-  
+        webParser.clearBuffer(param_value, queryMax);
+        webParser.parseQuery(queryBuffer, "eventColors", param_value);
+        static_cast<PWM4*>(temp)->setEventColors(param_value);
 }
-
-
-

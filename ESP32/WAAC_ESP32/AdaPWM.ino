@@ -47,7 +47,7 @@ void adaFruit8PWMAjaxOutput(WiFiClient client, Device *device) {
           client.print(F("</pin>"));
             
           client.print(F("<dependent>"));
-          client.print(device->getDependentDevice());
+          client.print(static_cast<AdaFruitPWM8*>(device)->getDependentDevice());
           client.print(F("</dependent>"));
 
           int i2cArray[2];
@@ -66,6 +66,11 @@ void adaFruit8PWMAjaxOutput(WiFiClient client, Device *device) {
  //Serial.println(eventstring);
           client.print(eventstring);
           client.print(F("</event>"));
+          client.print(F("<eventColors>"));
+          char colorsString[queryMax] = {'\0'};
+          static_cast<AdaFruitPWM8*>(device)->getEventColors(colorsString);
+          client.print(colorsString);
+         client.print(F("</eventColors>"));
           int pinArray[8];
           static_cast<AdaFruitPWM8*>(device)->getPins(pinArray);
 
@@ -202,14 +207,18 @@ void saveAdaFruit8PWM(Device *device) {
             
             webParser.clearBuffer(param_value, queryMax);
             webParser.parseQuery(queryBuffer, "dependent", param_value);
-            device->setDependentDevice(atoi(param_value));
+            static_cast<AdaFruitPWM8*>(device)->setDependentDevice(atoi(param_value));
             
             webParser.clearBuffer(param_value, queryMax);
             webParser.parseQuery(queryBuffer, "event", param_value);
          //Serial.println("********");
          //Serial.println(param_value);
-            device->setEvent(param_value);
-            
+            static_cast<AdaFruitPWM8*>(device)->setEvent(param_value);
+
+            webParser.clearBuffer(param_value, queryMax);
+            webParser.parseQuery(queryBuffer, "eventColors", param_value);
+            static_cast<AdaFruitPWM8*>(device)->setEventColors(param_value);
+        
             Serial.println("ada8 saved");
 }
 
@@ -362,20 +371,9 @@ void createAdaFruit8PWM() {
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "event", param_value);
 
-        deviceDelegate.currentDevice()->setEvent(param_value);
-        /*
-        if(param_value[0] == '\0') {
-          Serial.println("event is a null xxxxxxxxxx");
-          if(param_value != NULL) {
-            Serial.println("param_value is not NULL");
-          }
-          //deviceDelegate.currentDevice()->setHasEvent(false);
-        } else {
-          deviceDelegate.currentDevice()->setEvent(param_value);
-        }
-        
-        Serial.println("ada8 created");
-        */
+        temp->setEvent(param_value);
 
+        webParser.clearBuffer(param_value, queryMax);
+        webParser.parseQuery(queryBuffer, "eventColors", param_value);
+        temp->setEventColors(param_value);
 }
-

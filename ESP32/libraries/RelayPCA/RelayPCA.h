@@ -13,7 +13,7 @@
 #include "Storable.h"
 #include "Adafruit_PWMServoDriver.h"
 
-class RelayPCA : public Relay, public Storable
+class RelayPCA : public Relay
 {
   public:
       // Empty constructor.

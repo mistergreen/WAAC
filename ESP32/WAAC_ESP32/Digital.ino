@@ -25,7 +25,7 @@ void relayAjaxOutput(WiFiClient client, Device *device) {
       client.print(F("</invert>"));
       
       client.print(F("<dependent>"));
-      client.print(device->getDependentDevice());
+      client.print(static_cast<Relay*>(device)->getDependentDevice());
       client.print(F("</dependent>"));
       client.print(F("<event>"));
       char eventString[queryMax] = {'\0'};
@@ -76,7 +76,7 @@ void relayMCPajaxOutput(WiFiClient client, Device *device) {
       client.print(F("</scl>"));
              
       client.print(F("<dependent>"));
-      client.print(device->getDependentDevice());
+      client.print(static_cast<Relay*>(device)->getDependentDevice());
       client.print(F("</dependent>"));
       client.print(F("<event>"));
       char eventString[queryMax] = {'\0'};
@@ -105,7 +105,7 @@ void relayPCAajaxOutput(WiFiClient client, Device *device) {
           
       
       client.print(F("<dependent>"));
-      client.print(device->getDependentDevice());
+      client.print(static_cast<Relay*>(device)->getDependentDevice());
       client.print(F("</dependent>"));
       client.print(F("<event>"));
       char eventString[queryMax] = {'\0'};
@@ -212,7 +212,7 @@ void createRelay() {
 
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "event", param_value);
-        deviceDelegate.currentDevice()->setEvent(param_value);
+        temp->setEvent(param_value);
 
 
         webParser.clearBuffer(param_value, queryMax);
@@ -270,7 +270,7 @@ void createRelayPCA() {
 
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "event", param_value);
-        deviceDelegate.currentDevice()->setEvent(param_value);
+        temp->setEvent(param_value);
 
 
         webParser.clearBuffer(param_value, queryMax);
@@ -329,7 +329,7 @@ void createRelayMCP() {
 
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "event", param_value);
-        deviceDelegate.currentDevice()->setEvent(param_value);
+        static_cast<RelayMCP*>(temp)->setEvent(param_value);
 
 
         webParser.clearBuffer(param_value, queryMax);
@@ -343,11 +343,11 @@ void createRelayMCP() {
 void saveRelay(Device *device) {
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "dependent", param_value);
-        device->setDependentDevice(atoi(param_value));
+        static_cast<Relay*>(device)->setDependentDevice(atoi(param_value));
         
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "event", param_value);
-        device->setEvent(param_value);
+        static_cast<Relay*>(device)->setEvent(param_value);
 
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "invert", param_value);
@@ -380,11 +380,11 @@ void saveRelayPCA(Device *device) {
         
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "dependent", param_value);
-        device->setDependentDevice(atoi(param_value));
+        static_cast<Relay*>(device)->setDependentDevice(atoi(param_value));
         
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "event", param_value);
-        device->setEvent(param_value);
+        static_cast<Relay*>(device)->setEvent(param_value);
 
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "invert", param_value);
@@ -442,11 +442,11 @@ void saveRelayMCP(Device *device) {
         
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "dependent", param_value);
-        device->setDependentDevice(atoi(param_value));
+        static_cast<Relay*>(device)->setDependentDevice(atoi(param_value));
         
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "event", param_value);
-        device->setEvent(param_value);
+        static_cast<Relay*>(device)->setEvent(param_value);
 
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "invert", param_value);
@@ -454,5 +454,3 @@ void saveRelayMCP(Device *device) {
         static_cast<RelayMCP*>(device)->setInvert(atoi(param_value));
         
 }
-
-

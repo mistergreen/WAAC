@@ -66,7 +66,7 @@ class Alert : public Device
     long interval;
     long intervalTime;
 
-
-    
+    // It suspends the events checking.
+    bool suspendTime;
 };
 #endif

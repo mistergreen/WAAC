@@ -16,13 +16,10 @@ class Device : public Storable
     virtual void loop() = 0; //child must define - will be called from delegate loop()
     
     //can override
-    virtual void setSuspendTime(bool in_suspend);
-    virtual const char * read(){ return "0.0"; };
-    virtual void setEvent(char *in_string){};
-    virtual void getEvent(char *string){};
-    virtual int getDependentDevice(){};
-    virtual void setDependentDevice(int id){};
+    virtual void setSuspendTime(bool in_suspend) {};
+    virtual const char * read(){ return "0.0"; }; 
     virtual void toggleState(){};
+
     //
     virtual bool isI2C() { return false; };
     virtual bool isVideo() { return false; };
@@ -64,10 +61,8 @@ class Device : public Storable
     bool getDeviceState();
     void setDeviceState(bool state);
     
-    bool getSuspendTime();
-    
     long convertToSeconds(int in_hour, int in_minute, int in_second);
-      
+
     int deviceId;
     float min;
     float max;
@@ -79,13 +74,8 @@ class Device : public Storable
     char deviceName[35];
     char imageName[20];
     char deviceColor[7];
-    //boolean crashes!!!!!!!!!
-    //boolean isI2C;
-    //boolean isVideo;
-    //boolean isAlert;
     bool deviceState;
-    bool suspendTime;
-    
+
         // It serializes the class into a Json document.
     void serialize(
     // Input Json object pointer to be filled with the class information.

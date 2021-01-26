@@ -89,36 +89,46 @@
 										
 										$('#readout').html($(data).find("readout").text());
 										
-										
 										var events = $(data).find("event").text();
 										var parts = events.split(",");
-										
-										//dow
-											var k = 0;
-											
-											$("input[name='dow']").each(function(){
-												var day = parts[0].charAt(k);
-												if(day == "1") {
-													$(this).prop("checked",true).checkboxradio("refresh");
-												}
-												
-												k++;
-											});
-											
+									
+										var j = 1;
+										//console.log("***"+parts+" - "+ parts.length/3);
+										if(events != null) {
+											for(var i=0; i < parts.length; i+=3) {
+												var start = parts[i].split(":");
+												$("#hour"+j).val(start[0]);
+												$("#minute"+j).val(start[1]);
+												$("#second"+j).val(start[2]);
+												var duration = parts[i+1].split(":");
+												$("#hourd"+j).val(duration[0]);
+												$("#minuted"+j).val(duration[1]);
+												$("#secondd"+j).val(duration[2]);
+
+												//dow
+												var k = 0;
+
+												$("input[name='dow"+j+"']").each(function(){
+													var day = parts[i+2].charAt(k);
+													if(day == "1") {
+														$(this).prop("checked",true).checkboxradio("refresh");
+													}
+
+													k++;
+												});
+												//
+												j++;
+											}
+										}
+
+										var events = $(data).find("eventColors").text();
+										var parts = events.split(",");
+
 										var j = 1;
 								
-										for(var i=1; i < parts.length; i+=3) {
-											var start = parts[i].split(":");
-											$("#hour"+j).val(start[0]);
-											$("#minute"+j).val(start[1]);
-											$("#second"+j).val(start[2]);
-											
-											var duration = parts[i+1].split(":");
-											$("#hourd"+j).val(duration[0]);
-											$("#minuted"+j).val(duration[1]);
-											$("#secondd"+j).val(duration[2]);
+										for(var i=0; i < parts.length; i+=1) {
 											//pwm
-											var pwm = parts[i+2].split(":");
+											var pwm = parts[i].split(":");
 											$("#red"+j).val(pwm[0]).slider("refresh");
 											$("#green"+j).val(pwm[1]).slider("refresh");
 											$("#blue"+j).val(pwm[2]).slider("refresh");
@@ -210,31 +220,38 @@
 				str += "&image=" + $("#imagemenu option:selected").val() + "&dependent=" + $("#dependentmenu option:selected").val() +"&";
 			
 				var eventStr = "event=";
-				var dow = "";
-				$('input[name="dow"]').each(function(){
-					if($(this).is(":checked")) {
-						dow +="1";
-					} else {
-						dow +="0";
-					}
-				});
-				
-				eventStr += dow;
 					
 				for( var i = 1; i <= 4; i++) {
 					if($("#hour"+i).val() != "") {
-						
-						eventStr = eventStr + "," + $("#hour"+i).val() + ":" + $("#minute"+i).val() + ":" + $("#second"+i).val();
-						eventStr = eventStr + "," + $("#hourd"+i).val() + ":" + $("#minuted"+i).val() + ":" + $("#secondd"+i).val();
-						eventStr = eventStr + "," + $("#red"+i).val() + ":" + $("#green"+i).val() + ":"+ $("#blue"+i).val() +":"+ $("#white"+i).val();
+						if(i >= 2) eventStr += ",";
+						eventStr = eventStr + $("#hour"+i).val() + ":" + $("#minute"+i).val() + ":" + $("#second"+i).val()+ "," ;
+						eventStr = eventStr + $("#hourd"+i).val() + ":" + $("#minuted"+i).val() + ":" + $("#secondd"+i).val()+ "," ;
+
+						var dow = "";
+						$('input[name="dow' + i +'"]').each(function(){
+							if($(this).is(":checked")) {
+								dow +="1";
+							} else {
+								dow +="0";
+							}
+						});
+
+						eventStr += dow;
 					}
 				}
 				
 				str += eventStr;
+
+				var eventColorsStr = "&eventColors=";
 				
-	
+				for( var i = 1; i <= 4; i++) {
+					if($("#hour"+i).val() != "") {
+						if(i >= 2) eventStr += ",";
+						eventColorsStr = eventColorsStr + $("#red"+i).val() + ":" + $("#green"+i).val() + ":"+ $("#blue"+i).val() +":"+ $("#white"+i).val();
+					}
+				}
 		
-				$.get( "?savedevice="+ deviceId +"&devicetype="+ deviceType + "&"+ str, function(data) {
+				$.get( "?savedevice="+ deviceId +"&devicetype="+ deviceType + "&"+ str + eventColorsStr, function(data) {
 					if(data != null) {
 						//on complete save, go back to home
 						if($(data).find("response").text() == "success") {

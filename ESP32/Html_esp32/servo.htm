@@ -85,12 +85,16 @@
 												$("#hour"+j).val(start[0]);
 												$("#minute"+j).val(start[1]);
 												$("#second"+j).val(start[2]);
+												var duration = parts[i+1].split(":");
+												$("#hourd"+j).val(duration[0]);
+												$("#minuted"+j).val(duration[1]);
+												$("#secondd"+j).val(duration[2]);
 
 												//dow
 												var k = 0;
 
 												$("input[name='dow"+j+"']").each(function(){
-													var day = parts[i+1].charAt(k);
+													var day = parts[i+2].charAt(k);
 													if(day == "1") {
 														$(this).prop("checked",true).checkboxradio("refresh");
 													}
@@ -151,6 +155,7 @@
 					if($("#hour"+i).val() != "") {
 						if(i >= 2) eventStr += ",";
 						eventStr = eventStr + $("#hour"+i).val() + ":" + $("#minute"+i).val() + ":" + $("#second"+i).val() +",";
+						eventStr = eventStr + $("#hourd"+i).val() + ":" + $("#minuted"+i).val() + ":" + $("#secondd"+i).val() +",";
 						var dow = "";
 						$('input[name="dow' + i +'"]').each(function(){
 							if($(this).is(":checked")) {
@@ -246,181 +251,229 @@
         </div>
 	</div>
   
-     <legend>Time Events (24:00:00 hours)</legend>
+	<legend>Time Events (24:00:00 hours)</legend>
      
-     <ol>
-     	<li>
-        <fieldset class="ui-grid-a ui-responsive">
-        	<div class = "ui-block-a">
-        	<b>Start</b>
-         	<div class="ui-grid-b">
-                <div class = "ui-block-a">
-                     <input name="hour1" type="number" id="hour1" placeholder="Hour" value="" />
-                </div>
-                <div class = "ui-block-b">
-                     <input name="minute1" type="number" id="minute1" placeholder="Minute" value="" />
-                </div>
-              	<div class = "ui-block-c">
-                 	<input name="second1" type="number" id="second1" placeholder="Second" value="" />
-              	</div>
-        	</div>
-            </div>
-            <div class = "ui-block-b">
-            <b>Day of the week</b>
-            <fieldset data-role="controlgroup" data-type="horizontal"  data-theme="b">
-                
-                <input type="checkbox" name="dow1" id="su1" value="su">
-                <label for="su1">Su</label>
-                <input type="checkbox" name="dow1" id="mo1" value="mo">
-                <label for="mo1">Mo</label>
-                <input type="checkbox" name="dow1" id="tu1" value="tu">
-                <label for="tu1">Tu</label>
-                <input type="checkbox" name="dow1" id="we1" value="we">
-                <label for="we1">We</label>
-                <input type="checkbox" name="dow1" id="th1" value="th">
-                <label for="th1">Th</label>
-                <input type="checkbox" name="dow1" id="fr1" value="fr">
-                <label for="fr1">Fr</label>
-                <input type="checkbox" name="dow1" id="sa1" value="sa">
-                <label for="sa1">Sa</label>
-            </fieldset>
-            <br>
-            	<a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="clearOut(1)" style="width: 55px; float: right;">RESET</a>
-            </div>    
-  		</fieldset>
-         </li>
-     	<li>
-        <fieldset class="ui-grid-a ui-responsive">
-        	<div class = "ui-block-a">
-        	<b>Start</b>
-         	<div class="ui-grid-b">
-                <div class = "ui-block-a">
-                     <input name="hour2" type="number" id="hour2" placeholder="Hour" value="" />
-                </div>
-                <div class = "ui-block-b">
-                     <input name="minute2" type="number" id="minute2" placeholder="Minute" value="" />
-                </div>
-              	<div class = "ui-block-c">
-                 	<input name="second2" type="number" id="second2" placeholder="Second" value="" />
-              	</div>
-        	</div>
-			</div>
-            <div class = "ui-block-b">
-            <b>Day of the week</b>
-            <fieldset data-role="controlgroup" data-type="horizontal"  data-theme="b">
-                
-                <input type="checkbox" name="dow2" id="su2" value="su">
-                <label for="su2">Su</label>
-                <input type="checkbox" name="dow2" id="mo2" value="mo">
-                <label for="mo2">Mo</label>
-                <input type="checkbox" name="dow2" id="tu2" value="tu">
-                <label for="tu2">Tu</label>
-                <input type="checkbox" name="dow2" id="we2" value="we">
-                <label for="we2">We</label>
-                <input type="checkbox" name="dow2" id="th2" value="th">
-                <label for="th2">Th</label>
-                <input type="checkbox" name="dow2" id="fr2" value="fr">
-                <label for="fr2">Fr</label>
-                <input type="checkbox" name="dow2" id="sa2" value="sa">
-                <label for="sa2">Sa</label>
-            </fieldset>
-            <br>
-            	<a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="clearOut(2)" style="width: 55px; float: right;">RESET</a>
-            </div>    
-  		</fieldset>
-         </li>
-        <li>
-        <fieldset class="ui-grid-a ui-responsive">
-        	<div class = "ui-block-a">
-        	<b>Start</b>
-         	<div class="ui-grid-b">
-                <div class = "ui-block-a">
-                     <input name="hour3" type="number" id="hour3" placeholder="Hour" value="" />
-                </div>
-                <div class = "ui-block-b">
-                     <input name="minute3" type="number" id="minute3" placeholder="Minute" value="" />
-                </div>
-              	<div class = "ui-block-c">
-                 	<input name="second3" type="number" id="second3" placeholder="Second" value="" />
-              	</div>
-        	</div>
-            </div>
-            <div class = "ui-block-b">
-            <b>Day of the week</b>
-            <fieldset data-role="controlgroup" data-type="horizontal"  data-theme="b">
-                
-                <input type="checkbox" name="dow3" id="su3" value="su">
-                <label for="su3">Su</label>
-                <input type="checkbox" name="dow3" id="mo3" value="mo">
-                <label for="mo3">Mo</label>
-                <input type="checkbox" name="dow3" id="tu3" value="tu">
-                <label for="tu3">Tu</label>
-                <input type="checkbox" name="dow3" id="we3" value="we">
-                <label for="we3">We</label>
-                <input type="checkbox" name="dow3" id="th3" value="th">
-                <label for="th3">Th</label>
-                <input type="checkbox" name="dow3" id="fr3" value="fr">
-                <label for="fr3">Fr</label>
-                <input type="checkbox" name="dow3" id="sa3" value="sa">
-                <label for="sa3">Sa</label>
-            </fieldset>
-            <br>
-            	<a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="clearOut(3)" style="width: 55px; float: right;">RESET</a>
-            </div>    
-  		</fieldset>
-         </li>
-        <li>
-        <fieldset class="ui-grid-a ui-responsive">
-        	<div class = "ui-block-a">
-        	<b>Start</b>
-         	<div class="ui-grid-b">
-                <div class = "ui-block-a">
-                     <input name="hour4" type="number" id="hour4" placeholder="Hour" value="" />
-                </div>
-                <div class = "ui-block-b">
-                     <input name="minute4" type="number" id="minute4" placeholder="Minute" value="" />
-                </div>
-              	<div class = "ui-block-c">
-                 	<input name="second4" type="number" id="second4" placeholder="Second" value="" />
-              	</div>
-        	</div>
-            </div>
-            <div class = "ui-block-b">
-            <b>Day of the week</b>
-            <fieldset data-role="controlgroup" data-type="horizontal"  data-theme="b">
-                
-                <input type="checkbox" name="dow4" id="su4" value="su">
-                <label for="su4">Su</label>
-                <input type="checkbox" name="dow4" id="mo4" value="mo">
-                <label for="mo4">Mo</label>
-                <input type="checkbox" name="dow4" id="tu4" value="tu">
-                <label for="tu4">Tu</label>
-                <input type="checkbox" name="dow4" id="we4" value="we">
-                <label for="we4">We</label>
-                <input type="checkbox" name="dow4" id="th4" value="th">
-                <label for="th4">Th</label>
-                <input type="checkbox" name="dow4" id="fr4" value="fr">
-                <label for="fr4">Fr</label>
-                <input type="checkbox" name="dow4" id="sa4" value="sa">
-                <label for="sa4">Sa</label>
-            </fieldset>
-            <br>
-            	<a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="clearOut(4)" style="width: 55px; float: right;">RESET</a>
-            </div>    
-  		</fieldset>
-         </li> 
-     </ol>
-  </form>
-           		     
-                  
-            </div>
-           	<div data-role="footer" data-position="fixed" data-type="horizontal" data-theme="b" data-tap-toggle="false">
-                <div style="text-align: center">
-                    <a href="#" class="ui-btn ui-icon-check ui-btn-icon-left" onClick="validate()">SAVE</a>
-                    <a href="#" data-ajax="false" class="ui-btn ui-icon-minus ui-btn-icon-left" onClick="cancel()">CANCEL</a>
-                    <a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="deleteDevice()">DELETE</a>
-                </div>
-    		</div>
+	<ol>
+		<li>
+	   <fieldset class="ui-grid-a ui-responsive">
+		   <div class = "ui-block-a">
+		   <b>Start</b>
+			<div class="ui-grid-b">
+			   <div class = "ui-block-a">
+					<input name="hour1" type="number" id="hour1" placeholder="Hour" value="" />
+			   </div>
+			   <div class = "ui-block-b">
+					<input name="minute1" type="number" id="minute1" placeholder="Minute" value="" />
+			   </div>
+				 <div class = "ui-block-c">
+					<input name="second1" type="number" id="second1" placeholder="Second" value="" />
+				 </div>
+		   </div>
+		   <b>Duration</b>
+			<div class="ui-grid-b">
+			   <div class = "ui-block-a">
+					<input name="hourd1" type="number" id="hourd1" placeholder="Hour" value="" />
+			   </div>
+			   <div class = "ui-block-b">
+					<input name="minuted1" type="number" id="minuted1" placeholder="Minute" value="" />
+			   </div>
+				 <div class = "ui-block-c">
+					<input name="secondd1" type="number" id="secondd1" placeholder="Second" value="" />
+				 </div>
+		   </div>
+		   </div>
+		   <div class = "ui-block-b">
+		   <b>Day of the week</b>
+		   <fieldset data-role="controlgroup" data-type="horizontal"  data-theme="b">
+			   
+			   <input type="checkbox" name="dow1" id="su1" value="su">
+			   <label for="su1">Su</label>
+			   <input type="checkbox" name="dow1" id="mo1" value="mo">
+			   <label for="mo1">Mo</label>
+			   <input type="checkbox" name="dow1" id="tu1" value="tu">
+			   <label for="tu1">Tu</label>
+			   <input type="checkbox" name="dow1" id="we1" value="we">
+			   <label for="we1">We</label>
+			   <input type="checkbox" name="dow1" id="th1" value="th">
+			   <label for="th1">Th</label>
+			   <input type="checkbox" name="dow1" id="fr1" value="fr">
+			   <label for="fr1">Fr</label>
+			   <input type="checkbox" name="dow1" id="sa1" value="sa">
+			   <label for="sa1">Sa</label>
+		   </fieldset>
+		   <br>
+			   <a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="clearOut(1)" style="width: 55px; float: right;">RESET</a>
+		   </div>    
+		 </fieldset>
+		</li>
+		<li>
+	   <fieldset class="ui-grid-a ui-responsive">
+		   <div class = "ui-block-a">
+		   <b>Start</b>
+			<div class="ui-grid-b">
+			   <div class = "ui-block-a">
+					<input name="hour2" type="number" id="hour2" placeholder="Hour" value="" />
+			   </div>
+			   <div class = "ui-block-b">
+					<input name="minute2" type="number" id="minute2" placeholder="Minute" value="" />
+			   </div>
+				 <div class = "ui-block-c">
+					<input name="second2" type="number" id="second2" placeholder="Second" value="" />
+				 </div>
+		   </div>
+		   <b>Duration</b>
+			<div class="ui-grid-b">
+			   <div class = "ui-block-a">
+					<input name="hourd2" type="number" id="hourd2" placeholder="Hour" value="" />
+			   </div>
+			   <div class = "ui-block-b">
+					<input name="minuted2" type="number" id="minuted2" placeholder="Minute" value="" />
+			   </div>
+				 <div class = "ui-block-c">
+					<input name="secondd2" type="number" id="secondd2" placeholder="Second" value="" />
+				 </div>
+		   </div>
+		   </div>
+		   <div class = "ui-block-b">
+		   <b>Day of the week</b>
+		   <fieldset data-role="controlgroup" data-type="horizontal"  data-theme="b">
+			   
+			   <input type="checkbox" name="dow2" id="su2" value="su">
+			   <label for="su2">Su</label>
+			   <input type="checkbox" name="dow2" id="mo2" value="mo">
+			   <label for="mo2">Mo</label>
+			   <input type="checkbox" name="dow2" id="tu2" value="tu">
+			   <label for="tu2">Tu</label>
+			   <input type="checkbox" name="dow2" id="we2" value="we">
+			   <label for="we2">We</label>
+			   <input type="checkbox" name="dow2" id="th2" value="th">
+			   <label for="th2">Th</label>
+			   <input type="checkbox" name="dow2" id="fr2" value="fr">
+			   <label for="fr2">Fr</label>
+			   <input type="checkbox" name="dow2" id="sa2" value="sa">
+			   <label for="sa2">Sa</label>
+		   </fieldset>
+		   <br>
+			   <a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="clearOut(2)" style="width: 55px; float: right;">RESET</a>
+		   </div>    
+		 </fieldset>
+		</li>
+	   <li>
+	   <fieldset class="ui-grid-a ui-responsive">
+		   <div class = "ui-block-a">
+		   <b>Start</b>
+			<div class="ui-grid-b">
+			   <div class = "ui-block-a">
+					<input name="hour3" type="number" id="hour3" placeholder="Hour" value="" />
+			   </div>
+			   <div class = "ui-block-b">
+					<input name="minute3" type="number" id="minute3" placeholder="Minute" value="" />
+			   </div>
+				 <div class = "ui-block-c">
+					<input name="second3" type="number" id="second3" placeholder="Second" value="" />
+				 </div>
+		   </div>
+		   <b>Duration</b>
+			<div class="ui-grid-b">
+			   <div class = "ui-block-a">
+					<input name="hourd3" type="number" id="hourd3" placeholder="Hour" value="" />
+			   </div>
+			   <div class = "ui-block-b">
+					<input name="minuted3" type="number" id="minuted3" placeholder="Minute" value="" />
+			   </div>
+				 <div class = "ui-block-c">
+					<input name="secondd3" type="number" id="secondd3" placeholder="Second" value="" />
+				 </div>
+		   </div>
+		   </div>
+		   <div class = "ui-block-b">
+		   <b>Day of the week</b>
+		   <fieldset data-role="controlgroup" data-type="horizontal"  data-theme="b">
+			   
+			   <input type="checkbox" name="dow3" id="su3" value="su">
+			   <label for="su3">Su</label>
+			   <input type="checkbox" name="dow3" id="mo3" value="mo">
+			   <label for="mo3">Mo</label>
+			   <input type="checkbox" name="dow3" id="tu3" value="tu">
+			   <label for="tu3">Tu</label>
+			   <input type="checkbox" name="dow3" id="we3" value="we">
+			   <label for="we3">We</label>
+			   <input type="checkbox" name="dow3" id="th3" value="th">
+			   <label for="th3">Th</label>
+			   <input type="checkbox" name="dow3" id="fr3" value="fr">
+			   <label for="fr3">Fr</label>
+			   <input type="checkbox" name="dow3" id="sa3" value="sa">
+			   <label for="sa3">Sa</label>
+		   </fieldset>
+		   <br>
+			   <a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="clearOut(3)" style="width: 55px; float: right;">RESET</a>
+		   </div>    
+		 </fieldset>
+		</li>
+	   <li>
+	   <fieldset class="ui-grid-a ui-responsive">
+		   <div class = "ui-block-a">
+		   <b>Start</b>
+			<div class="ui-grid-b">
+			   <div class = "ui-block-a">
+					<input name="hour4" type="number" id="hour4" placeholder="Hour" value="" />
+			   </div>
+			   <div class = "ui-block-b">
+					<input name="minute4" type="number" id="minute4" placeholder="Minute" value="" />
+			   </div>
+				 <div class = "ui-block-c">
+					<input name="second4" type="number" id="second4" placeholder="Second" value="" />
+				 </div>
+		   </div>
+		   <b>Duration</b>
+			<div class="ui-grid-b">
+			   <div class = "ui-block-a">
+					<input name="hourd4" type="number" id="hourd4" placeholder="Hour" value="" />
+			   </div>
+			   <div class = "ui-block-b">
+					<input name="minuted4" type="number" id="minuted4" placeholder="Minute" value="" />
+			   </div>
+				 <div class = "ui-block-c">
+					<input name="secondd4" type="number" id="secondd4" placeholder="Second" value="" />
+				 </div>
+		   </div>
+		   </div>
+		   <div class = "ui-block-b">
+		   <b>Day of the week</b>
+		   <fieldset data-role="controlgroup" data-type="horizontal"  data-theme="b">
+			   
+			   <input type="checkbox" name="dow4" id="su4" value="su">
+			   <label for="su4">Su</label>
+			   <input type="checkbox" name="dow4" id="mo4" value="mo">
+			   <label for="mo4">Mo</label>
+			   <input type="checkbox" name="dow4" id="tu4" value="tu">
+			   <label for="tu4">Tu</label>
+			   <input type="checkbox" name="dow4" id="we4" value="we">
+			   <label for="we4">We</label>
+			   <input type="checkbox" name="dow4" id="th4" value="th">
+			   <label for="th4">Th</label>
+			   <input type="checkbox" name="dow4" id="fr4" value="fr">
+			   <label for="fr4">Fr</label>
+			   <input type="checkbox" name="dow4" id="sa4" value="sa">
+			   <label for="sa4">Sa</label>
+		   </fieldset>
+		   <br>
+			   <a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="clearOut(4)" style="width: 55px; float: right;">RESET</a>
+		   </div>    
+		 </fieldset>
+		</li> 
+	</ol>
+ </form>
+					   
+				 
+		   </div>
+			  <div data-role="footer" data-position="fixed" data-type="horizontal" data-theme="b" data-tap-toggle="false">
+			   <div style="text-align: center">
+				   <a href="#" class="ui-btn ui-icon-check ui-btn-icon-left" onClick="validate()">SAVE</a>
+				   <a href="#" data-ajax="false" class="ui-btn ui-icon-minus ui-btn-icon-left" onClick="cancel()">CANCEL</a>
+				   <a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="deleteDevice()">DELETE</a>
+			   </div>
+		   </div>
 </div>
 
 

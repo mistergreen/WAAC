@@ -22,14 +22,9 @@ RelayPCA::RelayPCA() : Relay()
     }
 }
 
-RelayPCA::RelayPCA(char *in_name, int in_pin, int in_dependent_device_id) : Relay()
+RelayPCA::RelayPCA(char *in_name, int in_pin, int in_dependent_device_id)
 {
-    // Device() call super to init vars
-    dependentDeviceId = in_dependent_device_id;
-    //find dependent device once - not all the time
-    setDependentDevice(dependentDeviceId);
-
-    //deviceID is automatically set my deviceDeleGate
+     Relay(in_name, in_pin, in_dependent_device_id);
 
     strcpy(deviceName,in_name);
     //classType inherit from base
