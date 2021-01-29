@@ -22,7 +22,7 @@ class PWM4 : public Device, public EventHandler, public Storable
   public:
 
     // Class constructor, it sets the default values.
-    PWM4(char *in_name = "", int in_dependent_device_id = 0, uint8_t channels = 4, char *format = "%d:%d:%d:%d");
+    PWM4(char *in_name = "", int in_dependent_device_id = 0, uint8_t channels = 4);
 
     ~PWM4(); // destructor
     
@@ -56,8 +56,6 @@ class PWM4 : public Device, public EventHandler, public Storable
   protected:
     // The number of channels
     const uint8_t NUM_CHANNELS;
-
-    char* channelsFormat;
 
     typedef struct {
         int pwm[4]; // - for each events, value of pwm

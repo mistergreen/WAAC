@@ -17,7 +17,7 @@
 
 
 AdaFruitPWM8::AdaFruitPWM8(char *in_name, int in_dependent_device_id, int insda, int inscl) : 
-    PWM4(in_name, in_dependent_device_id, 8, "%d:%d:%d:%d:%d:%d:%d:%d")
+    PWM4(in_name, in_dependent_device_id, 8)
 {
     Serial.println("Creating AdaFruitPWM8");
 
@@ -50,6 +50,8 @@ AdaFruitPWM8::AdaFruitPWM8(char *in_name, int in_dependent_device_id, int insda,
 AdaFruitPWM8::~AdaFruitPWM8() {
     //clean up
     switchOff();
+
+    ~PWM4();
 }
 
 

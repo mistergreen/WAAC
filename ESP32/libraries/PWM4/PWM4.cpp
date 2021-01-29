@@ -8,7 +8,7 @@
 #include "PWM4.h"
 
 
-PWM4::PWM4(char *in_name, int in_dependent_device_id, uint8_t channels, char *format) : 
+PWM4::PWM4(char *in_name, int in_dependent_device_id, uint8_t channels) : 
     Device(), EventHandler(in_dependent_device_id), NUM_CHANNELS (channels)
 {
     //deviceID is automatically set my deviceDeleGate
@@ -16,9 +16,6 @@ PWM4::PWM4(char *in_name, int in_dependent_device_id, uint8_t channels, char *fo
     strcpy(deviceName,in_name);
     //classType inherit from base
     strcpy(classType,"PWM4");
-
-    channelsFormat = new char[strlen(format)+1];
-    strcpy(channelsFormat, format);
 
     color = new colorAux[NUM_CHANNELS];
 
@@ -37,9 +34,6 @@ PWM4::PWM4(char *in_name, int in_dependent_device_id, uint8_t channels, char *fo
 PWM4::~PWM4() {
     //clean up
     switchOff();
-
-    delete [] channelsFormat;
-    channelsFormat = NULL;
 
     delete [] color;
     color = NULL;
