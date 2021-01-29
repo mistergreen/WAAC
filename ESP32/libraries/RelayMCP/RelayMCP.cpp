@@ -17,6 +17,9 @@
 
 RelayMCP::RelayMCP() : Relay()
 {
+    //classType inherit from base
+    strcpy(classType,"RelayMCP");
+
     //pin config
     // GPA0 = #21 alias 0
     // GPB0 = #1 alias 8
@@ -35,12 +38,6 @@ RelayMCP::RelayMCP(char *in_name, int in_pin, int in_dependent_device_id)
     strcpy(deviceName,in_name);
     //classType inherit from base
     strcpy(classType,"RelayMCP");
-
-    pin = in_pin;
-
-    isDay = false; // isDay is the day an event is to occur
-    timedIndexCounter = 0;
-    onceFlag = false;
 
     //pin config
     // GPA0 = #21 alias 0

@@ -72,6 +72,22 @@ void loadDevices(const char *filename) {
         temp->deserialize(obj);
         deviceDelegate.addDevice( temp );
       }
+      else if (strcmp("PWM4", obj["classType"]) == 0)
+      {
+        Serial.println ("Creating PWM4");
+        
+        PWM4 *temp = new PWM4();
+        temp->deserialize(obj);
+        deviceDelegate.addDevice( temp );
+      }
+      else if (strcmp("AdaFruitPWM8", obj["classType"]) == 0)
+      {
+        Serial.println ("Creating AdaFruitPWM8");
+        
+        AdaFruitPWM8 *temp = new AdaFruitPWM8();
+        temp->deserialize(obj);
+        deviceDelegate.addDevice( temp );
+      }
     }
   }
     

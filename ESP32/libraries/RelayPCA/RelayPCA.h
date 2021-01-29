@@ -37,16 +37,6 @@ class RelayPCA : public Relay
     void setI2C(int insda, int inscl);
     
   private:
-    boolean isDay;
-    boolean onceFlag;
-    uint8_t timedIndexCounter;
-    int hour[5];
-    int minute[5];
-    int second[5];
-    int hourDuration[5];
-    int minuteDuration[5];
-    int secondDuration[5];
-    char dow[5][8];
 
     int SDA;
     int SCL;

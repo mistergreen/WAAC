@@ -52,7 +52,7 @@
 										$('#pin').val($(data).find("pin").text());
 										$('#stopAngle').val($(data).find("stopAngle").text());
 										$('#moveAngle').val($(data).find("moveAngle").text());
-										$('#duration').val($(data).find("secondDuration").text());
+										$('#duration').val($(data).find("duration").text());
 										
 										var value = $(data).find("state").text();
 									
@@ -79,7 +79,7 @@
 									
 										var j = 1;
 										//console.log("***"+parts+" - "+ parts.length/3);
-										if(events != null) {
+										if ((events != null) && (parts.length > 1)) {
 											for(var i=0; i < parts.length; i+=3) {
 												var start = parts[i].split(":");
 												$("#hour"+j).val(start[0]);

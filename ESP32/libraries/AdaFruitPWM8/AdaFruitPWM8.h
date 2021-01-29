@@ -13,7 +13,8 @@
 class AdaFruitPWM8 : public PWM4
 {
   public:
-    AdaFruitPWM8(char *in_name, int in_dependent_device_id, int insda, int inscl);
+    // Class constructor, it sets the default values.
+    AdaFruitPWM8(char *in_name = "", int in_dependent_device_id = 0, int insda = 0, int inscl = 0);
     ~AdaFruitPWM8(); // destructor
     
     void setPins(int red, int green, int blue, int white, int aux1, int aux2, int aux3, int aux4);

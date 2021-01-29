@@ -20,7 +20,9 @@
 class PWM4 : public Device, public EventHandler, public Storable
 {
   public:
-    PWM4(char *in_name, int in_dependent_device_id, uint8_t channels = 4, char *format = "%d:%d:%d:%d");
+
+    // Class constructor, it sets the default values.
+    PWM4(char *in_name = "", int in_dependent_device_id = 0, uint8_t channels = 4, char *format = "%d:%d:%d:%d");
 
     ~PWM4(); // destructor
     
@@ -79,7 +81,7 @@ class PWM4 : public Device, public EventHandler, public Storable
 
   private:
     
-    uint8_t timedIndexCounter;
+    uint8_t colorsIndexCounter;
 
     long initMillis;
     

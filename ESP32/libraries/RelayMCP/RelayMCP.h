@@ -37,15 +37,10 @@ class RelayMCP : public Relay
         JsonObject& doc);
     
   private:
-    boolean isDay;
-    boolean onceFlag;
-    uint8_t timedIndexCounter;
 
     int SDA;
     int SCL;
-    //Adafruit_MCP23017 mcp; // automatic memory
-
-    
+   
 };//need ; at the end of a class def
 
 #endif

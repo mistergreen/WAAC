@@ -66,12 +66,23 @@ float EventHandler::getEventPercentage()
         // Calculate the event duration in milliseconds.
         long evenDuration =  convertToSeconds(hourDuration[inProgressEventId],
                                             minuteDuration[inProgressEventId],
-                                            secondDuration[inProgressEventId]) * 1000L;
+                                            secondDuration[inProgressEventId]);
 
         // Get the current time.        
-        long currentTime = millis();
+        long currentTime = convertToSeconds(::hour(),::minute(),::second());
 
         percentage = (float)(currentTime-eventTime) / (float)evenDuration;
+
+        // Clip for possible rounding problems.
+        if (percentage < 0)
+        {
+            percentage = 0;
+        }
+        else if (percentage > 1)
+        {
+            percentage = 1;
+        }
+
     }
     
     return percentage;
@@ -261,14 +272,22 @@ void EventHandler::getEvent(char *string) {
         
         // Define a temporary string buffer.
         char buf[EVENT_STRING_SIZE];
+
+        // clean the buffer
+        memset(buf, 0, sizeof(buf));
+        memset(string, 0, sizeof(buf));
         
         for (uint8_t i=0; i < timedIndexCounter; i++) {
-            sprintf(buf, ",%02d:%02d:%02d,%02d:%02d:%02d,%s", hour[i],minute[i],second[i],hourDuration[i],minuteDuration[i],secondDuration[i],dow[i]);
+            if (i > 0)
+            {
+                strcat(string, ",");
+            }
+            sprintf(buf, "%02d:%02d:%02d,%02d:%02d:%02d,%s", hour[i],minute[i],second[i],hourDuration[i],minuteDuration[i],secondDuration[i],dow[i]);
             strcat(string,buf);
         }
     } else {
         Serial.println("EventHandler::getEvent no event");
-        strcpy(string, '\0');
+        strcpy(string, "");
     }
 }
 
@@ -298,7 +317,15 @@ void EventHandler::serialize(JsonObject& doc)
 {
     // 64 characters per event + carriage return
     char event[67*12];
+
+    // clean the buffer
+    memset(event, 0, sizeof(event));
+
     getEvent(event);
+    
+    Serial.print("EventHandler::serialize ");
+    Serial.println(event);
+
     doc["event"] = event;
     doc["dependentDeviceId"] = dependentDeviceId;
 }
@@ -308,8 +335,12 @@ void EventHandler::deserialize(
 {
     // 64 characters per event + carriage return
     char event[67*12];
-    strcpy (event, doc["event"]);
     
+    // clean the buffer
+    memset(event, 0, sizeof(event));
+
+    strcpy (event, doc["event"]);
+
     setEvent(event);
 
     setDependentDevice(doc["dependentDeviceId"]);

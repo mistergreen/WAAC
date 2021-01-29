@@ -10,6 +10,9 @@
 
 Relay::Relay() : Device(), EventHandler()
 {
+    //classType inherit from base
+    strcpy(classType, "Relay");
+
     invert = false;
 }
 

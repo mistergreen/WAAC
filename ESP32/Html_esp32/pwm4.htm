@@ -13,268 +13,259 @@
   
 	$(document).on('pageshow',function(event) {
 				
-					var deviceId = localStorage.getItem("deviceId");
-					var deviceType = localStorage.getItem("deviceType");
-			$.mobile.loading("show");
-					//get data from the server
-					nocache = "&nocache=" + Math.random() * 1000000;
-					var imageStr="";
-					var deviceStr="";
+		var deviceId = localStorage.getItem("deviceId");
+		var deviceType = localStorage.getItem("deviceType");
+
+		$.mobile.loading("show");
+		//get data from the server
+		nocache = "&nocache=" + Math.random() * 1000000;
+		var imageStr="";
+		var deviceStr="";
 					
-						$.get( "?deviceid="+ deviceId +"&devicetype=" + deviceType + nocache,  
-							function(data) {
-								//console.dirxml(data);
-							$.mobile.loading("hide");
-								// grab images & color list
-								$(data).find("item").each(function() {
-									imageStr += '<option value="'+ $(this).find("image").text()+'">'+ $(this).find("image").text()+'</option>';
-								});
-							
-								$('#imagemenu').append(imageStr).selectmenu("refresh",true);
-								
-								// grab dependent device  list
-								$(data).find("device").each(function() {
-									deviceStr += '<option value="'+ $(this).find("id").text()+'">'+ decodeURIComponent($(this).find("name").text()) +'</option>';
-								});
-								
-								$('#dependentmenu').append(deviceStr).selectmenu("refresh",true);
-							
-							
-								//****** grab device specific data & populate fields ********
-								if(deviceId != 0) {	
-								
-										$('#name').val(decodeURIComponent($(data).find("deviceName").text()));
-										
-										var redpin = $(data).find("redpin").text();
-										$('#redpin').val((redpin=="-1")?"":redpin);
-										
-										var greenpin = $(data).find("greenpin").text();
-										$('#greenpin').val((greenpin=="-1")?"":greenpin);
-										
-										var bluepin = $(data).find("bluepin").text();
-										$('#bluepin').val((bluepin=="-1")?"":bluepin);
-										
-										var whitepin = $(data).find("whitepin").text()
-										$('#whitepin').val((whitepin=="-1")?"":whitepin);
-                                    
-                                    var redChannel = $(data).find("redChannel").text();
-										$('#redChannel').val((redChannel=="-1")?"":redChannel);
-										
-										var greenChannel = $(data).find("greenChannel").text();
-										$('#greenChannel').val((greenChannel=="-1")?"":greenChannel);
-										
-										var blueChannel = $(data).find("blueChannel").text();
-										$('#blueChannel').val((blueChannel=="-1")?"":blueChannel);
-										
-										var whiteChannel = $(data).find("whiteChannel").text()
-										$('#whiteChannel').val((whiteChannel=="-1")?"":whiteChannel);
-                                    
-										
-										var value = $(data).find("state").text();
-									
-										
-										if(value == "0") {
-											$('#status').val("off").slider("refresh");
-										} else {
-											$('#status').val("on").slider("refresh");
-										}
-		
-										
-										var imageMenu = $(data).find("deviceImage").text();
-										$('#imagemenu').val(imageMenu).selectmenu("refresh");
-										
-										var depend = $(data).find("dependent").text();
-										$('#dependentmenu').val(depend).selectmenu("refresh");
-										
-										
-										$('#readout').html($(data).find("readout").text());
-										
-										var events = $(data).find("event").text();
-										var parts = events.split(",");
-									
-										var j = 1;
-										//console.log("***"+parts+" - "+ parts.length/3);
-										if(events != null) {
-											for(var i=0; i < parts.length; i+=3) {
-												var start = parts[i].split(":");
-												$("#hour"+j).val(start[0]);
-												$("#minute"+j).val(start[1]);
-												$("#second"+j).val(start[2]);
-												var duration = parts[i+1].split(":");
-												$("#hourd"+j).val(duration[0]);
-												$("#minuted"+j).val(duration[1]);
-												$("#secondd"+j).val(duration[2]);
-
-												//dow
-												var k = 0;
-
-												$("input[name='dow"+j+"']").each(function(){
-													var day = parts[i+2].charAt(k);
-													if(day == "1") {
-														$(this).prop("checked",true).checkboxradio("refresh");
-													}
-
-													k++;
-												});
-												//
-												j++;
-											}
-										}
-
-										var events = $(data).find("eventColors").text();
-										var parts = events.split(",");
-
-										var j = 1;
-								
-										for(var i=0; i < parts.length; i+=1) {
-											//pwm
-											var pwm = parts[i].split(":");
-											$("#red"+j).val(pwm[0]).slider("refresh");
-											$("#green"+j).val(pwm[1]).slider("refresh");
-											$("#blue"+j).val(pwm[2]).slider("refresh");
-											$("#white"+j).val(pwm[3]).slider("refresh");
-											j++;
-										}
-
-								}//end deviceId
-	$.mobile.loading("hide");
-							
-							}).fail(function( jqXHR, textStatus, errorThrown ) {
-								alert("Unsuccessful. See console.log for info.");
-								console.log( "error: " +":"+textStatus +":"+errorThrown);
-						}); // xml function
-					
-					$("#imagemenu").change(function() {
-						var str = $(this).val();
-						
-						$("#display_image img").attr("src", "images/"+str);
-						
-					});
-					
-					var pwmVal = [];
-					$('input[name=slider1]').on('slidestop', function(event) {
-						var i = 0;
-						$('input[name=slider1]').each(function() {
-							pwmVal[i] = $(this).val();
-							i++;
-						});
-						setPWMs(pwmVal);
-					});
-					
-					$('input[name=slider2]').on('slidestop', function(event) {
-						var i = 0;
-						$('input[name=slider2]').each(function() {
-							pwmVal[i] = $(this).val();
-							i++;
-						});
-						setPWMs(pwmVal);
-					});
-					
-					$('input[name=slider3]').on('slidestop', function(event) {
-						var i = 0;
-						$('input[name=slider3]').each(function() {
-							pwmVal[i] = $(this).val();
-							i++;
-						});
-						setPWMs(pwmVal);
-					});
-					$('input[name=slider4]').on('slidestop', function(event) {
-						var i = 0;
-						$('input[name=slider4]').each(function() {
-							pwmVal[i] = $(this).val();
-							i++;
-						});
-						setPWMs(pwmVal);
-					});
-				
-			});
+		$.get( "?deviceid="+ deviceId +"&devicetype=" + deviceType + nocache, 
+			function(data) {
+				//console.dirxml(data);
+				$.mobile.loading("hide");
+				// grab images & color list
+				$(data).find("item").each(function() {
+					imageStr += '<option value="'+ $(this).find("image").text()+'">'+ $(this).find("image").text()+'</option>';
+				});
 			
-			
-			
-			function setPWMs(inArray) {
-				var id = localStorage.getItem("deviceId");
-				console.log(inArray);
-                if(id!=0) {
-                    $.get("?setpwms=" + id + "&red="+ inArray[0] +"&green="+inArray[1]+"&blue="+inArray[2]+"&white="+inArray[3], function(data) {
-                    //nothing
-                    });
-                }
+				$('#imagemenu').append(imageStr).selectmenu("refresh",true);
 				
-				
-				
-			}
-			
-	
-			function validate() {
-	
-				var deviceId = localStorage.getItem("deviceId");
-				var deviceType = localStorage.getItem("deviceType");
-                // we got formatted data to do serialize()
-                //var formStr = $("form").serialize();
-                //console.log(formStr);
-                
-				var str = "";
-
-				str += "name=" + $("#name").val() + "&redpin=" + $("#redpin").val() + "&greenpin=" + $("#greenpin").val() + "&bluepin=" + $("#bluepin").val() + "&whitepin=" + $("#whitepin").val();
-                str += "&redChannel=" + $("#redChannel").val() + "&greenChannel=" + $("#greenChannel").val() + "&blueChannel=" + $("#blueChannel").val() + "&whiteChannel=" + $("#whiteChannel").val();
-				str += "&image=" + $("#imagemenu option:selected").val() + "&dependent=" + $("#dependentmenu option:selected").val() +"&";
-			
-				var eventStr = "event=";
-					
-				for( var i = 1; i <= 4; i++) {
-					if($("#hour"+i).val() != "") {
-						if(i >= 2) eventStr += ",";
-						eventStr = eventStr + $("#hour"+i).val() + ":" + $("#minute"+i).val() + ":" + $("#second"+i).val()+ "," ;
-						eventStr = eventStr + $("#hourd"+i).val() + ":" + $("#minuted"+i).val() + ":" + $("#secondd"+i).val()+ "," ;
-
-						var dow = "";
-						$('input[name="dow' + i +'"]').each(function(){
-							if($(this).is(":checked")) {
-								dow +="1";
-							} else {
-								dow +="0";
-							}
-						});
-
-						eventStr += dow;
-					}
-				}
-				
-				str += eventStr;
-
-				var eventColorsStr = "&eventColors=";
-				
-				for( var i = 1; i <= 4; i++) {
-					if($("#hour"+i).val() != "") {
-						if(i >= 2) eventStr += ",";
-						eventColorsStr = eventColorsStr + $("#red"+i).val() + ":" + $("#green"+i).val() + ":"+ $("#blue"+i).val() +":"+ $("#white"+i).val();
-					}
-				}
-		
-				$.get( "?savedevice="+ deviceId +"&devicetype="+ deviceType + "&"+ str + eventColorsStr, function(data) {
-					if(data != null) {
-						//on complete save, go back to home
-						if($(data).find("response").text() == "success") {
-							location.href="index.htm";
-						}
-					}
-					
-				}).fail(function( jqXHR, textStatus, errorThrown ) {
-					alert("Saving was unsuccessful. See console.log for info.");
-					console.log( "error: " +":"+textStatus +":"+errorThrown);
+				// grab dependent device  list
+				$(data).find("device").each(function() {
+					deviceStr += '<option value="'+ $(this).find("id").text()+'">'+ decodeURIComponent($(this).find("name").text()) +'</option>';
 				});
 				
-			}// end function
-			
-		function clearOut(inId) {
-				if(confirm("Are you sure?")) {
-					$("#hour"+inId+", #minute"+inId+", #second"+inId+", #hourd"+inId+", #minuted"+inId+", #secondd"+inId).val("");
-					//$("input[name='dow']").attr("checked",false).checkboxradio("refresh");
-					$("input[name='slider" +inId+"']").val(0).slider("refresh");
-	
+				$('#dependentmenu').append(deviceStr).selectmenu("refresh",true);
+							
+				//****** grab device specific data & populate fields ********
+				if(deviceId != 0) {	
+				
+					$('#name').val(decodeURIComponent($(data).find("deviceName").text()));
 					
+					var redpin = $(data).find("redpin").text();
+					$('#redpin').val((redpin=="-1")?"":redpin);
+					
+					var greenpin = $(data).find("greenpin").text();
+					$('#greenpin').val((greenpin=="-1")?"":greenpin);
+					
+					var bluepin = $(data).find("bluepin").text();
+					$('#bluepin').val((bluepin=="-1")?"":bluepin);
+					
+					var whitepin = $(data).find("whitepin").text()
+					$('#whitepin').val((whitepin=="-1")?"":whitepin);
+				
+					var redChannel = $(data).find("redChannel").text();
+					$('#redChannel').val((redChannel=="-1")?"":redChannel);
+					
+					var greenChannel = $(data).find("greenChannel").text();
+					$('#greenChannel').val((greenChannel=="-1")?"":greenChannel);
+					
+					var blueChannel = $(data).find("blueChannel").text();
+					$('#blueChannel').val((blueChannel=="-1")?"":blueChannel);
+					
+					var whiteChannel = $(data).find("whiteChannel").text()
+					$('#whiteChannel').val((whiteChannel=="-1")?"":whiteChannel);
+				
+					var value = $(data).find("state").text();
+				
+					if(value == "0") {
+						$('#status').val("off").slider("refresh");
+					} else {
+						$('#status').val("on").slider("refresh");
+					}
+
+					var imageMenu = $(data).find("deviceImage").text();
+					$('#imagemenu').val(imageMenu).selectmenu("refresh");
+					
+					var depend = $(data).find("dependent").text();
+					$('#dependentmenu').val(depend).selectmenu("refresh");
+					
+					$('#readout').html($(data).find("readout").text());
+					
+					var events = $(data).find("event").text();
+					var parts = events.split(",");
+				
+					var j = 1;
+					//console.log("***"+parts+" - "+ parts.length/3);
+					if ((events != null) && (parts.length > 1)) {
+						for(var i=0; i < parts.length; i+=3) {
+							var start = parts[i].split(":");
+							$("#hour"+j).val(start[0]);
+							$("#minute"+j).val(start[1]);
+							$("#second"+j).val(start[2]);
+							var duration = parts[i+1].split(":");
+							$("#hourd"+j).val(duration[0]);
+							$("#minuted"+j).val(duration[1]);
+							$("#secondd"+j).val(duration[2]);
+
+							//dow
+							var k = 0;
+
+							$("input[name='dow']").each(function(){
+								var day = parts[i+2].charAt(k);
+								if(day == "1") {
+									$(this).prop("checked",true).checkboxradio("refresh");
+								}
+
+								k++;
+							});
+							//
+							j++;
+						}
+					}
+
+					var events = $(data).find("eventColors").text();
+					var parts = events.split(",");
+
+					var j = 1;
+			
+					for(var i=0; i < parts.length; i+=1) {
+						//pwm
+						var pwm = parts[i].split(":");
+						$("#red"+j).val(pwm[0]).slider("refresh");
+						$("#green"+j).val(pwm[1]).slider("refresh");
+						$("#blue"+j).val(pwm[2]).slider("refresh");
+						$("#white"+j).val(pwm[3]).slider("refresh");
+						j++;
+					}
+				}//end deviceId
+
+				$.mobile.loading("hide");
+							
+			}).fail(function( jqXHR, textStatus, errorThrown ) {
+				alert("Unsuccessful. See console.log for info.");
+				console.log( "error: " +":"+textStatus +":"+errorThrown);
+				}); // xml function
+					
+		$("#imagemenu").change(function() {
+			var str = $(this).val();
+			
+			$("#display_image img").attr("src", "images/"+str);
+			
+		});
+		
+		var pwmVal = [];
+		$('input[name=slider1]').on('slidestop', function(event) {
+			var i = 0;
+			$('input[name=slider1]').each(function() {
+				pwmVal[i] = $(this).val();
+				i++;
+			});
+			setPWMs(pwmVal);
+		});
+		
+		$('input[name=slider2]').on('slidestop', function(event) {
+			var i = 0;
+			$('input[name=slider2]').each(function() {
+				pwmVal[i] = $(this).val();
+				i++;
+			});
+			setPWMs(pwmVal);
+		});
+		
+		$('input[name=slider3]').on('slidestop', function(event) {
+			var i = 0;
+			$('input[name=slider3]').each(function() {
+				pwmVal[i] = $(this).val();
+				i++;
+			});
+			setPWMs(pwmVal);
+		});
+		$('input[name=slider4]').on('slidestop', function(event) {
+			var i = 0;
+			$('input[name=slider4]').each(function() {
+				pwmVal[i] = $(this).val();
+				i++;
+			});
+			setPWMs(pwmVal);
+		});			
+	});
+			
+	
+	function setPWMs(inArray) {
+		var id = localStorage.getItem("deviceId");
+		console.log(inArray);
+		if(id!=0) {
+			$.get("?setpwms=" + id + "&red="+ inArray[0] +"&green="+inArray[1]+"&blue="+inArray[2]+"&white="+inArray[3], function(data) {
+			//nothing
+			});
+		}	
+	}
+	
+
+	function validate() {
+
+		var deviceId = localStorage.getItem("deviceId");
+		var deviceType = localStorage.getItem("deviceType");
+		// we got formatted data to do serialize()
+		//var formStr = $("form").serialize();
+		//console.log(formStr);
+		
+		var str = "";
+
+		str += "name=" + $("#name").val() + "&redpin=" + $("#redpin").val() + "&greenpin=" + $("#greenpin").val() + "&bluepin=" + $("#bluepin").val() + "&whitepin=" + $("#whitepin").val();
+		str += "&redChannel=" + $("#redChannel").val() + "&greenChannel=" + $("#greenChannel").val() + "&blueChannel=" + $("#blueChannel").val() + "&whiteChannel=" + $("#whiteChannel").val();
+		str += "&image=" + $("#imagemenu option:selected").val() + "&dependent=" + $("#dependentmenu option:selected").val() +"&";
+	
+		var eventStr = "event=";
+			
+		for( var i = 1; i <= 4; i++) {
+			if($("#hour"+i).val() != "") {
+				if(i >= 2) eventStr += ",";
+				eventStr = eventStr + $("#hour"+i).val() + ":" + $("#minute"+i).val() + ":" + $("#second"+i).val()+ "," ;
+				eventStr = eventStr + $("#hourd"+i).val() + ":" + $("#minuted"+i).val() + ":" + $("#secondd"+i).val()+ "," ;
+
+				var dow = "";
+				$("input[name='dow']").each(function(){
+					if($(this).is(":checked")) {
+						dow +="1";
+					} else {
+						dow +="0";
+					}
+				});
+
+				eventStr += dow;
+			}
+		}
+		
+		str += eventStr;
+
+		var eventColorsStr = "&eventColors=";
+		
+		for( var i = 1; i <= 4; i++) {
+			if($("#hour"+i).val() != "") {
+				if(i >= 2) eventColorsStr += ",";
+				eventColorsStr = eventColorsStr + $("#red"+i).val() + ":" + $("#green"+i).val() + ":"+ $("#blue"+i).val() +":"+ $("#white"+i).val();
+			}
+		}
+
+		$.get( "?savedevice="+ deviceId +"&devicetype="+ deviceType + "&"+ str + eventColorsStr, function(data) {
+			if(data != null) {
+				//on complete save, go back to home
+				if($(data).find("response").text() == "success") {
+					location.href="index.htm";
 				}
 			}
+			
+		}).fail(function( jqXHR, textStatus, errorThrown ) {
+			alert("Saving was unsuccessful. See console.log for info.");
+			console.log( "error: " +":"+textStatus +":"+errorThrown);
+		});
+		
+	}// end function
+	
+	function clearOut(inId) {
+		if(confirm("Are you sure?")) {
+			$("#hour"+inId+", #minute"+inId+", #second"+inId+", #hourd"+inId+", #minuted"+inId+", #secondd"+inId).val("");
+			//$("input[name='dow']").attr("checked",false).checkboxradio("refresh");
+			$("input[name='slider" +inId+"']").val(0).slider("refresh");
+
+			
+		}
+	}
 	
 </script>
               

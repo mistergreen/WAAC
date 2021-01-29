@@ -104,38 +104,39 @@
 										var events = $(data).find("event").text();
 										var parts = events.split(",");
 										
-											
-										var j = 1;
-								
-										console.log("parts: "+parts);
+										if ((events != null) && (parts.length > 1)){	
+											var j = 1;
+									
+											console.log("parts: "+parts);
 
-										for(var i=0; i < parts.length; i+=3) {
-											var startTime = parts[i];
-											var start = startTime.split(":");
-											$("#hour"+j).val(start[0]);
-											$("#minute"+j).val(start[1]);
-											$("#second"+j).val(start[2]);
-											
-											var durationPart = parts[i+1];
-											console.log("duration: "+durationPart);
-											var duration = durationPart.split(":");
-											$("#hourd"+j).val(duration[0]);
-											$("#minuted"+j).val(duration[1]);
-											$("#secondd"+j).val(duration[2]);
-
-											//dow
-											var k = 0;
-											
-											$("input[name='dow']").each(function(){
-												var day = parts[i+2].charAt(k);
-												if(day == "1") {
-													$(this).prop("checked",true).checkboxradio("refresh");
-												}
+											for(var i=0; i < parts.length; i+=3) {
+												var startTime = parts[i];
+												var start = startTime.split(":");
+												$("#hour"+j).val(start[0]);
+												$("#minute"+j).val(start[1]);
+												$("#second"+j).val(start[2]);
 												
-												k++;
-											});
+												var durationPart = parts[i+1];
+												console.log("duration: "+durationPart);
+												var duration = durationPart.split(":");
+												$("#hourd"+j).val(duration[0]);
+												$("#minuted"+j).val(duration[1]);
+												$("#secondd"+j).val(duration[2]);
 
-											j++;
+												//dow
+												var k = 0;
+												
+												$("input[name='dow']").each(function(){
+													var day = parts[i+2].charAt(k);
+													if(day == "1") {
+														$(this).prop("checked",true).checkboxradio("refresh");
+													}
+													
+													k++;
+												});
+
+												j++;
+											}
 										}
 
 										var events = $(data).find("eventColors").text();
@@ -253,7 +254,7 @@ $.mobile.loading("hide");
 						eventStr = eventStr + $("#hourd"+i).val() + ":" + $("#minuted"+i).val() + ":" + $("#secondd"+i).val()+ "," ;
 
 						var dow = "";
-						$('input[name="dow' + i +'"]').each(function(){
+						$("input[name='dow']").each(function(){
 							if($(this).is(":checked")) {
 								dow +="1";
 							} else {
@@ -271,7 +272,7 @@ $.mobile.loading("hide");
 				
 				for( var i = 1; i <= 4; i++) {
 					if($("#hour"+i).val() != "") {
-						if(i >= 2) eventStr += ",";
+						if(i >= 2) eventColorsStr += ",";
 						eventColorsStr = eventColorsStr + $("#red"+i).val() + ":" + $("#green"+i).val() + ":"+ $("#blue"+i).val() +":"+ $("#white"+i).val();
 						eventColorsStr = eventColorsStr + ":" + $("#aux"+i+"1").val() + ":" + $("#aux"+i+"2").val() + ":"+ $("#aux"+i+"3").val() +":"+ $("#aux"+i+"4").val();
 					}

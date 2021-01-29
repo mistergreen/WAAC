@@ -19,13 +19,17 @@
 AdaFruitPWM8::AdaFruitPWM8(char *in_name, int in_dependent_device_id, int insda, int inscl) : 
     PWM4(in_name, in_dependent_device_id, 8, "%d:%d:%d:%d:%d:%d:%d:%d")
 {
+    Serial.println("Creating AdaFruitPWM8");
+
+    //classType inherit from base
+    strcpy(classType,"AdaFruitPWM8");
+
     if(!PCAhelper::isSet) {
         PCAhelper::init();
     }
 
     SDA = insda;
     SCL = inscl;
-
 
 #ifdef ESP8266
     //setup I2C
@@ -123,6 +127,14 @@ void AdaFruitPWM8::serialize(JsonObject& doc)
 {
     // First call father serialization
     Device::serialize(doc);
+    EventHandler::serialize(doc);
+
+    char event[4*20];
+    // clean the buffer
+    memset(event, 0, sizeof(event));
+
+    getEventColors(event);
+    doc["eventColors"] = event;
 
     doc["pin0"] = color[0].pin;
     doc["pin1"] = color[1].pin;
@@ -133,10 +145,6 @@ void AdaFruitPWM8::serialize(JsonObject& doc)
     doc["pin6"] = color[6].pin;
     doc["pin7"] = color[7].pin;
 
-    char event[4*20];
-    getEventColors(event);
-    doc["eventColors"] = event;
-
     doc["SDA"] = SDA;
     doc["SCL"] = SCL;
 }
@@ -146,6 +154,14 @@ void AdaFruitPWM8::deserialize(
 {
    // First call father deserialization
     Device::deserialize(doc);
+    EventHandler::deserialize(doc);
+
+    char event[4*20];
+    // clean the buffer
+    memset(event, 0, sizeof(event));
+    strcpy (event, doc["eventColors"]);
+    
+    setEventColors(event);
 
     setPins(doc["pin0"],
             doc["pin1"],
@@ -155,11 +171,6 @@ void AdaFruitPWM8::deserialize(
             doc["pin5"],
             doc["pin6"],
             doc["pin7"]);
-
-    char event[4*20];
-    strcpy (event, doc["eventColors"]);
-    
-    setEventColors(event);
 
     SDA = doc["SDA"];
     SCL = doc["SCL"];

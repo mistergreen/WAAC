@@ -17,6 +17,9 @@
 
 RelayPCA::RelayPCA() : Relay()
 {
+    //classType inherit from base
+    strcpy(classType,"RelayPCA");
+
     if(!PCAhelper::isSet) {
         PCAhelper::init();
     }
@@ -24,17 +27,11 @@ RelayPCA::RelayPCA() : Relay()
 
 RelayPCA::RelayPCA(char *in_name, int in_pin, int in_dependent_device_id)
 {
-     Relay(in_name, in_pin, in_dependent_device_id);
+    Relay(in_name, in_pin, in_dependent_device_id);
 
     strcpy(deviceName,in_name);
     //classType inherit from base
     strcpy(classType,"RelayPCA");
-
-    pin = in_pin;
-
-    isDay = false; // isDay is the day an event is to occur
-    timedIndexCounter = 0;
-    onceFlag = false;
 
     if(!PCAhelper::isSet) {
         PCAhelper::init();
