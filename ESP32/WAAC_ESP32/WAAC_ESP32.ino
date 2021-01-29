@@ -1055,6 +1055,8 @@ void parseReceivedRequest(WiFiClient client)
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "deletedevice", param_value);
         deviceDelegate.removeDevice(atoi(param_value));
+
+        saveDevices(devicesFile);
         
         successAjax(client);
     }
