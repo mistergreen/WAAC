@@ -47,14 +47,6 @@ AdaFruitPWM8::AdaFruitPWM8(char *in_name, int in_dependent_device_id, int insda,
 }
 
 
-AdaFruitPWM8::~AdaFruitPWM8() {
-    //clean up
-    switchOff();
-
-    ~PWM4();
-}
-
-
 void AdaFruitPWM8::setPins(int red, int green, int blue, int white, int aux1, int aux2, int aux3, int aux4) {
     //turn off any previous pin
     //switchOff();
