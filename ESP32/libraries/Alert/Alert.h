@@ -12,10 +12,10 @@
 #include "Device.h"
 #include "Storable.h"
 
-class Alert : public Device
+class Alert : public Device, public Storable
 {
   public:
-    Alert(char *in_name, int in_dependent_device_id);
+    Alert(char *in_name = "", int in_dependent_device_id = 0);
     ~Alert(); // destructor
     
     // It serializes the class into a Json document.

@@ -162,6 +162,7 @@ void Alert::serialize(JsonObject& doc)
     getEvent(event);
     doc["event"] = event;
 
+    doc["dependentDeviceId"] = dependentDeviceId;
 }
 
 void Alert::deserialize(
@@ -178,5 +179,7 @@ void Alert::deserialize(
     strcpy (event, doc["event"]);
     
     setEvent(event);
+
+    setDependentDevice(doc["dependentDeviceId"]);
 }
 

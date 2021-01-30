@@ -88,6 +88,14 @@ void loadDevices(const char *filename) {
         temp->deserialize(obj);
         deviceDelegate.addDevice( temp );
       }
+      else if (strcmp("Alert", obj["classType"]) == 0)
+      {
+        Serial.println ("Creating Alert");
+        
+        Alert *temp = new Alert();
+        temp->deserialize(obj);
+        deviceDelegate.addDevice( temp );
+      }
     }
   }
     
