@@ -63,6 +63,16 @@ class Device : public Storable
     
     long convertToSeconds(int in_hour, int in_minute, int in_second);
 
+    // It serializes the class into a Json document.
+    virtual void serialize(
+    // Input Json object pointer to be filled with the class information.
+        JsonObject& doc);
+    
+    // It fills the class using the information contained into the document.
+    virtual void deserialize(
+        // Input Json object pointer containing the class information.
+        JsonObject& doc);
+
     int deviceId;
     float min;
     float max;
@@ -75,16 +85,6 @@ class Device : public Storable
     char imageName[20];
     char deviceColor[7];
     bool deviceState;
-
-        // It serializes the class into a Json document.
-    void serialize(
-    // Input Json object pointer to be filled with the class information.
-        JsonObject& doc);
-    
-    // It fills the class using the information contained into the document.
-    void deserialize(
-        // Input Json object pointer containing the class information.
-        JsonObject& doc);
     
   private:
     

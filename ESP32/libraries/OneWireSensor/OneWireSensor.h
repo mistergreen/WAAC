@@ -47,7 +47,6 @@ class OneWireSensor : public Device, public SensorWaac
     bool fahrenheit;
     char temperature[17];
     OneWire *ds;
-
 };
 
 #endif

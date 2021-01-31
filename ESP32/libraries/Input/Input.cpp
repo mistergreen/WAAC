@@ -7,7 +7,18 @@
 #include <Arduino.h>
 #include "Input.h"
 
-Input::Input(char *in_name, uint8_t in_pin) : Device(), SensorWaac()
+Input::Input()
+{
+    //classType inherit from base
+    strcpy(classType, "Input");
+
+    lastDebounceTime = 0;  // the last time the output pin was toggled
+    debounceDelay = 50; 
+    lastState = LOW; 
+}
+
+
+Input::Input(char *in_name, uint8_t in_pin) : Device(), SensorWaac(), Storable()
 {
     //deviceID is automatically set my deviceDeleGate
 
@@ -88,4 +99,6 @@ void Input::deserialize(
     Device::deserialize(doc);
     
     SensorWaac::deserialize(doc);
+
+    pinMode(pin, INPUT);
 }

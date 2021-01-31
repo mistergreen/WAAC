@@ -4,6 +4,14 @@
 #include "Analog.h"
 #include "shunt.h"
 
+    
+Analog::Analog()
+{
+    //classType inherit from base
+    strcpy(classType, "Analog");
+}
+
+
 Analog::Analog(char *in_name, uint8_t in_pin) : Device(), SensorWaac()
 {
     //deviceID is automatically set my deviceDeleGate
@@ -100,3 +108,19 @@ void Analog::loop() {
     }
 }
 
+
+void Analog::serialize(JsonObject& doc)
+{
+    Device::serialize(doc);
+    SensorWaac::serialize(doc);
+}
+
+
+void Analog::deserialize(
+    JsonObject& doc)
+{
+    Device::deserialize(doc);
+    SensorWaac::deserialize(doc);
+
+    pinMode(pin, INPUT);
+}

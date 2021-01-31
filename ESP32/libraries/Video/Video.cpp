@@ -8,7 +8,7 @@
 #include "Video.h"
 #include "Device.h"
 
-Video::Video(char *in_name, char *in_code) : Device()
+Video::Video(char *in_name, char *in_code) : Device(), Storable()
 {
     //deviceID is automatically set my deviceDeleGate
     //crashes, maybe format the code = {'\0'} ?
@@ -21,7 +21,7 @@ Video::Video(char *in_name, char *in_code) : Device()
     
 }
 
-Video::Video(char *in_name) : Device()
+Video::Video(char *in_name) : Device(), Storable()
 {
     //deviceID is automatically set my deviceDeleGate
     
@@ -50,6 +50,21 @@ void Video::setCode(char *in_code) {
     
 }
 
+void Video::serialize(JsonObject& doc)
+{
+    // First call father serialization
+    Device::serialize(doc);
+    
+    doc["code"] = code;
+}
 
+void Video::deserialize(
+    JsonObject& doc)
+{
+   // First call father deserialization
+    Device::deserialize(doc);
+
+    strcpy(code, doc["code"]);
+}
 
 

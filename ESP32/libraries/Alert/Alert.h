@@ -15,7 +15,10 @@
 class Alert : public Device, public Storable
 {
   public:
-    Alert(char *in_name = "", int in_dependent_device_id = 0);
+    // Empty constructor for deserialization.
+    Alert();
+
+    Alert(char *in_name, int in_dependent_device_id);
     ~Alert(); // destructor
     
     // It serializes the class into a Json document.

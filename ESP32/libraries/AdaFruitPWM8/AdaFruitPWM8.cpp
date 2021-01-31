@@ -7,13 +7,24 @@
 
 #define UNSET -1
 
-
 #include <Arduino.h>
 #include "AdaFruitPWM8.h"
 #include "PCAhelper.h"
 #include <Wire.h>
 #include <DeviceDelegate.h>
 #include <TimeLib.h>
+
+AdaFruitPWM8::AdaFruitPWM8() : PWM4()
+{
+    Serial.println("Creating AdaFruitPWM8");
+
+    //classType inherit from base
+    strcpy(classType,"AdaFruitPWM8");  
+
+    if(!PCAhelper::isSet) {
+        PCAhelper::init();
+    }
+}
 
 
 AdaFruitPWM8::AdaFruitPWM8(char *in_name, int in_dependent_device_id, int insda, int inscl) : 

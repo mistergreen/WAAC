@@ -9,7 +9,24 @@
 #include "InputMCP.h"
 #include "MCPhelper.h"
 
-InputMCP::InputMCP(char *in_name, uint8_t in_pin) : Device(), SensorWaac()
+
+InputMCP::InputMCP()
+{
+    //classType inherit from base
+    strcpy(classType, "InputMCP");
+
+    // Input signal starts HIGH, button must connect from pin to ground and read LOW when pressed
+    if(!MCPhelper::isSet) {
+        MCPhelper::init();
+    }
+
+    lastDebounceTime = 0;  // the last time the output pin was toggled
+    debounceDelay = 50; 
+    lastState = LOW; 
+}
+
+
+InputMCP::InputMCP(char *in_name, uint8_t in_pin) : Device(), SensorWaac(), Storable()
 {
     //deviceID is automatically set my deviceDeleGate
 
@@ -131,9 +148,9 @@ void InputMCP::deserialize(
     Device::deserialize(doc);
     
     SensorWaac::deserialize(doc);
-    
-    MCPhelper::mcp.pinMode(pin, OUTPUT);
-    MCPhelper::mcp.pullUp(pin, LOW); // in case it was set HIGH previously
+        
+    MCPhelper::mcp.pinMode(pin, INPUT);
+    MCPhelper::mcp.pullUp(pin, HIGH);  // turn on a 100K pullup internally
     
     setI2C(doc["SDA"], doc["SCL"]);
 }

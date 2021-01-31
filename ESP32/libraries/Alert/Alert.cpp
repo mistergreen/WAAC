@@ -15,7 +15,24 @@
 static char server[] = "www.2noodles.com";
 static char key[] = "greencontroller";
 
-Alert::Alert(char *in_name, int in_dependent_device_id) : Device()
+
+Alert::Alert() : Device(), Storable()
+{
+    hour = 1;
+    minute = 0;
+    
+    strcpy(message, "");
+    strcpy(subject, "");
+    
+    //classType inherit from base
+    strcpy(classType,"Alert");
+    
+    intervalTime = 0;
+    interval = 0;
+}
+
+
+Alert::Alert(char *in_name, int in_dependent_device_id) : Device(), Storable()
 {
     // Device() call super to init vars
     dependentDeviceId = in_dependent_device_id;

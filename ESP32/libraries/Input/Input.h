@@ -17,7 +17,11 @@
 class Input : public Device, public SensorWaac, public Storable
 {
   public:
+    // Empty constructor for deserialization.
+    Input();
+
     Input(char *in_name, uint8_t in_pin);
+    
     ~Input() {}; // destructor
     
     // It serializes the class into a Json document.

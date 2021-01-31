@@ -11,15 +11,17 @@
 #ifndef HallSensor_h
 #define HallSensor_h
 
+#include "Device.h"
+#include "SensorWaac.h"
+#include "Storable.h"
 
-#include <Device.h>
-#include <SensorWaac.h>
-#include <Storable.h>
 
-
-class HallSensor : public Device, public SensorWaac
+class HallSensor : public Device, public SensorWaac, public Storable
 {
   public:
+    // Empty constructor for deserialization.
+    HallSensor();
+
     HallSensor(char *in_name, uint8_t in_pin);
     ~HallSensor(); // destructor
 
@@ -34,10 +36,10 @@ class HallSensor : public Device, public SensorWaac
         JsonObject& doc);
         
     void loop(); // required
-    void setup(void (*ISR_callback)(void), int value);
     const char * read(); // override
     float getNewValue(); // override
-
+    void setup(void (*ISR_callback)(void), int value);
+    
     bool isSensor() {return true;};
 
     void rpm ();
@@ -46,7 +48,6 @@ class HallSensor : public Device, public SensorWaac
     unsigned long lastRead; 
     float sensorVal;
 
-    
 };//need ; at the end of a class def
 
 #endif

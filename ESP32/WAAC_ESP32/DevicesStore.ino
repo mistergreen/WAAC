@@ -30,71 +30,77 @@ void loadDevices(const char *filename) {
 
       // Get the JSON object.
       JsonObject obj = doc[i + 1];
+
+      const char* deviceType = obj["classType"];
+      
+      Serial.print ("Creating ");
+      Serial.println (deviceType);
+
+      Device* temp = NULL;
       
       // Find the right device.
-      if (strcmp("ServoMotor", obj["classType"]) == 0)
+      if (strcmp("ServoMotor", deviceType) == 0)
       {
-        Serial.println ("Creating Servo Motor");
-        
-        ServoMotor *temp = new ServoMotor();
-        temp->deserialize(obj);
-        deviceDelegate.addDevice( temp );
+        temp = new ServoMotor();
       }
-      else if (strcmp("Relay", obj["classType"]) == 0)
+      else if (strcmp("Relay", deviceType) == 0)
       {
-        Serial.println ("Creating Relay");
-        
-        Relay *temp = new Relay();
-        temp->deserialize(obj);
-        deviceDelegate.addDevice( temp );
+        temp = new Relay();
       }
-      else if (strcmp("RelayMCP", obj["classType"]) == 0)
+      else if (strcmp("RelayMCP", deviceType) == 0)
       {
-        Serial.println ("Creating RelayMCP");
-        
-        RelayMCP *temp = new RelayMCP();
-        temp->deserialize(obj);
-        deviceDelegate.addDevice( temp );
+        temp = new RelayMCP();
       }
-      else if (strcmp("RelayPCA", obj["classType"]) == 0)
+      else if (strcmp("RelayPCA", deviceType) == 0)
       {
-        Serial.println ("Creating RelayPCA");
-        
-        RelayPCA *temp = new RelayPCA();
-        temp->deserialize(obj);
-        deviceDelegate.addDevice( temp );
+        temp = new RelayPCA();
       }
-      else if (strcmp("OneWireSensor", obj["classType"]) == 0)
+      else if (strcmp("OneWireSensor", deviceType) == 0)
       {
-        Serial.println ("Creating OneWireSensor");
-        
-        OneWireSensor *temp = new OneWireSensor();
-        temp->deserialize(obj);
-        deviceDelegate.addDevice( temp );
+        temp = new OneWireSensor();
       }
-      else if (strcmp("PWM4", obj["classType"]) == 0)
+      else if (strcmp("PWM4", deviceType) == 0)
       {
-        Serial.println ("Creating PWM4");
-        
-        PWM4 *temp = new PWM4();
-        temp->deserialize(obj);
-        deviceDelegate.addDevice( temp );
+        temp = new PWM4();
       }
-      else if (strcmp("AdaFruitPWM8", obj["classType"]) == 0)
+      else if (strcmp("AdaFruitPWM8", deviceType) == 0)
       {
-        Serial.println ("Creating AdaFruitPWM8");
-        
-        AdaFruitPWM8 *temp = new AdaFruitPWM8();
-        temp->deserialize(obj);
-        deviceDelegate.addDevice( temp );
+        temp = new AdaFruitPWM8();
       }
-      else if (strcmp("Alert", obj["classType"]) == 0)
+      else if (strcmp("Alert", deviceType) == 0)
       {
-        Serial.println ("Creating Alert");
-        
-        Alert *temp = new Alert();
+        temp = new Alert();
+      }
+      else if (strcmp("Analog", deviceType) == 0)
+      {
+        temp = new Analog();
+      }
+      else if (strcmp("HallSensor", deviceType) == 0)
+      {
+        temp = new HallSensor();
+      }
+      else if (strcmp("Input", deviceType) == 0)
+      {
+        temp = new Input();
+      }
+      else if (strcmp("InputMCP", deviceType) == 0)
+      {
+        temp = new InputMCP();
+      }
+      else if (strcmp("Video", deviceType) == 0)
+      {
+        temp = new Video();
+      }
+
+      if (temp != NULL)
+      {
         temp->deserialize(obj);
         deviceDelegate.addDevice( temp );
+
+        if (strcmp("HallSensor", deviceType) == 0)
+        {
+           static_cast<HallSensor*>(deviceDelegate.currentDevice())->setup([](){ static_cast<HallSensor*>(deviceDelegate.currentDevice())->rpm(); }, RISING);
+        }
       }
     }
   }

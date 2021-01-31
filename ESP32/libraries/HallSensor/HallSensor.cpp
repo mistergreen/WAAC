@@ -5,8 +5,17 @@
 #include "HallSensor.h"
 #include "shunt.h"
 
+HallSensor::HallSensor()
+{
+    //classType inherit from base
+    strcpy(classType, "HallSensor");
+   
+    count = 0;
+    lastRead = 0;
+    sensorVal = 0;
+}
 
-HallSensor::HallSensor(char *in_name, uint8_t in_pin) : Device(), SensorWaac()
+HallSensor::HallSensor(char *in_name, uint8_t in_pin) : Device(), SensorWaac(), Storable()
 {
     //deviceID is automatically set my deviceDeleGate
 
@@ -21,17 +30,19 @@ HallSensor::HallSensor(char *in_name, uint8_t in_pin) : Device(), SensorWaac()
     count = 0;
     lastRead = 0;
     sensorVal = 0;
-
 }
+
 
 HallSensor::~HallSensor() {
     //cleaup - get rid of interrupt
     detachInterrupt(pin);
 }
 
+
 void HallSensor::setup(void (*ISR_callback)(void), int value) {
     attachInterrupt(digitalPinToInterrupt(pin), ISR_callback, value);
 }
+
 
 
 const char * HallSensor::read() {
@@ -142,7 +153,6 @@ void HallSensor::serialize(JsonObject& doc)
     Device::serialize(doc);
     
     SensorWaac::serialize(doc);
-
 }
 
 void HallSensor::deserialize(
@@ -152,5 +162,8 @@ void HallSensor::deserialize(
     Device::deserialize(doc);
     
     SensorWaac::deserialize(doc);
+
+    // set internal pullup
+    pinMode(pin, INPUT_PULLUP);
 }
 
