@@ -7,7 +7,6 @@
  * AnalogInput can be converted to digital except pin 34-39
  * 
  */
-#define MAXDEVICE   20 //maximum number you can add devices objects. Also defined in deviceDelegate
 #define UNSET       -1
 #define bufferMax   628
 #define queryMax    350
@@ -1000,7 +999,7 @@ void parseReceivedRequest(WiFiClient client)
           //****************************************create new object ******************************
           //Serial.println("xxxxxxx created device xxxxxxxx");
           //don't allow more than 10 devices
-          if(deviceDelegate.getDeviceCount() >= MAXDEVICE) return;
+          if(deviceDelegate.getDeviceCount() >= deviceDelegate.sMAX_NUM_DEVICES) return;
           
           webParser.clearBuffer(param_value, queryMax);
           webParser.parseQuery(queryBuffer, "devicetype", param_value);

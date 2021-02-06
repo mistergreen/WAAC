@@ -387,7 +387,7 @@ boolean WWWsettings::updateDDNS() {
     
     char userpass[100]={'\0'};
     
-    sprintf(userpass, "%s:%s", user, password);
+    sprintf(userpass, "%s:%s", ddnsUser, ddnsPassword);
     //Serial.println(userpass);
     String output = rbase64.encode(userpass);
     //Serial.println(output);
@@ -578,19 +578,19 @@ long WWWsettings::convertToSeconds(int in_hour, int in_minute, int in_second) {
 }
 
 char * WWWsettings::getUser(){
-    return user;
+    return ddnsUser;
 }
 
 void WWWsettings::setUser(char *in_user){
-    strcpy(user, in_user);
+    strcpy(ddnsUser, in_user);
 }
 
 char * WWWsettings::getPassword(){
-    return password;
+    return ddnsPassword;
 }
 
 void WWWsettings::setPassword(char *in_password){
-    strcpy(password, in_password);
+    strcpy(ddnsPassword, in_password);
 }
 
 void WWWsettings::setEmailIpState(boolean in_state) {
@@ -681,6 +681,68 @@ boolean WWWsettings::waitForResponse(WiFiClient client)
 }
 
 
+void WWWsettings::serialize(JsonObject& doc)
+{
+    doc["fromEmail"] = fromEmail;
+    doc["subject"] = subject;
+    doc["smtp"] = smtp;
+    doc["smtpPort"] = smtpPort;
+    doc["ddnsUser"] = ddnsUser;
+    doc["ddnsPassword"] = ddnsPassword;
+    doc["message"] = message;
+    doc["ddnsHost"] = ddnsHost;
+    doc["ddnsHostName"] = ddnsHostName;
+
+    doc["networkIp"] = networkIp;
+    doc["oldNetworkIp"] = oldNetworkIp;
+    doc["networkAddress"] = networkAddress;
+    doc["networkHost"] = networkHost;
+    
+    doc["timeZone"] = timeZone;
+    doc["dayLightSaving"] = dayLightSaving;
+    
+    doc["hour"] = hour;
+    doc["minute"] = minute;
+
+    doc["isEmailIp"] = isEmailIp;
+    doc["isDDNSIp"] = isDDNSIp;
+
+    doc["NTPServer"] = NTPServer;
+}
+
+void WWWsettings::deserialize(
+    JsonObject& doc)
+{
+    strcpy(fromEmail, doc["fromEmail"]);
+    strcpy(subject, doc["subject"]);
+    strcpy(smtp, doc["smtp"]);
+    smtpPort = doc["smtpPort"];
+    strcpy(ddnsUser, doc["ddnsUser"]);
+    strcpy(ddnsPassword, doc["ddnsPassword"]);
+    strcpy(message, doc["message"]);
+    strcpy(ddnsHost, doc["ddnsHost"]);
+    strcpy(ddnsHostName, doc["ddnsHostName"]);
+
+    strcpy(networkIp, doc["networkIp"]);
+    strcpy(oldNetworkIp, doc["oldNetworkIp"]);
+    strcpy(networkAddress, doc["networkAddress"]);
+    strcpy(networkHost, doc["networkHost"]);
+
+    timeZone = doc["timeZone"];
+    dayLightSaving = doc["dayLightSaving"];
+    
+    hour = doc["hour"];
+    minute = doc["minute"];
+
+    isEmailIp = doc["isEmailIp"];
+    isDDNSIp = doc["isDDNSIp"];
+
+    strcpy(NTPServer, doc["NTPServer"]);
+
+    begin(timeZone, NTPServer);
+
+    syncNTP();
+}
 
 
 

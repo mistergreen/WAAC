@@ -95,7 +95,7 @@ void loadDevices(const char *filename) {
       if (temp != NULL)
       {
         temp->deserialize(obj);
-        deviceDelegate.addDevice( temp );
+        deviceDelegate.addDevice(temp, temp->getDeviceId());
 
         if (strcmp("HallSensor", deviceType) == 0)
         {

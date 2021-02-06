@@ -11,10 +11,11 @@
 #include <Arduino.h>
 #include <WiFiUdp.h>
 #include <TimeLib.h>
+#include "Storable.h"
 
 #define NTP_PACKET_SIZE 48
 
-class WWWsettings
+class WWWsettings: public Storable
 {
   public:
     WWWsettings();
@@ -119,7 +120,17 @@ class WWWsettings
     
     void setDayLightSaving(boolean val);
     uint8_t getDayLightSaving();
+
+
+    // It serializes the class into a Json document.
+    void serialize(
+        // Input Json object pointer to be filled with the class information.
+        JsonObject& doc);
     
+    // It fills the class using the information contained into the document.
+    void deserialize(
+        // Input Json object pointer containing the class information.
+        JsonObject& doc);
     
   private:
    
@@ -127,10 +138,9 @@ class WWWsettings
     char subject[55];
     char smtp[50];
     int smtpPort;
-    char user[50];
-    char password[50];
+    char ddnsUser[50];
+    char ddnsPassword[50];
     char message[200];
-    char wwwType[30];
     
     char ddnsHost[50];
     char ddnsHostName[55];
@@ -161,9 +171,5 @@ class WWWsettings
     byte packetBuffer[NTP_PACKET_SIZE]; //buffer to hold incoming & outgoing packets
     byte timeServerIp[4];
     char NTPServer[55];
-    
-   
-
-    
 };
 #endif
