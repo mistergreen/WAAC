@@ -25,6 +25,21 @@ WWWsettings::WWWsettings()
     syncOnce = false;
     //strcpy(toEmail, "");
     dayLightSaving = 0;
+
+    // The local IP adrress.
+    memset(localIP, 0, sizeof(localIP));
+
+    // The local subnet mask.
+    memset(localSub, 0, sizeof(localSub));
+    
+    // The local gateway.
+    memset(localGW, 0, sizeof(localGW));
+
+    // The WiFi SSID.
+    strcpy(WiFi_SSID,"");
+
+    // The WiFi password.
+    strcpy(WiFi_password,"");
     
 }
 
@@ -676,8 +691,84 @@ boolean WWWsettings::waitForResponse(WiFiClient client)
     }//end while
     
     return true;
+}
 
+
+uint8_t* WWWsettings::getLocalIP()
+{
+    return localIP;
+}
+
+void WWWsettings::setLocalIP(uint8_t ip1, uint8_t ip2, uint8_t ip3, uint8_t ip4)
+{
+    Serial.print("Setting IP ");
+    Serial.print(ip1);
+    Serial.print(".");
+    Serial.print(ip2);
+    Serial.print(".");
+    Serial.print(ip3);
+    Serial.print(".");
+    Serial.println(ip4);
+
+    localIP[0] = ip1;
+    localIP[1] = ip2;
+    localIP[2] = ip3;
+    localIP[3] = ip4;
+}
+
+uint8_t* WWWsettings::getLocalSubnet()
+{
+    return localSub;
+}
+
+void WWWsettings::setLocalSubnet(uint8_t sn1, uint8_t sn2, uint8_t sn3, uint8_t sn4)
+{
+    Serial.print("Setting Subnet ");
+    Serial.print(sn1);
+    Serial.print(".");
+    Serial.print(sn2);
+    Serial.print(".");
+    Serial.print(sn3);
+    Serial.print(".");
+    Serial.println(sn4);
     
+    localSub[0] = sn1;
+    localSub[1] = sn2;
+    localSub[2] = sn3;
+    localSub[3] = sn4;
+}
+
+uint8_t* WWWsettings::getLocalGW()
+{
+    return localGW;
+}
+
+void WWWsettings::setLocalGW(uint8_t gw1, uint8_t gw2, uint8_t gw3, uint8_t gw4)
+{
+    localGW[0] = gw1;
+    localGW[1] = gw2;
+    localGW[2] = gw3;
+    localGW[3] = gw4;
+}
+
+char* WWWsettings::getWiFiSSID()
+{
+    return WiFi_SSID;
+}
+
+void WWWsettings::setWiFiSSID(char* ssid)
+{
+    strncpy(WiFi_SSID, ssid, 32);
+}
+
+char* WWWsettings::getWiFiPassword()
+{
+    return WiFi_password;
+}
+
+void WWWsettings::setWiFiPassword(char* password)
+{
+    strncpy(WiFi_password, password, 64);
 }
 
 
@@ -708,6 +799,30 @@ void WWWsettings::serialize(JsonObject& doc)
     doc["isDDNSIp"] = isDDNSIp;
 
     doc["NTPServer"] = NTPServer;
+
+    // The local IP adrress.
+    doc["localIP0"] = localIP[0];
+    doc["localIP1"] = localIP[1];
+    doc["localIP2"] = localIP[2];
+    doc["localIP3"] = localIP[3];
+
+    // The local subnet mask.
+    doc["localSub0"] = localSub[0];
+    doc["localSub1"] = localSub[1];
+    doc["localSub2"] = localSub[2];
+    doc["localSub3"] = localSub[3];
+    
+    // The local gateway.
+    doc["localGW0"] = localGW[0];
+    doc["localGW1"] = localGW[1];
+    doc["localGW2"] = localGW[2];
+    doc["localGW3"] = localGW[3];
+
+    // The WiFi SSID.
+    doc["WiFi_SSID"] = WiFi_SSID;
+
+    // The WiFi password.
+    doc["WiFi_password"] = WiFi_password;
 }
 
 void WWWsettings::deserialize(
@@ -739,9 +854,33 @@ void WWWsettings::deserialize(
 
     strcpy(NTPServer, doc["NTPServer"]);
 
-    begin(timeZone, NTPServer);
+    // The local IP adrress.
+    localIP[0] = doc["localIP0"];
+    localIP[1] = doc["localIP1"];
+    localIP[2] = doc["localIP2"];
+    localIP[3] = doc["localIP3"];
 
-    syncNTP();
+    // The local subnet mask.
+    localSub[0] = doc["localSub0"];
+    localSub[1] = doc["localSub1"];
+    localSub[2] = doc["localSub2"];
+    localSub[3] = doc["localSub3"];
+
+    // The local gateway.
+    localGW[0] = doc["localGW0"];
+    localGW[1] = doc["localGW1"];
+    localGW[2] = doc["localGW2"];
+    localGW[3] = doc["localGW3"];
+
+    // The WiFi SSID.
+    strcpy(WiFi_SSID, doc["WiFi_SSID"]);
+
+    // The WiFi password.
+    strcpy(WiFi_password, doc["WiFi_password"]);
+
+    //begin(timeZone, NTPServer);
+
+    //syncNTP();
 }
 
 

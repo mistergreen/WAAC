@@ -121,6 +121,20 @@ class WWWsettings: public Storable
     void setDayLightSaving(boolean val);
     uint8_t getDayLightSaving();
 
+    uint8_t* getLocalIP();
+    void setLocalIP(uint8_t ip1, uint8_t ip2, uint8_t ip3, uint8_t ip4);
+
+    uint8_t* getLocalSubnet();
+    void setLocalSubnet(uint8_t sn1, uint8_t sn2, uint8_t sn3, uint8_t sn4);
+
+    uint8_t* getLocalGW();
+    void setLocalGW(uint8_t gw1, uint8_t gw2, uint8_t gw3, uint8_t gw4);
+
+    char* getWiFiSSID();
+    void setWiFiSSID(char* ssid);
+
+    char* getWiFiPassword();
+    void setWiFiPassword(char* password);
 
     // It serializes the class into a Json document.
     void serialize(
@@ -171,5 +185,20 @@ class WWWsettings: public Storable
     byte packetBuffer[NTP_PACKET_SIZE]; //buffer to hold incoming & outgoing packets
     byte timeServerIp[4];
     char NTPServer[55];
+
+    // The local IP adrress.
+    uint8_t localIP[4];
+
+    // The local subnet mask.
+    uint8_t localSub[4];
+    
+    // The local gateway.
+    uint8_t localGW[4];
+
+    // The WiFi SSID.
+    char WiFi_SSID[32];
+
+    // The WiFi password.
+    char WiFi_password[64];
 };
 #endif

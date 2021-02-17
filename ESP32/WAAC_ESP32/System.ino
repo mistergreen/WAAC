@@ -19,8 +19,6 @@ void testEmail(WiFiClient client) {
       wwws.email(subject, message);
       
       successAjax(client);
-
-  
 }
 
 
@@ -177,14 +175,44 @@ void saveSetting(WiFiClient client, Config config) {
     
     config.timeZone = wwws.getTimeZone();
 
-    saveConfiguration(configFile, config);
+    char ip[4][4] = {'\0'};
+    webParser.parseQuery(queryBuffer, "localIP1", ip[0]);
+    webParser.parseQuery(queryBuffer, "localIP2", ip[1]);
+    webParser.parseQuery(queryBuffer, "localIP3", ip[2]);
+    webParser.parseQuery(queryBuffer, "localIP4", ip[3]);
+    wwws.setLocalIP(atoi(ip[0]), atoi(ip[1]), atoi(ip[2]), atoi(ip[3]));
+
+    memset (ip, 0, 4*4);
+    webParser.parseQuery(queryBuffer, "localSub1", ip[0]);
+    webParser.parseQuery(queryBuffer, "localSub2", ip[1]);
+    webParser.parseQuery(queryBuffer, "localSub3", ip[2]);
+    webParser.parseQuery(queryBuffer, "localSub4", ip[3]);
+    wwws.setLocalSubnet(atoi(ip[0]), atoi(ip[1]), atoi(ip[2]), atoi(ip[3]));
+
+    memset (ip, 0, 4*4);
+    webParser.parseQuery(queryBuffer, "localGW1", ip[0]);
+    webParser.parseQuery(queryBuffer, "localGW2", ip[1]);
+    webParser.parseQuery(queryBuffer, "localGW3", ip[2]);
+    webParser.parseQuery(queryBuffer, "localGW4", ip[3]);
+    wwws.setLocalGW(atoi(ip[0]), atoi(ip[1]), atoi(ip[2]), atoi(ip[3]));
+
+    webParser.clearBuffer(param_value, queryMax);
+    webParser.parseQuery(queryBuffer, "ssid", param_value);
+    urldecode(param_value);
+    wwws.setWiFiSSID(param_value);
+
+    webParser.clearBuffer(param_value, queryMax);
+    webParser.parseQuery(queryBuffer, "wifiPW", param_value);
+    wwws.setWiFiPassword(param_value);
+    
+    saveConfiguration(configFile);
       
     //ajax requires a response or will throw a connection lost
     successAjax(client);
 }
 
 void getSetting(WiFiClient client) {
-       client.println(F("HTTP/1.1 200 OK"));
+      client.println(F("HTTP/1.1 200 OK"));
       client.println(F("Content-Type: text/xml"));
       client.println();
       client.println(F("<?xml version = \"1.0\" encoding=\"UTF-8\"?>"));
@@ -241,6 +269,171 @@ void getSetting(WiFiClient client) {
       client.print(F("<daylight>"));
       client.print(wwws.getDayLightSaving());
       client.print(F("</daylight>"));
-      
+
+      uint8_t* ip;
+      ip = wwws.getLocalIP();
+      client.print(F("<localIP1>"));
+      client.print(ip[0]);
+      client.print(F("</localIP1>"));
+      client.print(F("<localIP2>"));
+      client.print(ip[1]);
+      client.print(F("</localIP2>"));
+      client.print(F("<localIP3>"));
+      client.print(ip[2]);
+      client.print(F("</localIP3>"));
+      client.print(F("<localIP4>"));
+      client.print(ip[3]);
+      client.print(F("</localIP4>"));
+
+      ip = wwws.getLocalSubnet();
+      client.print(F("<localSub1>"));
+      client.print(ip[0]);
+      client.print(F("</localSub1>"));
+      client.print(F("<localSub2>"));
+      client.print(ip[1]);
+      client.print(F("</localSub2>"));
+      client.print(F("<localSub3>"));
+      client.print(ip[2]);
+      client.print(F("</localSub3>"));
+      client.print(F("<localSub4>"));
+      client.print(ip[3]);
+      client.print(F("</localSub4>"));
+
+      ip = wwws.getLocalGW();
+      client.print(F("<localGW1>"));
+      client.print(ip[0]);
+      client.print(F("</localGW1>"));
+      client.print(F("<localGW2>"));
+      client.print(ip[1]);
+      client.print(F("</localGW2>"));
+      client.print(F("<localGW3>"));
+      client.print(ip[2]);
+      client.print(F("</localGW3>"));
+      client.print(F("<localGW4>"));
+      client.print(ip[3]);
+      client.print(F("</localGW4>"));
+
+      client.print(F("<ssid>"));
+      client.print(wwws.getWiFiSSID());
+      client.print(F("</ssid>"));
+      client.print(F("<wifiPW>"));
+      client.print(wwws.getWiFiPassword());
+      client.print(F("</wifiPW>"));
+
       client.print(F("</setting>"));
+}
+
+
+void urldecode(char* str)
+{
+  // Create two pointers that point to the start of the data
+  char *leader = str;
+  char *follower = leader;
+  
+  // While we're not at the end of the string (current character not NULL)
+  while (*leader) {
+      // Check to see if the current character is a %
+      if (*leader == '%') {
+  
+          // Grab the next two characters and move leader forwards
+          leader++;
+          char high = *leader;
+          leader++;
+          char low = *leader;
+  
+          // Convert ASCII 0-9A-F to a value 0-15
+          if (high > 0x39) high -= 7;
+          high &= 0x0f;
+  
+          // Same again for the low byte:
+          if (low > 0x39) low -= 7;
+          low &= 0x0f;
+  
+          // Combine the two into a single byte and store in follower:
+          *follower = (high << 4) | low;
+      } else {
+          // All other characters copy verbatim
+          *follower = *leader;
+      }
+  
+      // Move both pointers to the next character:
+      leader++;
+      follower++;
+  }
+  // Terminate the new string with a NULL character to trim it off
+  *follower = 0;
+
+/*    String encodedString="";
+    char c;
+    char code0;
+    char code1;
+    for (int i =0; i < str.length(); i++){
+        c=str.charAt(i);
+      if (c == '+'){
+        encodedString+=' ';  
+      }else if (c == '%') {
+        i++;
+        code0=str.charAt(i);
+        i++;
+        code1=str.charAt(i);
+        c = (h2int(code0) << 4) | h2int(code1);
+        encodedString+=c;
+      } else{
+        
+        encodedString+=c;  
+      }
+      
+      yield();
+    }
+    
+   return encodedString;*/
+}
+
+String urlencode(String str)
+{
+    String encodedString="";
+    char c;
+    char code0;
+    char code1;
+    char code2;
+    for (int i =0; i < str.length(); i++){
+      c=str.charAt(i);
+      if (c == ' '){
+        encodedString+= '+';
+      } else if (isalnum(c)){
+        encodedString+=c;
+      } else{
+        code1=(c & 0xf)+'0';
+        if ((c & 0xf) >9){
+            code1=(c & 0xf) - 10 + 'A';
+        }
+        c=(c>>4)&0xf;
+        code0=c+'0';
+        if (c > 9){
+            code0=c - 10 + 'A';
+        }
+        code2='\0';
+        encodedString+='%';
+        encodedString+=code0;
+        encodedString+=code1;
+        //encodedString+=code2;
+      }
+      yield();
+    }
+    return encodedString;
+    
+}
+
+unsigned char h2int(char c)
+{
+    if (c >= '0' && c <='9'){
+        return((unsigned char)c - '0');
+    }
+    if (c >= 'a' && c <='f'){
+        return((unsigned char)c - 'a' + 10);
+    }
+    if (c >= 'A' && c <='F'){
+        return((unsigned char)c - 'A' + 10);
+    }
+    return(0);
 }

@@ -4,10 +4,11 @@
 // villa.andrea@gmail.com
 
 // Compute the required size
-static const int sCONFIG_DOC_SIZE = 3*JSON_ARRAY_SIZE(4) + JSON_OBJECT_SIZE(7) + 256;
+//static const int sCONFIG_DOC_SIZE = 3*JSON_ARRAY_SIZE(4) + JSON_OBJECT_SIZE(7) + 256;
+static const int sCONFIG_DOC_SIZE = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(32) + 496;
   
 // Loads the configuration from a file
-void loadConfiguration(const char *filename, Config &config) {
+void loadConfigurationOld(const char *filename, Config &config) {
   // Open file for reading
   File file = FS_HANDLER.open(filename);
 
@@ -70,7 +71,7 @@ void loadConfiguration(const char *filename, Config &config) {
 }
 
 // Saves the configuration to a file
-void saveConfiguration(const char *filename, const Config &config) {
+void saveConfigurationOld(const char *filename, const Config &config) {
   // Delete existing file, otherwise the configuration is appended to the file
   FS_HANDLER.remove(filename);
 
@@ -109,6 +110,67 @@ void saveConfiguration(const char *filename, const Config &config) {
   subnet.add(config.subnet[1]);
   subnet.add(config.subnet[2]);
   subnet.add(config.subnet[3]);
+
+  // Serialize JSON to file
+  if (serializeJson(doc, file) == 0) {
+    Serial.println(F("Failed to write to file"));
+  }
+  
+  // Close the file
+  file.close();
+
+  printFile(filename);
+}
+
+
+// Loads the configuration from a file
+void loadConfiguration(const char *filename) {
+  // Open file for reading
+  File file = FS_HANDLER.open(filename);
+
+  // Allocate a temporary JsonDocument
+  // Don't forget to change the capacity to match your requirements.
+  // Use arduinojson.org/v6/assistant to compute the capacity.
+  StaticJsonDocument<sCONFIG_DOC_SIZE> doc;
+
+  // Deserialize the JSON document
+  DeserializationError error = deserializeJson(doc, file);
+  if (error){
+    Serial.println(F("Failed to read file, using default configuration"));
+    Serial.println(error.c_str());
+  }
+  else {
+    Serial.println(F("Deserializing configuration"));
+    // Get the JSON object.
+    JsonObject obj = doc[0];
+    wwws.deserialize(obj);
+  }
+  
+  // Close the file (Curiously, File's destructor doesn't close the file)
+  file.close();
+  
+  printFile(filename);
+}
+
+// Saves the configuration to a file
+void saveConfiguration(const char *filename) {
+  // Delete existing file, otherwise the configuration is appended to the file
+  FS_HANDLER.remove(filename);
+
+  // Open file for writing
+  File file = FS_HANDLER.open(filename, FILE_WRITE);
+  if (!file) {
+    Serial.println(F("Failed to create file"));
+    return;
+  }
+
+  // Allocate a temporary JsonDocument
+  // Don't forget to change the capacity to match your requirements.
+  // Use arduinojson.org/assistant to compute the capacity.
+  StaticJsonDocument<sCONFIG_DOC_SIZE> doc;
+  
+  JsonObject obj = doc.createNestedObject();
+  wwws.serialize(obj);
 
   // Serialize JSON to file
   if (serializeJson(doc, file) == 0) {
