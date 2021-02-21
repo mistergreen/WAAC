@@ -199,64 +199,82 @@ void setup()
 
   // Should load default config if run for the first time
   Serial.println(F("Loading configuration..."));
-  //loadConfiguration(configFile, config);
 
-  loadConfiguration(configFile);
-
-  // Set the IP from the configuration
-  //IPAddress ip(config.ip[0], config.ip[1], config.ip[2], config.ip[3]);
-  //IPAddress gateway(config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3]); 
-  //IPAddress subnet(config.subnet[0], config.subnet[1], config.subnet[2], config.subnet[3]);
-  uint8_t* storedIp = wwws.getLocalIP();
-  uint8_t* sn = wwws.getLocalSubnet();
-  uint8_t* gw = wwws.getLocalGW();
+  // If configuration loaded corretly then set IP else set AP mode
+  if (true == loadConfiguration(configFile))
+  {
+    // Set the IP from the configuration
+    uint8_t* storedIp = wwws.getLocalIP();
+    uint8_t* sn = wwws.getLocalSubnet();
+    uint8_t* gw = wwws.getLocalGW();
+    
+    IPAddress ip(storedIp[0],storedIp[1],storedIp[2],storedIp[3]);
+    IPAddress gateway(gw[0],gw[1],gw[2],gw[3]); 
+    IPAddress subnet(sn[0],sn[1],sn[2],sn[3]);
+    
+    //IPAddress primaryDNS(8, 8, 8, 8); //optional
+    //IPAddress secondaryDNS(8, 8, 4, 4); //optional
   
-  IPAddress ip(storedIp[0],storedIp[1],storedIp[2],storedIp[3]);
-  IPAddress gateway(gw[0],gw[1],gw[2],gw[3]); 
-  IPAddress subnet(sn[0],sn[1],sn[2],sn[3]);
+    //************ wifi *******************
+    // Static IP doesn't look like it works for the ESP32 at this point
+    //if (!WiFi.config(ip, gateway, subnet, primaryDNS, secondaryDNS)) {
   
-  //IPAddress primaryDNS(8, 8, 8, 8); //optional
-  //IPAddress secondaryDNS(8, 8, 4, 4); //optional
-
-
-  //************ wifi *******************
-  // Static IP doesn't look like it works for the ESP32 at this point
-  //if (!WiFi.config(ip, gateway, subnet, primaryDNS, secondaryDNS)) {
-
-  if (!WiFi.config(ip, gateway, subnet, gateway)) {
-    Serial.println("STA Failed to configure");
+    if (!WiFi.config(ip, gateway, subnet, gateway)) {
+      Serial.println("STA Failed to configure");
+    }
+  
+    Serial.print("Connecting to ");
+    Serial.println(wwws.getWiFiSSID());
+  
+    WiFi.begin(wwws.getWiFiSSID(), wwws.getWiFiPassword());
+    
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+      Serial.print(".");
+    }
+  
+    Serial.println("Connected to wifi");
+    printWifiStatus();
+  
+    // Load all stored devices.
+    loadDevices(devicesFile);
+  
+    // set up server for the rest of the sockets
+    server.begin();
+    
+    //set up upd first so it gets sockets #0
+    //wwws.begin(config.timeZone, config.ntpServer);
+    wwws.begin();
+   
+    //delay(10000);
+    
+    //sync time to NTP
+    wwws.syncNTP();
+    
+    Serial.print("memory ");
+    Serial.println(freeMemory());
   }
-
-  Serial.print("Connecting to ");
-  Serial.println(wwws.getWiFiSSID());
-
-  WiFi.begin(wwws.getWiFiSSID(), wwws.getWiFiPassword());
+  else
+  {
+    WiFi.mode(WIFI_AP);
+    if(!WiFi.softAPConfig(IPAddress(192, 168, 4, 1), IPAddress(192, 168, 4, 1), IPAddress(255, 255, 255, 0))){
+        Serial.println("AP Config Failed");
+    }
   
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
+    const char* ssid     = "ESP32-WAAC";
+    const char* password = "waac";
+
+    // Connect to Wi-Fi network with SSID and password
+    Serial.print("Setting AP (Access Point)…");
+    // Remove the password parameter, if you want the AP (Access Point) to be open
+    WiFi.softAP(ssid, password);
+    
+    IPAddress IP = WiFi.softAPIP();
+    Serial.print("AP IP address: ");
+    Serial.println(IP);
+    
+    server.begin();
   }
-
-  Serial.println("Connected to wifi");
-  printWifiStatus();
-
-  // Load all stored devices.
-  loadDevices(devicesFile);
-
-  // set up server for the rest of the sockets
-  server.begin();
-  
-  //set up upd first so it gets sockets #0
-  //wwws.begin(config.timeZone, config.ntpServer);
-  wwws.begin();
- 
-  //delay(10000);
-  
-  //sync time to NTP
-  wwws.syncNTP();
-  
-  Serial.print("memory ");
-  Serial.println(freeMemory());
 }
 
 
