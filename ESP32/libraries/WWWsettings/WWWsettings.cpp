@@ -877,10 +877,6 @@ void WWWsettings::deserialize(
 
     // The WiFi password.
     strcpy(WiFi_password, doc["WiFi_password"]);
-
-    //begin(timeZone, NTPServer);
-
-    //syncNTP();
 }
 
 
