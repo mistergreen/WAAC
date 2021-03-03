@@ -262,7 +262,7 @@ void setup()
     }
   
     const char* ssid     = "ESP32-WAAC";
-    const char* password = "waac";
+    const char* password = "aquarium";
 
     // Connect to Wi-Fi network with SSID and password
     Serial.print("Setting AP (Access Point)…");
