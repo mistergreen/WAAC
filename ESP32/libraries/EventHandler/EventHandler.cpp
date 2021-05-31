@@ -2,8 +2,10 @@
 * The scheduling class cpp file.
 */
 
-#include <TimeLib.h>
+//#include <TimeLib.h>
 #include "EventHandler.h"
+#include "WWWsettings.h"
+#include <ezTime.h>
 
 // The event string size is 9(hh:mm:ss,) + 9(hh:mm:ss,) + 8(dow) + 1 (string terminator) = 27
 #define EVENT_STRING_SIZE 27
@@ -68,8 +70,14 @@ float EventHandler::getEventPercentage()
                                             minuteDuration[inProgressEventId],
                                             secondDuration[inProgressEventId]);
 
+        // Get the settings instance.
+        WWWsettings* settings = WWWsettings::getinstance();
+
+        // Get the current time.
+        Timezone* now = settings->getTime();
+
         // Get the current time.        
-        long currentTime = convertToSeconds(::hour(),::minute(),::second());
+        long currentTime = convertToSeconds(now->hour(), now->minute(), now->second());
 
         percentage = (float)(currentTime-eventTime) / (float)evenDuration;
 
@@ -112,7 +120,14 @@ bool EventHandler::isEventInProgress()
               
         //Serial.println("isDay of event");
         // ::hour() get time from Time.h
-        long currentTime = convertToSeconds(::hour(),::minute(),::second());
+        
+        // Get the settings instance.
+        WWWsettings* settings = WWWsettings::getinstance();
+
+        // Get the current time.
+        Timezone* now = settings->getTime();
+
+        long currentTime = convertToSeconds(now->hour(), now->minute(), now->second());
 
         // Get start time
         long eventTime = convertToSeconds(hour[inProgressEventId],
@@ -148,7 +163,13 @@ bool EventHandler::isEventInProgress()
         if(dow[i][::weekday()-1] == '1') {
             //Serial.println("isDay of event");
             // ::hour() get time from Time.h
-            long currentTime = convertToSeconds(::hour(),::minute(),::second());
+            // Get the settings instance.
+            WWWsettings* settings = WWWsettings::getinstance();
+
+            // Get the current time.
+            Timezone* now = settings->getTime();
+
+            long currentTime = convertToSeconds(now->hour(), now->minute(), now->second());
             // Get start time
             long eventTime = convertToSeconds(hour[i],minute[i],second[i]);
             // Calculate end time.

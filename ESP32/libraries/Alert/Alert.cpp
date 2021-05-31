@@ -9,7 +9,6 @@
 #include "Alert.h"
 #include <Device.h>
 #include <DeviceDelegate.h>
-#include <TimeLib.h>
 #include <WWWsettings.h>
 
 static char server[] = "www.2noodles.com";
@@ -80,12 +79,18 @@ void Alert::loop()
             if(dependentDeviceId > 0) { //if there's a dependent device
                 //find dependent device - call DeviceDelegate
                 boolean temp = dependentDeviceObject->getDeviceState();
+
+                // Get the settings instance.
+                WWWsettings* settings = WWWsettings::getinstance();
                 
-                long currentTime = convertToSeconds(::hour(),::minute(),::second());
+                // Get the current time.
+                Timezone* now = settings->getTime();
+
+                long currentTime = convertToSeconds(now->hour(),now->minute(),now->second());
                 
                 if(temp == deviceState && intervalTime < currentTime ) {
                     
-                    WWWsettings::globalEmail(getSubject(), getMessage());
+                    settings->email(getSubject(), getMessage());
                     intervalTime = interval + currentTime;
                 } else if (temp != deviceState && intervalTime < currentTime) {
                     //don't reset right away

@@ -12,7 +12,6 @@
 #include "PCAhelper.h"
 #include <Wire.h>
 #include <DeviceDelegate.h>
-#include <TimeLib.h>
 
 AdaFruitPWM8::AdaFruitPWM8() : PWM4()
 {

@@ -25,7 +25,7 @@ void alertAjaxOutput(WiFiClient client, Device *device) {
 void saveAlert(Device *device) {
         //webParser.clearBuffer(param_value, queryMax);
         //webParser.parseQuery(queryBuffer, "email", param_value);
-        static_cast<Alert*>(device)->setEmail(wwws.getToEmail());
+        static_cast<Alert*>(device)->setEmail(wwws->getToEmail());
        
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "subject", param_value);
@@ -109,6 +109,6 @@ void createAlert() {
         webParser.parseQuery(queryBuffer, "message", param_value);
         static_cast<Alert*>(temp)->setMessage(param_value);
         
-        static_cast<Alert*>(temp)->setEmail(wwws.getToEmail());
+        static_cast<Alert*>(temp)->setEmail(wwws->getToEmail());
 
 }

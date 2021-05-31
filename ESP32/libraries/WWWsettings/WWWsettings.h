@@ -10,7 +10,8 @@
 #include <WiFiClient.h>
 #include <Arduino.h>
 #include <WiFiUdp.h>
-#include <TimeLib.h>
+//#include <TimeLib.h>
+#include <ezTime.h>
 #include "Storable.h"
 
 #define NTP_PACKET_SIZE 48
@@ -19,18 +20,24 @@ class WWWsettings: public Storable
 {
   public:
     WWWsettings();
+
+    // It resturns the static instance of the class.
+    static WWWsettings* getinstance();
+
+    // It initializes the class.
     void begin();
 
     // Class setup with parameters passing
     void begin(
         // The time zone to set.
-        int time_zone,
+        char * time_zone,
         // The ntp server name.
-        char *ntp_server);
+        char * ntp_server);
 
     void check();
    
     void email(char *in_subject, char *in_message);
+
     //byte emailSMTP(char *in_subject, char *in_message);
     boolean updateDDNS();
 
@@ -83,8 +90,8 @@ class WWWsettings: public Storable
     char * getNTPServer();
     void setNTPServer(char *in_ip);
     
-    int getTimeZone();
-    void setTimeZone(int zone);
+    char* getTimeZone();
+    void setTimeZone(char* zone);
     
     long getInterval();
     void setInterval(long in_time);
@@ -145,6 +152,9 @@ class WWWsettings: public Storable
     void deserialize(
         // Input Json object pointer containing the class information.
         JsonObject& doc);
+
+    // It returns the current time in use.
+    Timezone* getTime();
     
   private:
    
@@ -167,12 +177,12 @@ class WWWsettings: public Storable
     long intervalTime;
     long previousTime;
     unsigned long waitTime;
-    long twoAM;
-    int timeZone;
+    char timeZoneName[45];
+    Timezone timeZone;
     uint8_t dayLightSaving;
     
-    uint8_t hour;
-    uint8_t minute;
+    uint8_t eventHour;
+    uint8_t eventMinute;
     
     boolean isEmailIp;
     boolean isDDNSIp;

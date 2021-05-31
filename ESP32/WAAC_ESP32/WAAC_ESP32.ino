@@ -21,7 +21,7 @@
 
 #include <SPI.h>
 #include <Servo.h>
-#include <TimeLib.h>
+#include <ezTime.h>
 #include <Wire.h>
 
 
@@ -121,7 +121,7 @@ struct Config {
   int ip[4];
   int gateway[4];
   int subnet[4];
-  int timeZone;
+  char timeZone[45];
   char ntpServer[32];
 };
 
@@ -138,7 +138,7 @@ int timeArray[6];
 WebParser webParser;
 
 File webFile;
-WWWsettings wwws;
+WWWsettings* wwws;
 
 /************* website login **************/
 
@@ -193,6 +193,8 @@ void setup()
   }
   Serial.println("SUCCESS - Found index.htm file.");
 
+  wwws = WWWsettings::getinstance();
+
   // Dump config file
   Serial.println(F("Print config file..."));
   printFile(configFile);
@@ -204,9 +206,9 @@ void setup()
   if (true == loadConfiguration(configFile))
   {
     // Set the IP from the configuration
-    uint8_t* storedIp = wwws.getLocalIP();
-    uint8_t* sn = wwws.getLocalSubnet();
-    uint8_t* gw = wwws.getLocalGW();
+    uint8_t* storedIp = wwws->getLocalIP();
+    uint8_t* sn = wwws->getLocalSubnet();
+    uint8_t* gw = wwws->getLocalGW();
     
     IPAddress ip(storedIp[0],storedIp[1],storedIp[2],storedIp[3]);
     IPAddress gateway(gw[0],gw[1],gw[2],gw[3]); 
@@ -224,9 +226,9 @@ void setup()
     }
   
     Serial.print("Connecting to ");
-    Serial.println(wwws.getWiFiSSID());
+    Serial.println(wwws->getWiFiSSID());
   
-    WiFi.begin(wwws.getWiFiSSID(), wwws.getWiFiPassword());
+    WiFi.begin(wwws->getWiFiSSID(), wwws->getWiFiPassword());
     
     while (WiFi.status() != WL_CONNECTED) {
       delay(500);
@@ -241,15 +243,14 @@ void setup()
   
     // set up server for the rest of the sockets
     server.begin();
-    
-    //set up upd first so it gets sockets #0
-    //wwws.begin(config.timeZone, config.ntpServer);
-    wwws.begin();
+
+    // set up settings class
+    wwws->begin();
    
     //delay(10000);
     
     //sync time to NTP
-    wwws.syncNTP();
+    wwws->syncNTP();
     
     Serial.print("memory ");
     Serial.println(freeMemory());
@@ -320,10 +321,8 @@ void loop()
  
   //loop through devices
   deviceDelegate.loopDevices();
-   //Serial.println("y");
-  //www settings
-  wwws.check();
-  //Serial.println("z");
+  wwws->check();
+
   // listen for incoming clients
   WiFiClient client = server.available();
  
@@ -578,6 +577,7 @@ void parseReceivedRequest(WiFiClient client)
     // ***************** list devices in index.htm  ************************************   
     else if(webParser.contains(queryBuffer, "devicelist=1")) 
     {
+      Timezone* currentTime = wwws->getTime();
       
       webParser.clearBuffer(param_value, queryMax);
       client.println(F("HTTP/1.1 200 OK"));
@@ -588,19 +588,19 @@ void parseReceivedRequest(WiFiClient client)
       client.println(F("<?xml version = \"1.0\" encoding=\"UTF-8\"?>"));
       client.print(F("<list>"));
       client.print(F("<time><hour>"));
-      client.print(hour());
+      client.print(currentTime->hour());
       client.print(F("</hour><minute>"));
-      client.print(minute());
+      client.print(currentTime->minute());
       client.print(F("</minute><second>"));
-      client.print(second());
+      client.print(currentTime->second());
       client.print(F("</second><weekday>"));
-      client.print(dayName[weekday()]);
+      client.print(dayName[currentTime->weekday()]);
       client.print(F("</weekday><month>"));
-      client.print(monthName[month()]);
+      client.print(monthName[currentTime->month()]);
       client.print(F("</month><day>"));
-      client.print(day());
+      client.print(currentTime->day());
       client.print(F("</day><year>"));
-      client.print(year());
+      client.print(currentTime->year());
       client.println(F("</year></time>"));
       client.print(F("<memory>"));
       client.print(freeMemory());
