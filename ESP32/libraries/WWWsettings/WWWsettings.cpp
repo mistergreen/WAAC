@@ -12,16 +12,24 @@
 #include <rBase64.h>
 
 //used for NTP sync function
-WWWsettings* WWWsettings::thisClassObj;
+WWWsettings* WWWsettings::thisClassObj = NULL;
 //static member
 char WWWsettings::toEmail[55] = {};
+
+WWWsettings* WWWsettings::getinstance()
+{
+    if (thisClassObj == NULL)
+    {
+        thisClassObj = new WWWsettings();
+    }
+
+    return thisClassObj;
+}
 
 WWWsettings::WWWsettings()
 {
     localPort = 8888;
-    timeZone  = -5;
-    strcpy(NTPServer, "time.google.com"); //defaul NTP
-    twoAM = convertToSeconds(18,0,0);
+
     syncOnce = false;
     //strcpy(toEmail, "");
     dayLightSaving = 0;
@@ -50,8 +58,8 @@ void WWWsettings::begin()
     isEmailIp = false;
     intervalTime = 0;
     previousTime = 0;
-    hour = 12;
-    minute = 0;
+    eventHour = 12;
+    eventMinute = 0;
     interval = 0;
     
     //NTPio get split up in timeServerIp[] - get sent to sendNTPacket
@@ -60,21 +68,24 @@ void WWWsettings::begin()
     //timeServerIp(ipArray[0], ipArray[1], ipArray[2], ipArray[3]);
     //need to only do it once so you don't eat up all of the sockets
     Udp.begin(localPort);
+
+    // Wait time to sync.
+    waitForSync();
 }
 
 void WWWsettings::begin(
     // The time zone to set.
-    int time_zone,
+    char * time_zone,
     // The ntp server name.
     char *ntp_server) {
-        timeZone = time_zone;
-        strcpy(NTPServer, ntp_server); 
+        setNTPServer(ntp_server);
+        setTimeZone (time_zone);
         isDDNSIp = false;
         isEmailIp = false;
         intervalTime = 0;
         previousTime = 0;
-        hour = 12;
-        minute = 0;
+        eventHour = 12;
+        eventMinute = 0;
         interval = 0;
         
         //timeServerIp(ipArray[0], ipArray[1], ipArray[2], ipArray[3]);
@@ -83,12 +94,9 @@ void WWWsettings::begin(
     }
 
 void WWWsettings::syncNTP() {
-    thisClassObj = this;
-    Serial.println("waiting for sync");
-    //sync expects a callback function, not method, so a static method is used
-    setSyncProvider(globalGetNTPTime);
-    setSyncInterval(twoAM);
-    
+    // Set again the location, it network was missing the location may not be properly set.
+    timeZone.setLocation(timeZoneName);
+    updateNTP();
 }
 
 void WWWsettings::splitIP(char *inString, uint8_t *inArray) {
@@ -111,64 +119,13 @@ void WWWsettings::splitIP(char *inString, uint8_t *inArray) {
 }
 
 time_t WWWsettings::testNTP() {
-    time_t time = getNtpTime();
-    setTime(time);
-    return time;
+
+    updateNTP();
+
+    //time_t time = getNtpTime();
+    //setTime(time);
+    return now();
 }
-
-/*-------- NTP code ----------*/
-
-time_t WWWsettings::getNtpTime()
-{
-    Udp.flush(); // discard any previously received packets
-    Serial.println("Transmit NTP Request");
-    sendNTPpacket(NTPServer);
-    uint32_t beginWait = millis();
- while (millis() - beginWait < 1500) {
-    int size = Udp.parsePacket();
-    if (size >= NTP_PACKET_SIZE) {
-        Serial.println("Receive NTP Response");
-        Udp.read(packetBuffer, NTP_PACKET_SIZE);  // read packet into the buffer
-        unsigned long secsSince1900;
-        // convert four bytes starting at location 40 to a long integer
-        secsSince1900 =  (unsigned long)packetBuffer[40] << 24;
-        secsSince1900 |= (unsigned long)packetBuffer[41] << 16;
-        secsSince1900 |= (unsigned long)packetBuffer[42] << 8;
-        secsSince1900 |= (unsigned long)packetBuffer[43];
-        return secsSince1900 - 2208988800UL + (timeZone + dayLightSaving) * SECS_PER_HOUR;
-    }
- }
-        Serial.println("No NTP Response");
-        return 0; // return 0 if unable to get the time
-
-    
-}
-
-// send an NTP request to the time server at the given address
-
-void WWWsettings::sendNTPpacket(char *address)
-{
-    // set all bytes in the buffer to 0
-    memset(packetBuffer, 0, NTP_PACKET_SIZE);
-    // Initialize values needed to form NTP request
-    // (see URL above for details on the packets)
-    packetBuffer[0] = 0b11100011;   // LI, Version, Mode
-    packetBuffer[1] = 0;     // Stratum, or type of clock
-    packetBuffer[2] = 6;     // Polling Interval
-    packetBuffer[3] = 0xEC;  // Peer Clock Precision
-    // 8 bytes of zero for Root Delay & Root Dispersion
-    packetBuffer[12]  = 49;
-    packetBuffer[13]  = 0x4E;
-    packetBuffer[14]  = 49;
-    packetBuffer[15]  = 52;
-    // all NTP fields have been given values, now
-    // you can send a packet requesting a timestamp:
-    Udp.beginPacket(address, 123); //NTP requests are to port 123
-    Udp.write(packetBuffer, NTP_PACKET_SIZE);
-    Udp.endPacket();
-}
-
-
 
 
 void WWWsettings::check()
@@ -176,7 +133,9 @@ void WWWsettings::check()
    //**** add non blocking code
     //Serial.println("m ");
     //Serial.println(toEmail);
-    long currentTime = convertToSeconds(::hour(),::minute(),::second());
+
+
+    long currentTime = convertToSeconds(timeZone.hour(), timeZone.minute(), timeZone.second());
    // Serial.println(currentTime);
     //Serial.println(interval);
     
@@ -216,16 +175,6 @@ void WWWsettings::check()
         }//every second
         
     }// interval exists
-    /*
-     //don't need it. the tiem lib syncs for you with setSyncInterval(interval); in secs. Default is 5min?
-    if(currentTime == twoAM && syncOnce == false) {
-        //sync at 2am
-        setSyncProvider(globalGetNTPTime);
-        syncOnce = true;
-    } else if(currentTime >= twoAM && syncOnce == true) {
-        syncOnce = false;
-    }
-     */
     
     if (client.available()) {
         char c = client.read();
@@ -296,9 +245,6 @@ void WWWsettings::email(char *in_subject, char *in_message) {
         Serial.print(c);
 
     }
-
-
-
    
     Serial.println("disconnecting.");
     
@@ -477,23 +423,23 @@ char * WWWsettings::getSMTP()
 
 
 void WWWsettings::setEvent(uint8_t in_hour, uint8_t in_minute) {
-    hour = in_hour;
-    minute = in_minute;
+    eventHour = in_hour;
+    eventMinute = in_minute;
     
-    interval = convertToSeconds(hour,minute,0);
+    interval = convertToSeconds(eventHour,eventMinute,0);
 
 }
 
 uint8_t WWWsettings::getHour() {
-    return hour;
+    return eventHour;
 }
 
 uint8_t WWWsettings::getMinute() {
-    return minute;
+    return eventMinute;
 }
 
 void WWWsettings::getEvent(char *string) {
-    sprintf(string, "%02d:%02d", hour,minute);
+    sprintf(string, "%02d:%02d", eventHour,eventMinute);
 }
 
 //don't declare static in method cpp, only h
@@ -542,16 +488,24 @@ char * WWWsettings::getNTPServer() {
 
 void WWWsettings::setNTPServer(char *in_ip){
     strcpy(NTPServer, in_ip);
+
+    setServer(NTPServer);
+
     //setup and copy-  get rid of ip
     //splitIP(NTPServer, timeServerIp);
 }
 
-int WWWsettings::getTimeZone() {
-    return timeZone;
+char * WWWsettings::getTimeZone() {
+    return timeZoneName;
 }
 
-void WWWsettings::setTimeZone(int zone){
-    timeZone = zone;
+void WWWsettings::setTimeZone(char * zone){
+    strncpy(timeZoneName, zone, 45);
+    timeZone.setLocation(timeZoneName);
+}
+
+Timezone* WWWsettings::getTime(){
+    return &timeZone;
 }
 
 
@@ -789,11 +743,11 @@ void WWWsettings::serialize(JsonObject& doc)
     doc["networkAddress"] = networkAddress;
     doc["networkHost"] = networkHost;
     
-    doc["timeZone"] = timeZone;
+    doc["timeZone"] = timeZoneName;
     doc["dayLightSaving"] = dayLightSaving;
     
-    doc["hour"] = hour;
-    doc["minute"] = minute;
+    doc["hour"] = eventHour;
+    doc["minute"] = eventMinute;
 
     doc["isEmailIp"] = isEmailIp;
     doc["isDDNSIp"] = isDDNSIp;
@@ -843,11 +797,12 @@ void WWWsettings::deserialize(
     strcpy(networkAddress, doc["networkAddress"]);
     strcpy(networkHost, doc["networkHost"]);
 
-    timeZone = doc["timeZone"];
+    strcpy(timeZoneName, doc["timeZone"]);
+
     dayLightSaving = doc["dayLightSaving"];
     
-    hour = doc["hour"];
-    minute = doc["minute"];
+    eventHour = doc["hour"];
+    eventMinute = doc["minute"];
 
     isEmailIp = doc["isEmailIp"];
     isDDNSIp = doc["isDDNSIp"];
@@ -877,6 +832,10 @@ void WWWsettings::deserialize(
 
     // The WiFi password.
     strcpy(WiFi_password, doc["WiFi_password"]);
+
+    setServer(NTPServer);
+
+    timeZone.setLocation(timeZoneName);
 }
 
 

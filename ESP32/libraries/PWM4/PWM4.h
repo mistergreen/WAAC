@@ -15,7 +15,6 @@
 #include "Device.h"
 #include "EventHandler.h"
 #include "DeviceDelegate.h"
-#include "TimeLib.h"
 
 class PWM4 : public Device, public EventHandler, public Storable
 {

@@ -10,7 +10,6 @@
 #include "ServoMotor.h"
 #include "DeviceDelegate.h"
 #include "Servo.h"
-#include <TimeLib.h>
 
 ServoMotor::ServoMotor() : Device(), EventHandler()
 {

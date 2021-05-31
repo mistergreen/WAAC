@@ -4,7 +4,6 @@
 // villa.andrea@gmail.com
 
 // Compute the required size
-//static const int sCONFIG_DOC_SIZE = 3*JSON_ARRAY_SIZE(4) + JSON_OBJECT_SIZE(7) + 256;
 static const int sCONFIG_DOC_SIZE = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(32) + 496;
 
 // Loads the configuration from a file
@@ -32,7 +31,7 @@ bool loadConfiguration(const char *filename) {
     Serial.println(F("Deserializing configuration"));
     // Get the JSON object.
     JsonObject obj = doc[0];
-    wwws.deserialize(obj);
+    wwws->deserialize(obj);
     retVal = true;
   }
   
@@ -62,7 +61,7 @@ void saveConfiguration(const char *filename) {
   StaticJsonDocument<sCONFIG_DOC_SIZE> doc;
   
   JsonObject obj = doc.createNestedObject();
-  wwws.serialize(obj);
+  wwws->serialize(obj);
 
   // Serialize JSON to file
   if (serializeJson(doc, file) == 0) {
