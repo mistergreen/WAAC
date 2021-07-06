@@ -123,4 +123,7 @@ void Relay::deserialize(
     invert = doc["invert"];
     
     pinMode(pin, OUTPUT);
+
+    switchOff();
+    deviceState = false;
 }
