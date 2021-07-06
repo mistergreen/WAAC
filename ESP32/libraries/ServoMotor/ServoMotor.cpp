@@ -104,6 +104,10 @@ void ServoMotor::switchOn()
     Serial.println(moveAngle);
     servo.write(moveAngle);
     delay(secondDuration);
+
+    // Set a second time for safety
+    delay(secondDuration);
+    servo.write(stopAngle);
     Serial.print("Setting angle: ");
     Serial.println(stopAngle);
     servo.write(stopAngle);
