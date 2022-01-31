@@ -1,5 +1,5 @@
-// ArduinoJson - arduinojson.org
-// Copyright Benoit Blanchon 2014-2020
+// ArduinoJson - https://arduinojson.org
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #include <ArduinoJson.h>
@@ -69,4 +69,14 @@ TEST_CASE("JsonObject::remove()") {
     REQUIRE("{\"a\":0,\"c\":2}" == result);
   }
 #endif
+
+  SECTION("remove by key on unbound reference") {
+    JsonObject unboundObject;
+    unboundObject.remove("key");
+  }
+
+  SECTION("remove by iterator on unbound reference") {
+    JsonObject unboundObject;
+    unboundObject.remove(unboundObject.begin());
+  }
 }

@@ -61,6 +61,7 @@
 #include "RelayMCP.h" 
 #include "RelayPCA.h" 
 #include "ServoMotor.h"
+#include "StepperMotor.h"
 #include "Shunt.h" 
 #include "Video.h"
 #include "WebParser.h"
@@ -76,7 +77,7 @@ const char *monthName[13] = {"", "January", "February", "March", "April", "May",
 
 /************* Device menu **************/
 // { device type (must be unique & same as classType/Name), description, html form to configure it }
-const char *deviceMenu[14][3] = {
+const char *deviceMenu[15][3] = {
                         {"AdaFruitPWM8","PCA9685 PWM 12-bit, 8 channel", "adapwm8.htm"},
                         {"Alert","Email Alerts", "alert.htm"},
                         {"Analog","Analog Sensors", "analog.htm"},
@@ -88,8 +89,9 @@ const char *deviceMenu[14][3] = {
                         {"Relay","Native Digital out", "relay.htm"},
                         {"RelayPCA","PCA9685 Digital out", "relay_i2c.htm"},
                         {"RelayMCP","MCP23017 Digital out", "relay_i2c.htm"},
-                        {"ServoMotor","Servo Motor out", "servo.htm"},
-                        {"Video", "Yout-tube Stream", "video.htm"},
+                        {"ServoMotor","Servo Motor", "servo.htm"},
+                        {"StepperMotor","Stepper Motor", "stepper.htm"},
+                        {"Video", "You-tube Stream", "video.htm"},
                         {NULL}
                        };
 
@@ -896,6 +898,11 @@ void parseReceivedRequest(WiFiClient client)
                servoAjaxOutput(client, device);
                 
             }
+            else if(webParser.compare(param_value, "StepperMotor")) 
+            {
+               stepperAjaxOutput(client, device);
+                
+            }
           }
             
           //menus
@@ -1021,6 +1028,9 @@ void parseReceivedRequest(WiFiClient client)
              saveServoMotor(device);
             
           }
+          else if(webParser.compare(param_value, "StepperMotor")) {
+             saveStepperMotor(device);
+          }
           //turn / reset devices back
           device->setSuspendTime(false);
           
@@ -1068,6 +1078,9 @@ void parseReceivedRequest(WiFiClient client)
           }
           else if(webParser.compare(param_value, "ServoMotor")) {
               createServoMotor();
+          }
+          else if(webParser.compare(param_value, "StepperMotor")) {
+              createStepperMotor();
           }
         }
         

@@ -1,8 +1,10 @@
-// ArduinoJson - arduinojson.org
-// Copyright Benoit Blanchon 2014-2020
+// ArduinoJson - https://arduinojson.org
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #pragma once
+
+#include <Arduino.h>
 
 namespace ARDUINOJSON_NAMESPACE {
 
@@ -43,7 +45,8 @@ struct BoundedReader<const __FlashStringHelper*, void> {
 
   size_t readBytes(char* buffer, size_t length) {
     size_t available = static_cast<size_t>(_end - _ptr);
-    if (available < length) length = available;
+    if (available < length)
+      length = available;
     memcpy_P(buffer, _ptr, length);
     _ptr += length;
     return length;

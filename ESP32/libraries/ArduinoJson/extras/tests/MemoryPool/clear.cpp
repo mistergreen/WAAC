@@ -1,8 +1,9 @@
-// ArduinoJson - arduinojson.org
-// Copyright Benoit Blanchon 2014-2020
+// ArduinoJson - https://arduinojson.org
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #include <ArduinoJson/Memory/MemoryPool.hpp>
+#include <ArduinoJson/Strings/StringAdapters.hpp>
 #include <catch.hpp>
 
 using namespace ARDUINOJSON_NAMESPACE;
@@ -21,8 +22,8 @@ TEST_CASE("MemoryPool::clear()") {
   }
 
   SECTION("Discards allocated strings") {
-    pool.allocFrozenString(10);
-    REQUIRE(pool.size() > 0);
+    pool.saveString(adaptString(const_cast<char *>("123456789")));
+    REQUIRE(pool.size() == 10);
 
     pool.clear();
 

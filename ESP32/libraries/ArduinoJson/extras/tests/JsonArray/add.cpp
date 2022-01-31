@@ -1,5 +1,5 @@
-// ArduinoJson - arduinojson.org
-// Copyright Benoit Blanchon 2014-2020
+// ArduinoJson - https://arduinojson.org
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #include <ArduinoJson.h>
@@ -102,13 +102,13 @@ TEST_CASE("JsonArray::add()") {
 
   SECTION("should duplicate char*") {
     array.add(const_cast<char*>("world"));
-    const size_t expectedSize = JSON_ARRAY_SIZE(1) + JSON_STRING_SIZE(6);
+    const size_t expectedSize = JSON_ARRAY_SIZE(1) + JSON_STRING_SIZE(5);
     REQUIRE(expectedSize == doc.memoryUsage());
   }
 
   SECTION("should duplicate std::string") {
     array.add(std::string("world"));
-    const size_t expectedSize = JSON_ARRAY_SIZE(1) + JSON_STRING_SIZE(6);
+    const size_t expectedSize = JSON_ARRAY_SIZE(1) + JSON_STRING_SIZE(5);
     REQUIRE(expectedSize == doc.memoryUsage());
   }
 

@@ -1,5 +1,5 @@
-# ArduinoJson - arduinojson.org
-# Copyright Benoit Blanchon 2014-2020
+# ArduinoJson - https://arduinojson.org
+# Copyright © 2014-2022, Benoit BLANCHON
 # MIT License
 
 add_executable(JsonDocumentTests
@@ -9,14 +9,22 @@ add_executable(JsonDocumentTests
 	containsKey.cpp
 	createNested.cpp
 	DynamicJsonDocument.cpp
+	ElementProxy.cpp
 	isNull.cpp
+	MemberProxy.cpp
 	nesting.cpp
+	overflowed.cpp
 	remove.cpp
 	shrinkToFit.cpp
 	size.cpp
 	StaticJsonDocument.cpp
 	subscript.cpp
+	swap.cpp
 )
 
-target_link_libraries(JsonDocumentTests catch)
 add_test(JsonDocument JsonDocumentTests)
+
+set_tests_properties(JsonDocument
+	PROPERTIES
+		LABELS 		"Catch"
+)

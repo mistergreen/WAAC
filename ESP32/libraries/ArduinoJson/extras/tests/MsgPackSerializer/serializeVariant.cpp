@@ -1,5 +1,5 @@
-// ArduinoJson - arduinojson.org
-// Copyright Benoit Blanchon 2014-2020
+// ArduinoJson - https://arduinojson.org
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #include <ArduinoJson.h>
@@ -31,7 +31,7 @@ static void checkVariant(T value, const std::string& expected) {
 }
 
 TEST_CASE("serialize MsgPack value") {
-  SECTION("undefined") {
+  SECTION("unbound") {
     checkVariant(JsonVariant(), "\xC0");  // we represent undefined as nil
   }
 
@@ -46,8 +46,14 @@ TEST_CASE("serialize MsgPack value") {
   }
 
   SECTION("positive fixint") {
-    checkVariant(0, "\x00");
-    checkVariant(127, "\x7F");
+    SECTION("signed") {
+      checkVariant(0, "\x00");
+      checkVariant(127, "\x7F");
+    }
+    SECTION("unsigned") {
+      checkVariant(0U, "\x00");
+      checkVariant(127U, "\x7F");
+    }
   }
 
   SECTION("uint 8") {

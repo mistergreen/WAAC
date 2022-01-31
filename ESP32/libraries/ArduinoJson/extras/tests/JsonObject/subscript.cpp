@@ -1,5 +1,5 @@
-// ArduinoJson - arduinojson.org
-// Copyright Benoit Blanchon 2014-2020
+// ArduinoJson - https://arduinojson.org
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #include <ArduinoJson.h>
@@ -48,7 +48,6 @@ TEST_CASE("JsonObject::operator[]") {
     REQUIRE(true == obj["hello"].is<const char*>());
     REQUIRE(false == obj["hello"].is<long>());
     REQUIRE(std::string("h3110") == obj["hello"].as<const char*>());
-    REQUIRE(std::string("h3110") == obj["hello"].as<char*>());  // <- short hand
   }
 
   SECTION("array") {
@@ -107,43 +106,43 @@ TEST_CASE("JsonObject::operator[]") {
 
   SECTION("should duplicate char* value") {
     obj["hello"] = const_cast<char*>("world");
-    const size_t expectedSize = JSON_OBJECT_SIZE(1) + JSON_STRING_SIZE(6);
+    const size_t expectedSize = JSON_OBJECT_SIZE(1) + JSON_STRING_SIZE(5);
     REQUIRE(expectedSize == doc.memoryUsage());
   }
 
   SECTION("should duplicate char* key") {
     obj[const_cast<char*>("hello")] = "world";
-    const size_t expectedSize = JSON_OBJECT_SIZE(1) + JSON_STRING_SIZE(6);
+    const size_t expectedSize = JSON_OBJECT_SIZE(1) + JSON_STRING_SIZE(5);
     REQUIRE(expectedSize == doc.memoryUsage());
   }
 
   SECTION("should duplicate char* key&value") {
     obj[const_cast<char*>("hello")] = const_cast<char*>("world");
-    const size_t expectedSize = JSON_OBJECT_SIZE(1) + 2 * JSON_STRING_SIZE(6);
+    const size_t expectedSize = JSON_OBJECT_SIZE(1) + 2 * JSON_STRING_SIZE(5);
     REQUIRE(expectedSize <= doc.memoryUsage());
   }
 
   SECTION("should duplicate std::string value") {
     obj["hello"] = std::string("world");
-    const size_t expectedSize = JSON_OBJECT_SIZE(1) + JSON_STRING_SIZE(6);
+    const size_t expectedSize = JSON_OBJECT_SIZE(1) + JSON_STRING_SIZE(5);
     REQUIRE(expectedSize == doc.memoryUsage());
   }
 
   SECTION("should duplicate std::string key") {
     obj[std::string("hello")] = "world";
-    const size_t expectedSize = JSON_OBJECT_SIZE(1) + JSON_STRING_SIZE(6);
+    const size_t expectedSize = JSON_OBJECT_SIZE(1) + JSON_STRING_SIZE(5);
     REQUIRE(expectedSize == doc.memoryUsage());
   }
 
   SECTION("should duplicate std::string key&value") {
     obj[std::string("hello")] = std::string("world");
-    const size_t expectedSize = JSON_OBJECT_SIZE(1) + 2 * JSON_STRING_SIZE(6);
+    const size_t expectedSize = JSON_OBJECT_SIZE(1) + 2 * JSON_STRING_SIZE(5);
     REQUIRE(expectedSize <= doc.memoryUsage());
   }
 
   SECTION("should duplicate a non-static JsonString key") {
     obj[JsonString("hello", false)] = "world";
-    const size_t expectedSize = JSON_OBJECT_SIZE(1) + JSON_STRING_SIZE(6);
+    const size_t expectedSize = JSON_OBJECT_SIZE(1) + JSON_STRING_SIZE(5);
     REQUIRE(expectedSize == doc.memoryUsage());
   }
 
@@ -189,7 +188,7 @@ TEST_CASE("JsonObject::operator[]") {
 
     obj["hello"] = vla;
 
-    REQUIRE(std::string("world") == obj["hello"].as<char*>());
+    REQUIRE(std::string("world") == obj["hello"].as<const char*>());
   }
 
   SECTION("obj.set(VLA, str)") {
@@ -209,7 +208,7 @@ TEST_CASE("JsonObject::operator[]") {
 
     obj["hello"].set(vla);
 
-    REQUIRE(std::string("world") == obj["hello"].as<char*>());
+    REQUIRE(std::string("world") == obj["hello"].as<const char*>());
   }
 
   SECTION("obj[VLA]") {

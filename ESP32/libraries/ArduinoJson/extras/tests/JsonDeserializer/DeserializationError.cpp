@@ -1,5 +1,5 @@
-// ArduinoJson - arduinojson.org
-// Copyright Benoit Blanchon 2014-2020
+// ArduinoJson - https://arduinojson.org
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #include <ArduinoJson.h>
@@ -11,14 +11,14 @@ void testStringification(DeserializationError error, std::string expected) {
 
 void testBoolification(DeserializationError error, bool expected) {
   // DeserializationError on left-hand side
-  CHECK(error == expected);
-  CHECK(error != !expected);
-  CHECK(!error == !expected);
+  CHECK(bool(error) == expected);
+  CHECK(bool(error) != !expected);
+  CHECK(!bool(error) == !expected);
 
   // DeserializationError on right-hand side
-  CHECK(expected == error);
-  CHECK(!expected != error);
-  CHECK(!expected == !error);
+  CHECK(expected == bool(error));
+  CHECK(!expected != bool(error));
+  CHECK(!expected == !bool(error));
 }
 
 #define TEST_STRINGIFICATION(symbol) \
@@ -30,20 +30,20 @@ void testBoolification(DeserializationError error, bool expected) {
 TEST_CASE("DeserializationError") {
   SECTION("c_str()") {
     TEST_STRINGIFICATION(Ok);
-    TEST_STRINGIFICATION(TooDeep);
-    TEST_STRINGIFICATION(NoMemory);
-    TEST_STRINGIFICATION(InvalidInput);
+    TEST_STRINGIFICATION(EmptyInput);
     TEST_STRINGIFICATION(IncompleteInput);
-    TEST_STRINGIFICATION(NotSupported);
+    TEST_STRINGIFICATION(InvalidInput);
+    TEST_STRINGIFICATION(NoMemory);
+    TEST_STRINGIFICATION(TooDeep);
   }
 
   SECTION("as boolean") {
     TEST_BOOLIFICATION(Ok, false);
-    TEST_BOOLIFICATION(TooDeep, true);
-    TEST_BOOLIFICATION(NoMemory, true);
-    TEST_BOOLIFICATION(InvalidInput, true);
+    TEST_BOOLIFICATION(EmptyInput, true);
     TEST_BOOLIFICATION(IncompleteInput, true);
-    TEST_BOOLIFICATION(NotSupported, true);
+    TEST_BOOLIFICATION(InvalidInput, true);
+    TEST_BOOLIFICATION(NoMemory, true);
+    TEST_BOOLIFICATION(TooDeep, true);
   }
 
   SECTION("ostream DeserializationError") {
@@ -58,13 +58,6 @@ TEST_CASE("DeserializationError") {
     REQUIRE(s.str() == "InvalidInput");
   }
 
-  SECTION("out of range") {
-    int code = 666;
-    DeserializationError err(
-        *reinterpret_cast<DeserializationError::Code*>(&code));
-    REQUIRE(err.c_str() == std::string("???"));
-  }
-
   SECTION("switch") {
     DeserializationError err = DeserializationError::InvalidInput;
     switch (err.code()) {
@@ -77,34 +70,24 @@ TEST_CASE("DeserializationError") {
     }
   }
 
-  SECTION("Comparisons") {
+  SECTION("Use in a condition") {
     DeserializationError invalidInput(DeserializationError::InvalidInput);
     DeserializationError ok(DeserializationError::Ok);
 
-    SECTION("DeserializationError == bool") {
-      REQUIRE(invalidInput == true);
-      REQUIRE(ok == false);
+    SECTION("if (!err)") {
+      if (!invalidInput)
+        FAIL();
     }
 
-    SECTION("bool == DeserializationError") {
-      REQUIRE(true == invalidInput);
-      REQUIRE(false == ok);
+    SECTION("if (err)") {
+      if (ok)
+        FAIL();
     }
+  }
 
-    SECTION("DeserializationError != bool") {
-      REQUIRE(invalidInput != false);
-      REQUIRE(ok != true);
-    }
-
-    SECTION("bool != DeserializationError") {
-      REQUIRE(false != invalidInput);
-      REQUIRE(true != ok);
-    }
-
-    SECTION("Negations") {
-      REQUIRE(!invalidInput == false);
-      REQUIRE(!ok == true);
-    }
+  SECTION("Comparisons") {
+    DeserializationError invalidInput(DeserializationError::InvalidInput);
+    DeserializationError ok(DeserializationError::Ok);
 
     SECTION("DeserializationError == Code") {
       REQUIRE(invalidInput == DeserializationError::InvalidInput);

@@ -1,12 +1,10 @@
-// ArduinoJson - arduinojson.org
-// Copyright Benoit Blanchon 2014-2020
+// ArduinoJson - https://arduinojson.org
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #pragma once
 
 #include <string>
-
-using namespace ARDUINOJSON_NAMESPACE;
 
 struct custom_char_traits : std::char_traits<char> {};
 struct custom_allocator : std::allocator<char> {};

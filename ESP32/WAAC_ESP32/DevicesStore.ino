@@ -43,6 +43,10 @@ void loadDevices(const char *filename) {
       {
         temp = new ServoMotor();
       }
+      else if (strcmp("StepperMotor", deviceType) == 0)
+      {
+        temp = new StepperMotor();
+      }
       else if (strcmp("Relay", deviceType) == 0)
       {
         temp = new Relay();
@@ -91,7 +95,7 @@ void loadDevices(const char *filename) {
       {
         temp = new Video();
       }
-
+      
       if (temp != NULL)
       {
         temp->deserialize(obj);
