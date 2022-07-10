@@ -88,6 +88,8 @@ Stepper::Stepper()
   // Arduino pins for the motor control connection:
   this->motor_pin_1 = 0;
   this->motor_pin_2 = 0;
+  this->motor_pin_3 = 0;
+  this->motor_pin_4 = 0;
 }
 
 /*
@@ -182,6 +184,38 @@ Stepper::Stepper(int number_of_steps, int motor_pin_1, int motor_pin_2,
 }
 
 /*
+ * Sets the pins
+ */
+void Stepper::setPins(int motor_pin_1, int motor_pin_2, int motor_pin_3, int motor_pin_4)
+{
+  // Arduino pins for the motor control connection:
+  this->motor_pin_1 = motor_pin_1;
+  this->motor_pin_2 = motor_pin_2;
+  this->motor_pin_3 = motor_pin_3;
+  this->motor_pin_4 = motor_pin_4;
+  
+  // setup the pins on the microcontroller:
+  pinMode(this->motor_pin_1, OUTPUT);
+  pinMode(this->motor_pin_2, OUTPUT);
+  pinMode(this->motor_pin_3, OUTPUT);
+  pinMode(this->motor_pin_4, OUTPUT);
+  
+  // When there are 4 pins, set the others to 0:
+  this->motor_pin_5 = 0;
+
+  // pin_count is used by the stepMotor() method:
+  this->pin_count = 4;
+}
+
+/*
+ * Sets number of steps
+ */
+void Stepper::setNumberOfSteps(int number_of_steps)
+{
+  this->number_of_steps = number_of_steps; // total number of steps for this motor
+}
+
+/*
  * Sets the speed in revs per minute
  */
 void Stepper::setSpeed(long whatSpeed)
@@ -236,6 +270,24 @@ void Stepper::step(int steps_to_move)
         stepMotor(this->step_number % 4);
     }
   }
+
+  if (this->pin_count == 2) {
+    digitalWrite(motor_pin_1, LOW);
+    digitalWrite(motor_pin_2, LOW);
+  }
+  if (this->pin_count == 4) {
+    digitalWrite(motor_pin_1, LOW);
+    digitalWrite(motor_pin_2, LOW);
+    digitalWrite(motor_pin_3, LOW);
+    digitalWrite(motor_pin_4, LOW);
+  }
+  if (this->pin_count == 5) {
+    digitalWrite(motor_pin_1, LOW);
+    digitalWrite(motor_pin_2, LOW);
+    digitalWrite(motor_pin_3, LOW);
+    digitalWrite(motor_pin_4, LOW);
+    digitalWrite(motor_pin_5, LOW);
+  }
 }
 
 /*
@@ -268,23 +320,23 @@ void Stepper::stepMotor(int thisStep)
       case 0:  // 1010
         digitalWrite(motor_pin_1, HIGH);
         digitalWrite(motor_pin_2, LOW);
-        digitalWrite(motor_pin_3, HIGH);
+        digitalWrite(motor_pin_3, LOW);
         digitalWrite(motor_pin_4, LOW);
       break;
       case 1:  // 0110
         digitalWrite(motor_pin_1, LOW);
         digitalWrite(motor_pin_2, HIGH);
-        digitalWrite(motor_pin_3, HIGH);
+        digitalWrite(motor_pin_3, LOW);
         digitalWrite(motor_pin_4, LOW);
       break;
       case 2:  //0101
         digitalWrite(motor_pin_1, LOW);
-        digitalWrite(motor_pin_2, HIGH);
-        digitalWrite(motor_pin_3, LOW);
-        digitalWrite(motor_pin_4, HIGH);
+        digitalWrite(motor_pin_2, LOW);
+        digitalWrite(motor_pin_3, HIGH);
+        digitalWrite(motor_pin_4, LOW);
       break;
       case 3:  //1001
-        digitalWrite(motor_pin_1, HIGH);
+        digitalWrite(motor_pin_1, LOW);
         digitalWrite(motor_pin_2, LOW);
         digitalWrite(motor_pin_3, LOW);
         digitalWrite(motor_pin_4, HIGH);

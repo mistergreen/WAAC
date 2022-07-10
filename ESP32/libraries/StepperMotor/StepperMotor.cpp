@@ -15,6 +15,7 @@ StepperMotor::StepperMotor() : Device(), EventHandler()
     stepsPerAction = 0;
     speedRpm = 0;
     
+    stepper = Stepper();
 }
 
 StepperMotor::StepperMotor(char *in_name, 
@@ -42,6 +43,15 @@ StepperMotor::StepperMotor(char *in_name,
     
     // Connect the stepper library to the selected pins.
     Serial.print("Setting stepper: ");
+    Serial.print(totalSteps);
+    Serial.print(" pins: ");
+    Serial.print(pins[0]);
+    Serial.print(", ");
+    Serial.print(pins[1]);
+    Serial.print(", ");
+    Serial.print(pins[2]);
+    Serial.print(", ");
+    Serial.print(pins[3]);
     Serial.println();
 
     stepper = Stepper(totalSteps, pins[0], pins[1], pins[2], pins[3]);
@@ -88,6 +98,7 @@ int StepperMotor::getTotalSteps() {
 
 void StepperMotor::setTotalSteps(int total_steps) {
     totalSteps = total_steps;
+    stepper.setNumberOfSteps(totalSteps);
 }
 
 
@@ -98,6 +109,7 @@ int StepperMotor::getSpeed() {
 
 void StepperMotor::setSpeed(int speed_rpm) {
     speedRpm = speed_rpm;
+    stepper.setSpeed(speedRpm);
 }
 
 void StepperMotor::setPins(int in_pin0, int in_pin1, int in_pin2, int in_pin3) {
@@ -108,7 +120,20 @@ void StepperMotor::setPins(int in_pin0, int in_pin1, int in_pin2, int in_pin3) {
     pins[3] = in_pin3;
     
     // Connect the stepper library to the selected pin.
-    stepper = Stepper(totalSteps, pins[0], pins[1], pins[2], pins[3]);
+    stepper.setPins(pins[0], pins[1], pins[2], pins[3]);
+
+    // Connect the stepper library to the selected pins.
+    Serial.print("Setting stepper: ");
+    Serial.print(totalSteps);
+    Serial.print(" pins: ");
+    Serial.print(pins[0]);
+    Serial.print(", ");
+    Serial.print(pins[1]);
+    Serial.print(", ");
+    Serial.print(pins[2]);
+    Serial.print(", ");
+    Serial.print(pins[3]);
+    Serial.println();
 }
 
 int StepperMotor::getPin(int pin_num)
@@ -131,6 +156,8 @@ void StepperMotor::switchOn()
     Serial.print("Setting steps: ");
     Serial.println(stepsPerAction);
     stepper.step(stepsPerAction);
+    delay(500);
+    Serial.println("Steps completed");
 }
 
 
@@ -180,4 +207,17 @@ void StepperMotor::deserialize(
     // Setup the servo library to the selected pin.
     stepper = Stepper(totalSteps, pins[0], pins[1], pins[2], pins[3]);
     stepper.setSpeed(speedRpm);
+
+    // Connect the stepper library to the selected pins.
+    Serial.print("Setting stepper: ");
+    Serial.print(totalSteps);
+    Serial.print(" pins: ");
+    Serial.print(pins[0]);
+    Serial.print(", ");
+    Serial.print(pins[1]);
+    Serial.print(", ");
+    Serial.print(pins[2]);
+    Serial.print(", ");
+    Serial.print(pins[3]);
+    Serial.println();
 }
