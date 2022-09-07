@@ -44,8 +44,6 @@ void Relay::performActionInEvent()
     if (false == deviceState)
     {
         switchOn();
-
-        deviceState = true;
     }
 }
 
@@ -56,8 +54,6 @@ void Relay::performActionOutEvent()
     if (true == deviceState)
     {
         switchOff();
-
-        deviceState = false;
     }
 }
 
@@ -71,6 +67,8 @@ void Relay::switchOn()
     } else {
         digitalWrite(pin,HIGH);
     }
+
+    deviceState = true;
 }
 
 void Relay::switchOff()
@@ -82,17 +80,22 @@ void Relay::switchOff()
     } else {
         digitalWrite(pin,LOW);
     }
+
+    deviceState = false;
 }
 
 void Relay::toggleState()
 {
-   //Serial.println("toggle called");
-    if (deviceState) {
-        switchOff();
-        //Serial.println("toggle off");
-    } else {
-        switchOn();
-        //Serial.println("toggle on");
+    if (true == EventHandler::getSuspendTime())
+    {
+        //Serial.println("toggle called");
+        if (deviceState) {
+            switchOff();
+            //Serial.println("toggle off");
+        } else {
+            switchOn();
+            //Serial.println("toggle on");
+        }
     }
 }
 
@@ -126,4 +129,17 @@ void Relay::deserialize(
 
     switchOff();
     deviceState = false;
+}
+
+
+void Relay::setSuspendTime(
+    bool in_suspend)
+{
+    EventHandler::setSuspendTime(in_suspend);
+}
+
+bool Relay::getSuspendTime()
+{
+    bool suspendTime = EventHandler::getSuspendTime();
+    return suspendTime;
 }

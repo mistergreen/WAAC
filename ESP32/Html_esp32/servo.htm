@@ -235,10 +235,7 @@
             <input name="moveAngle" type="text" id="moveAngle" placeholder="MoveAngle" value=""  /> 
             <input name="duration" type="text" id="duration" placeholder="Duration" value=""  />
 			<legend>Device Status</legend>
-            <select name="status" id="status" data-role="slider" onChange="switchState()">
-                <option value="off">Off</option>
-                <option value="on">On</option>
-            </select>
+            <button name="status" type="button" id="status" onclick="switchState()">Trigger</button>
          </div>
          <div class="ui-block-b">
             <select name="dependentmenu" id="dependentmenu">

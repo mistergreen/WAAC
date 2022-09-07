@@ -331,6 +331,15 @@ void EventHandler::setDependentDevice(int id) {
 void EventHandler::setSuspendTime(bool in_suspend)
 {
     suspendTime = in_suspend;
+    /*if (suspendTime == true)
+        Serial.println("Event handler suspended");
+    else
+        Serial.println("Event handler restored");*/
+}
+
+bool EventHandler::getSuspendTime()
+{
+    return suspendTime;
 }
 
 
@@ -349,6 +358,7 @@ void EventHandler::serialize(JsonObject& doc)
 
     doc["event"] = event;
     doc["dependentDeviceId"] = dependentDeviceId;
+    doc["suspendTime"] = suspendTime;
 }
 
 void EventHandler::deserialize(
@@ -365,6 +375,8 @@ void EventHandler::deserialize(
     setEvent(event);
 
     setDependentDevice(doc["dependentDeviceId"]);
+
+    setSuspendTime(doc["suspendTime"]);
 }
 
 

@@ -72,6 +72,9 @@ class EventHandler : public Storable
     // It returns the percentage of time elapsed in an event.
     float getEventPercentage();
 
+    // It reurns if the timer is suspended.
+    bool getSuspendTime();
+
     // The ID of the event in progress, -1 if no event is in progress.
     int inProgressEventId;
     

@@ -49,3 +49,16 @@ function switchState() {
 		});
 	}
 }
+
+
+function switchMode() {
+				
+	var id = localStorage.getItem("deviceId");
+	var mode = document.getElementById("mode").value;
+	if(id != 0) {
+		nocache = "&nocache=" + Math.random() * 1000000;
+		$.get("?switchMode=" + id + "&mode=" + mode + nocache, function(data, status, response) {
+				//no need for a response	
+		});
+	}
+}

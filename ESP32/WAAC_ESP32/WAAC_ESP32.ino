@@ -23,6 +23,7 @@
 #include <Servo.h>
 #include <ezTime.h>
 #include <Wire.h>
+#include <string.h>
 
 
 // Load the selected file system
@@ -671,8 +672,14 @@ void parseReceivedRequest(WiFiClient client)
       switchDigital(client);
         
     } 
-    
-      // ***************** set PWM values  ********************
+    // ***************** switch mode  ********************
+    else if(webParser.contains(queryBuffer, "switchMode="))
+    {
+      //will work for all device type with toggleState()
+      switchMode(client);
+        
+    } 
+    // ***************** set PWM values  ********************
     else if(webParser.contains(queryBuffer, "setpwms"))
     {
 
@@ -818,7 +825,7 @@ void parseReceivedRequest(WiFiClient client)
           //get device specific info
           if(atoi(param_value) != 0) {
             Device *device = deviceDelegate.findDevice(atoi(param_value));
-            device->setSuspendTime(true); 
+            //device->setSuspendTime(true); 
             client.print(F("<deviceName>"));
             client.print(device->getDeviceName());
             client.print(F("</deviceName>"));
@@ -830,7 +837,7 @@ void parseReceivedRequest(WiFiClient client)
             client.print(F("</deviceColor>"));
             client.print(F("<state>"));
             client.print(device->getDeviceState());
-            client.print(F("</state>"));
+            client.print(F("</state>"));           
 
       
             webParser.clearBuffer(param_value, queryMax);
@@ -1032,7 +1039,7 @@ void parseReceivedRequest(WiFiClient client)
              saveStepperMotor(device);
           }
           //turn / reset devices back
-          device->setSuspendTime(false);
+          //device->setSuspendTime(false);
           
         } else {
           //****************************************create new object ******************************

@@ -25,6 +25,10 @@ class Relay : public Device, public Storable, public EventHandler
     virtual void switchOn();
     virtual void switchOff();
     virtual void toggleState();
+    // Set if events can be suspended.
+    virtual void setSuspendTime(bool in_suspend);
+    // It reurns if the timer is suspended.
+    virtual bool getSuspendTime();
    
     boolean getInvert();
     void setInvert(boolean state);

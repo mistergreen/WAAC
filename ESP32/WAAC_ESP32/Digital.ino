@@ -16,6 +16,28 @@ void switchDigital(WiFiClient client) {
       }
 }
 
+
+void switchMode(WiFiClient client) {
+      webParser.clearBuffer(param_value, queryMax);
+      webParser.parseQuery(queryBuffer, "switchMode", param_value);
+      int deviceId = atoi(param_value);
+      if(deviceId > 0) { 
+        webParser.clearBuffer(param_value, queryMax);
+        webParser.parseQuery(queryBuffer, "mode", param_value);
+
+        if(0 == strcmp(param_value, "auto")) {
+          deviceDelegate.findDevice(deviceId)->setSuspendTime(false);
+        }
+        else {
+          deviceDelegate.findDevice(deviceId)->setSuspendTime(true);
+        }
+        Serial.print("switchMode: ");
+        Serial.println(param_value);
+        successAjax(client);
+      }
+}
+
+
 void relayAjaxOutput(WiFiClient client, Device *device) {
       client.print(F("<pin>"));
       client.print(device->getPin());
@@ -32,6 +54,10 @@ void relayAjaxOutput(WiFiClient client, Device *device) {
       static_cast<Relay*>(device)->getEvent(eventString);
       client.print(eventString);
       client.print(F("</event>"));
+      client.print(F("<mode>"));
+      client.print(static_cast<Relay*>(device)->getSuspendTime());
+      client.print(F("</mode>"));
+
 }
 
 void inputAjaxOutput(WiFiClient client, Device *device) {

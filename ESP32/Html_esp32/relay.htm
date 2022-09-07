@@ -50,19 +50,25 @@
 									if(deviceId != 0) {
 										$('#name').val( decodeURIComponent($(data).find("deviceName").text()) );
 										$('#pin').val($(data).find("pin").text());
-										var value = $(data).find("state").text();
-									
 										
+										var value = $(data).find("state").text();
+
 										if(value == "0") {
 											$('#status').val("off").slider("refresh");
 										} else {
 											$('#status').val("on").slider("refresh");
 										}
-		
+
+										var mode = $(data).find("mode").text();
+
+										if(mode == "0") {
+											$('#mode').val("auto").slider("refresh");
+										} else {
+											$('#mode').val("manual").slider("refresh");
+										}
 
 										var invert = $(data).find("invert").text();
-									
-										
+
 										if(invert == "0") {
 											$('#invert').prop("checked", false).checkboxradio('refresh');
 										} else {
@@ -180,7 +186,7 @@
 				str += eventStr;
 				
 				//console.log( str );
-				$.get( "?savedevice="+ deviceId +"&devicetype="+ deviceType +"&"+ str, function(data, status, response) {
+				$.get( "?savedevice="+ deviceId +"&devicetype="+ deviceType +"&"+ str, function(data, status, mode, response) {
 					if(data != null) {
 						//on complete save, go back to home
 						if($(data).find("response").text() == "success") {
@@ -254,6 +260,11 @@
             <select name="status" id="status" data-role="slider" onChange="switchState()">
                 <option value="off">Off</option>
                 <option value="on">On</option>
+            </select>
+			<legend>Device Mode</legend>
+            <select name="mode" id="mode" data-role="slider" onChange="switchMode()">
+                <option value="auto">Auto</option>
+                <option value="manual">Manual</option>
             </select>
             <legend>Invert Device State</legend>
 			<input type="checkbox" name="invert" id="invert"><label for="invert">Invert (active low)</label>

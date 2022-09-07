@@ -240,10 +240,7 @@
             <input name="speed" type="text" id="speed" placeholder="Speed" value=""  /> 
             <input name="totalSteps" type="text" id="totalSteps" placeholder="TotalSteps" value=""  />
 			<legend>Device Status</legend>
-            <select name="status" id="status" data-role="slider" onChange="switchState()">
-                <option value="off">Off</option>
-                <option value="on">On</option>
-            </select>
+			<button name="status" type="button" id="status" onclick="switchState()">Trigger</button>
          </div>
          <div class="ui-block-b">
             <select name="dependentmenu" id="dependentmenu">
