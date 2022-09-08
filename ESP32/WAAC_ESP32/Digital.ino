@@ -84,6 +84,12 @@ void inputMCPajaxOutput(WiFiClient client, Device *device) {
      
 }
 
+void inputButtonAjaxOutput(WiFiClient client, Device *device) {
+      client.print(F("<pin>"));
+      client.print(device->getPin());
+      client.print(F("</pin>"));
+}
+
 void relayMCPajaxOutput(WiFiClient client, Device *device) {
 
       client.print(F("<pin>"));
@@ -197,6 +203,30 @@ void createInputMCP() {
 
         static_cast<InputMCP*>(temp)->setI2C(sda, scl);
         
+
+        webParser.clearBuffer(param_value, queryMax);
+        webParser.parseQuery(queryBuffer, "image", param_value);
+        deviceDelegate.currentDevice()->setImageName(param_value);
+        
+        char color[7];
+        webParser.parseQuery(queryBuffer, "color", param_value);
+        findColor(param_value, color);
+        deviceDelegate.currentDevice()->setDeviceColor(color);
+
+}
+
+
+void createInputButton() {
+        webParser.clearBuffer(param_value, queryMax);
+        webParser.parseQuery(queryBuffer, "name", param_value);
+        
+        char tempPin[5]={'\0'};
+        webParser.parseQuery(queryBuffer, "pin", tempPin);
+        
+        //***********create device
+        InputButton *temp = new InputButton(param_value, convertPin(tempPin));
+        deviceDelegate.addDevice( temp );
+        //***********
 
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "image", param_value);
@@ -439,8 +469,11 @@ void saveInputMCP(Device *device) {
         }
 
         static_cast<InputMCP*>(device)->setI2C(sda, scl);
-        
-  
+}
+
+
+void saveInputButton(Device *device) {
+  // Empty for now, no need to store more params.
 }
 
 

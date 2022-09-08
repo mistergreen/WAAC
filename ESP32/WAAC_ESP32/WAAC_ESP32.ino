@@ -52,6 +52,7 @@
 #include "HallSensor.h"
 #include "Input.h"
 #include "InputMCP.h"
+#include "InputButton.hpp"
 #include "MCPhelper.h"
 #include "OneWire.h"
 #include "OneWireSensor.h"
@@ -78,13 +79,14 @@ const char *monthName[13] = {"", "January", "February", "March", "April", "May",
 
 /************* Device menu **************/
 // { device type (must be unique & same as classType/Name), description, html form to configure it }
-const char *deviceMenu[15][3] = {
+const char *deviceMenu[16][3] = {
                         {"AdaFruitPWM8","PCA9685 PWM 12-bit, 8 channel", "adapwm8.htm"},
                         {"Alert","Email Alerts", "alert.htm"},
                         {"Analog","Analog Sensors", "analog.htm"},
                         {"HallSensor","Flow Hall Sensors", "hall.htm"},
                         {"Input","Native Digital Input", "input.htm"},
                         {"InputMCP","MCP23017 Digital Input", "input_i2c.htm"},
+                        {"InputButton","Button Digital Input", "input_button.htm"},
                         {"OneWireSensor", "OneWire Dallas/Maxim", "onewire.htm"},
                         {"PWM4","ESP PWM, 4 channels", "pwm4.htm"},
                         {"Relay","Native Digital out", "relay.htm"},
@@ -878,6 +880,12 @@ void parseReceivedRequest(WiFiClient client)
               inputMCPajaxOutput(client, device);
                
             } 
+            else if(webParser.compare(param_value, "InputButton")) 
+            {
+               
+              inputButtonAjaxOutput(client, device);
+               
+            } 
             else if(webParser.compare(param_value, "PWM4")) 
             {
                pwm4AjaxOutput(client, device);
@@ -990,9 +998,14 @@ void parseReceivedRequest(WiFiClient client)
                saveRelayPCA(device);
           
           } 
-           else if(webParser.compare(param_value, "InputMCP"))
+          else if(webParser.compare(param_value, "InputMCP"))
           {
                saveInputMCP(device);
+          
+          } 
+          else if(webParser.compare(param_value, "InputButton"))
+          {
+               saveInputButton(device);
           
           } 
           else if(webParser.compare(param_value, "RelayMCP"))
@@ -1058,6 +1071,9 @@ void parseReceivedRequest(WiFiClient client)
           }
           else if(webParser.compare(param_value, "InputMCP")) {
               createInputMCP();
+          }
+          else if(webParser.compare(param_value, "InputButton")) {
+              createInputButton();
           }
           else if(webParser.compare(param_value, "RelayPCA")) {
               createRelayPCA();
