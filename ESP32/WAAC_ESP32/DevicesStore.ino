@@ -91,6 +91,10 @@ void loadDevices(const char *filename) {
       {
         temp = new InputMCP();
       }
+      else if (strcmp("InputButton", deviceType) == 0)
+      {
+        temp = new InputButton();
+      }
       else if (strcmp("Video", deviceType) == 0)
       {
         temp = new Video();

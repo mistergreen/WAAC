@@ -8,6 +8,10 @@
 #include "Device.h"
 
 
+const int Device::NUM_BUTTON_ACTIONS = 1;
+
+const char* Device::NAME_BUTTON_ACTIONS = "Toggle State";
+
 Device::Device()
 {
     deviceState = false;
@@ -125,6 +129,41 @@ bool Device::getDeviceState() {
 void Device::setDeviceState(bool state) {
     deviceState = state;
 }
+
+
+int Device::getNumButtonActions()
+{
+    return NUM_BUTTON_ACTIONS;
+}
+
+
+const char* Device::getButtonActionName(
+    int actionId)
+{
+    // The returned value.
+    char* retVal = "";
+
+    // Check the id before parforming any action.
+    if (actionId == 0)
+    {
+        retVal = (char *) NAME_BUTTON_ACTIONS;
+    }
+
+    return retVal;
+}
+
+void Device::callButtonAction(
+    int actionId)
+{
+    // Check the id before parforming any action.
+    if (actionId == 0)
+    {
+        Serial.print("Device::callButtonAction calling action ");
+        Serial.println(actionId);
+        toggleState();
+    }
+}
+
 
 void Device::serialize(JsonObject& doc)
 {

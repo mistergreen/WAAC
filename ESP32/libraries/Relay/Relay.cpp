@@ -8,6 +8,8 @@
 
 #include "Relay.h"
 
+const char* Relay::sNAME_BUTTON_ACTIONS[] = {"Toggle State", "Set to auto"};
+
 Relay::Relay() : Device(), EventHandler()
 {
     //classType inherit from base
@@ -86,16 +88,14 @@ void Relay::switchOff()
 
 void Relay::toggleState()
 {
-    if (true == EventHandler::getSuspendTime())
-    {
-        //Serial.println("toggle called");
-        if (deviceState) {
-            switchOff();
-            //Serial.println("toggle off");
-        } else {
-            switchOn();
-            //Serial.println("toggle on");
-        }
+    EventHandler::setSuspendTime(true);
+    //Serial.println("toggle action");
+    if (deviceState) {
+        switchOff();
+        //Serial.println("toggle off");
+    } else {
+        switchOn();
+        //Serial.println("toggle on");
     }
 }
 
@@ -142,4 +142,43 @@ bool Relay::getSuspendTime()
 {
     bool suspendTime = EventHandler::getSuspendTime();
     return suspendTime;
+}
+
+int Relay::getNumButtonActions()
+{
+    return sNUM_BUTTON_ACTIONS;
+}
+
+
+const char* Relay::getButtonActionName(
+    int actionId)
+{
+    // The returned value.
+    char* retVal = "";
+
+    // Check the id before parforming any action.
+    if (actionId < sNUM_BUTTON_ACTIONS)
+    {
+        retVal = (char *) sNAME_BUTTON_ACTIONS[actionId];
+    }
+
+    return retVal;
+}
+
+void Relay::callButtonAction(
+    int actionId)
+{
+    // Check the id before parforming any action.
+    if (actionId == 0)
+    {
+        Serial.print("Device::callButtonAction calling action ");
+        Serial.println(actionId);
+        toggleState();
+    }
+    else if (actionId == 1)
+    {
+        Serial.print("Device::callButtonAction calling action ");
+        Serial.println(actionId);
+        EventHandler::setSuspendTime(false);
+    }
 }

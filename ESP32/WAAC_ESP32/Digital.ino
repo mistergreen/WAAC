@@ -88,6 +88,49 @@ void inputButtonAjaxOutput(WiFiClient client, Device *device) {
       client.print(F("<pin>"));
       client.print(device->getPin());
       client.print(F("</pin>"));
+      client.print(F("<deviceclick>"));
+      client.print(static_cast<InputButton*>(device)->getClickDevice());
+      client.print(F("</deviceclick>"));
+      client.print(F("<actionclick>"));
+      client.print(static_cast<InputButton*>(device)->getClickAction());
+      client.print(F("</actionclick>"));
+      client.print(F("<devicedoubleclick>"));
+      client.print(static_cast<InputButton*>(device)->getDoubleClickDevice());
+      client.print(F("</devicedoubleclick>"));
+      client.print(F("<actiondoubleclick>"));
+      client.print(static_cast<InputButton*>(device)->getDoubleClickAction());
+      client.print(F("</actiondoubleclick>"));
+      client.print(F("<devicetripleclick>"));
+      client.print(static_cast<InputButton*>(device)->getTripleClickDevice());
+      client.print(F("</devicetripleclick>"));
+      client.print(F("<actiontripleclick>"));
+      client.print(static_cast<InputButton*>(device)->getTripleClickAction());
+      client.print(F("</actiontripleclick>"));
+      client.print(F("<devicelongclick>"));
+      client.print(static_cast<InputButton*>(device)->getLongClickDevice());
+      client.print(F("</devicelongclick>"));
+      client.print(F("<actionlongclick>"));
+      client.print(static_cast<InputButton*>(device)->getLongClickAction());
+      client.print(F("</actionlongclick>"));
+
+      client.print(F("<system>"));
+      client.print(F("<systemaction>"));
+      client.print(F("<action_name>"));
+      client.print(F("Reconnect"));
+      client.print(F("</action_name>"));
+      client.print(F("<action_id>"));
+      client.print(0);
+      client.print(F("</action_id>"));
+      client.print(F("</systemaction>"));
+      client.print(F("<systemaction>"));
+      client.print(F("<action_name>"));
+      client.print(F("Reset"));
+      client.print(F("</action_name>"));
+      client.print(F("<action_id>"));
+      client.print(1);
+      client.print(F("</action_id>"));
+      client.print(F("</systemaction>"));
+      client.print(F("</system>"));
 }
 
 void relayMCPajaxOutput(WiFiClient client, Device *device) {
@@ -237,6 +280,33 @@ void createInputButton() {
         findColor(param_value, color);
         deviceDelegate.currentDevice()->setDeviceColor(color);
 
+        char tempDevice[4] = {'\0'};
+        char tempAction[4] = {'\0'};
+        webParser.parseQuery(queryBuffer, "deviceClick", tempDevice);
+        webParser.parseQuery(queryBuffer, "actionClick", tempAction);
+        temp->setClickAction(atoi(tempDevice), atoi(tempAction)); 
+
+        //clear out param for new param
+        memset(&tempDevice[0], '\0', 4);
+        memset(&tempAction[0], '\0', 4);
+        webParser.parseQuery(queryBuffer, "deviceDoubleClick", tempDevice);
+        webParser.parseQuery(queryBuffer, "actionDoubleClick", tempAction);
+        temp->setDoubleClickAction(atoi(tempDevice), atoi(tempAction)); 
+
+        //clear out param for new param
+        memset(&tempDevice[0], '\0', 4);
+        memset(&tempAction[0], '\0', 4);
+        webParser.parseQuery(queryBuffer, "deviceTripleClick", tempDevice);
+        webParser.parseQuery(queryBuffer, "actionTripleClick", tempAction);
+        temp->setTripleClickAction(atoi(tempDevice), atoi(tempAction)); 
+
+        //clear out param for new param
+        memset(&tempDevice[0], '\0', 4);
+        memset(&tempAction[0], '\0', 4);
+
+        webParser.parseQuery(queryBuffer, "deviceLongClick", tempDevice);
+        webParser.parseQuery(queryBuffer, "actionLongClick", tempAction);
+        temp->setLongClickAction(atoi(tempDevice), atoi(tempAction));
 }
 
 
@@ -473,7 +543,33 @@ void saveInputMCP(Device *device) {
 
 
 void saveInputButton(Device *device) {
-  // Empty for now, no need to store more params.
+  char tempDevice[4] = {'\0'};
+  char tempAction[4] = {'\0'};
+  webParser.parseQuery(queryBuffer, "deviceClick", tempDevice);
+  webParser.parseQuery(queryBuffer, "actionClick", tempAction);
+  static_cast<InputButton*>(device)->setClickAction(atoi(tempDevice), atoi(tempAction)); 
+
+  //clear out param for new param
+  memset(&tempDevice[0], '\0', 4);
+  memset(&tempAction[0], '\0', 4);
+  webParser.parseQuery(queryBuffer, "deviceDoubleClick", tempDevice);
+  webParser.parseQuery(queryBuffer, "actionDoubleClick", tempAction);
+  static_cast<InputButton*>(device)->setDoubleClickAction(atoi(tempDevice), atoi(tempAction)); 
+
+  //clear out param for new param
+  memset(&tempDevice[0], '\0', 4);
+  memset(&tempAction[0], '\0', 4);
+  webParser.parseQuery(queryBuffer, "deviceTripleClick", tempDevice);
+  webParser.parseQuery(queryBuffer, "actionTripleClick", tempAction);
+  static_cast<InputButton*>(device)->setTripleClickAction(atoi(tempDevice), atoi(tempAction)); 
+
+  //clear out param for new param
+  memset(&tempDevice[0], '\0', 4);
+  memset(&tempAction[0], '\0', 4);
+
+  webParser.parseQuery(queryBuffer, "deviceLongClick", tempDevice);
+  webParser.parseQuery(queryBuffer, "actionLongClick", tempAction);
+  static_cast<InputButton*>(device)->setLongClickAction(atoi(tempDevice), atoi(tempAction));
 }
 
 

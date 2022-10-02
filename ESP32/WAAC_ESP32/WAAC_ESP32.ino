@@ -210,35 +210,7 @@ void setup()
   // If configuration loaded corretly then set IP else set AP mode
   if (true == loadConfiguration(configFile))
   {
-    // Set the IP from the configuration
-    uint8_t* storedIp = wwws->getLocalIP();
-    uint8_t* sn = wwws->getLocalSubnet();
-    uint8_t* gw = wwws->getLocalGW();
-    
-    IPAddress ip(storedIp[0],storedIp[1],storedIp[2],storedIp[3]);
-    IPAddress gateway(gw[0],gw[1],gw[2],gw[3]); 
-    IPAddress subnet(sn[0],sn[1],sn[2],sn[3]);
-    
-    //IPAddress primaryDNS(8, 8, 8, 8); //optional
-    //IPAddress secondaryDNS(8, 8, 4, 4); //optional
-  
-    //************ wifi *******************
-    // Static IP doesn't look like it works for the ESP32 at this point
-    //if (!WiFi.config(ip, gateway, subnet, primaryDNS, secondaryDNS)) {
-  
-    if (!WiFi.config(ip, gateway, subnet, gateway)) {
-      Serial.println("STA Failed to configure");
-    }
-  
-    Serial.print("Connecting to ");
-    Serial.println(wwws->getWiFiSSID());
-  
-    WiFi.begin(wwws->getWiFiSSID(), wwws->getWiFiPassword());
-    
-    while (WiFi.status() != WL_CONNECTED) {
-      delay(500);
-      Serial.print(".");
-    }
+    wwws->wifiConnect();
   
     Serial.println("Connected to wifi");
     printWifiStatus();
@@ -882,9 +854,7 @@ void parseReceivedRequest(WiFiClient client)
             } 
             else if(webParser.compare(param_value, "InputButton")) 
             {
-               
-              inputButtonAjaxOutput(client, device);
-               
+              inputButtonAjaxOutput(client, device);  
             } 
             else if(webParser.compare(param_value, "PWM4")) 
             {
@@ -934,19 +904,31 @@ void parseReceivedRequest(WiFiClient client)
             i++;
           }
           
-           
-              //get devices name & id for dependent list. Print for everybody. They can use with it what they will.
-              // saves adding on to the condition
-             for(i = 0; i < deviceDelegate.getDeviceCount(); i++) {
-                client.print(F("<device>"));
-                client.print(F("<name>"));
-                client.print(deviceDelegate.devices[i]->getDeviceName());
-                client.print(F("</name>"));
-                client.print(F("<id>"));
-                client.print(deviceDelegate.devices[i]->getDeviceId());
-                client.print(F("</id>"));
-                client.print(F("</device>"));
-             }
+          uint8_t j = 0;
+          //get devices name & id for dependent list. Print for everybody. They can use with it what they will.
+          // saves adding on to the condition
+          for(i = 0; i < deviceDelegate.getDeviceCount(); i++) {
+            client.print(F("<device>"));
+            client.print(F("<name>"));
+            client.print(deviceDelegate.devices[i]->getDeviceName());
+            client.print(F("</name>"));
+            client.print(F("<id>"));
+            client.print(deviceDelegate.devices[i]->getDeviceId());
+            client.print(F("</id>"));
+            client.print(F("<actions>"));
+            for(j = 0; j < deviceDelegate.devices[i]->getNumButtonActions(); j++) {
+              client.print(F("<action>"));
+              client.print(F("<action_name>"));
+              client.print(deviceDelegate.devices[i]->getButtonActionName(j));
+              client.print(F("</action_name>"));
+              client.print(F("<action_id>"));
+              client.print(j);
+              client.print(F("</action_id>"));
+              client.print(F("</action>"));
+            }
+            client.print(F("</actions>"));
+            client.print(F("</device>"));
+          }
          
             
           client.print(F("</deviceItem>"));

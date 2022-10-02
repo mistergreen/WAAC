@@ -42,6 +42,21 @@ class Relay : public Device, public Storable, public EventHandler
     void deserialize(
         // Input Json object pointer containing the class information.
         JsonObject& doc);
+
+        // It returns how many callable actions by a button are implemented by the device.
+    int getNumButtonActions();
+
+    // It returns the name of an action specified by the passed actionId
+    const char* getButtonActionName(
+      // The action to call
+      int actionId
+    );
+
+    // It calls an action specified by the passed actionId
+    void callButtonAction(
+      // The action to call
+      int actionId
+    );
         
   protected:
     
@@ -55,6 +70,12 @@ class Relay : public Device, public Storable, public EventHandler
     bool invert;
     
   private:
+      // The number of button actions implemented by the device.
+    static const int sNUM_BUTTON_ACTIONS = 2;
+
+    // The name of button actions implemented by the device.
+    static const char* sNAME_BUTTON_ACTIONS[2];
+
     // It stores the relay status.
     bool relayStatus;
     

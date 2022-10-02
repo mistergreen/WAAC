@@ -9,6 +9,7 @@
 // minh@2noodles.com
 
 #include "WWWsettings.h"
+#include <WiFi.h>
 #include <rBase64.h>
 
 //used for NTP sync function
@@ -839,4 +840,41 @@ void WWWsettings::deserialize(
 }
 
 
+void WWWsettings::wifiConnect()
+{
+    // Set the IP from the configuration
+    uint8_t* storedIp = getLocalIP();
+    uint8_t* sn = getLocalSubnet();
+    uint8_t* gw = getLocalGW();
+    
+    IPAddress ip(storedIp[0],storedIp[1],storedIp[2],storedIp[3]);
+    IPAddress gateway(gw[0],gw[1],gw[2],gw[3]); 
+    IPAddress subnet(sn[0],sn[1],sn[2],sn[3]);
+    
+    //IPAddress primaryDNS(8, 8, 8, 8); //optional
+    //IPAddress secondaryDNS(8, 8, 4, 4); //optional
+  
+    //************ wifi *******************
+    // Static IP doesn't look like it works for the ESP32 at this point
+    //if (!WiFi.config(ip, gateway, subnet, primaryDNS, secondaryDNS)) {
+  
+    if (!WiFi.config(ip, gateway, subnet, gateway)) {
+      Serial.println("STA Failed to configure");
+    }
+  
+    Serial.print("Connecting to ");
+    Serial.println(getWiFiSSID());
+  
+    WiFi.begin(getWiFiSSID(), getWiFiPassword());
+    
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+      Serial.print(".");
+    }
+}
 
+void WWWsettings::wifiReconnect()
+{
+    WiFi.disconnect();
+    wifiConnect();
+}

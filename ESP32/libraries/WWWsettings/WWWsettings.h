@@ -155,6 +155,12 @@ class WWWsettings: public Storable
 
     // It returns the current time in use.
     Timezone* getTime();
+
+    // It connects to WiFi.
+    void wifiConnect();
+
+    // It reconnects to WiFi.
+    void wifiReconnect();
     
   private:
    

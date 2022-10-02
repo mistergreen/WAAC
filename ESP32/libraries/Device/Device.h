@@ -63,6 +63,21 @@ class Device : public Storable
     
     long convertToSeconds(int in_hour, int in_minute, int in_second);
 
+    // It returns how many callable actions by a button are implemented by the device.
+    virtual int getNumButtonActions();
+
+    // It returns the name of an action specified by the passed actionId
+    virtual const char* getButtonActionName(
+      // The action to call
+      int actionId
+    );
+
+    // It calls an action specified by the passed actionId
+    virtual void callButtonAction(
+      // The action to call
+      int actionId
+    );
+
     // It serializes the class into a Json document.
     virtual void serialize(
     // Input Json object pointer to be filled with the class information.
@@ -72,6 +87,12 @@ class Device : public Storable
     virtual void deserialize(
         // Input Json object pointer containing the class information.
         JsonObject& doc);
+
+    // The number of button actions implemented by the device.
+    static const int NUM_BUTTON_ACTIONS;
+
+    // The name of button actions implemented by the device.
+    static const char* NAME_BUTTON_ACTIONS;
 
     int deviceId;
     float min;
@@ -87,9 +108,7 @@ class Device : public Storable
     bool deviceState;
     
   private:
-    
-    
-    
+
 };
 
 #endif
