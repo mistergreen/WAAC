@@ -57,6 +57,14 @@ legend {
 	z-index: 100;	
 }
 
+#navbar_away {
+	position:absolute;
+	top:300px;
+	left: 0;
+	width: 100%;
+	z-index: 100;	
+}
+
 .led-on {
 	margin: 0 4px 0 10px;
 	vertical-align:baseline;

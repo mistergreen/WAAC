@@ -340,7 +340,6 @@ void createRelay() {
         webParser.parseQuery(queryBuffer, "event", param_value);
         temp->setEvent(param_value);
 
-
         webParser.clearBuffer(param_value, queryMax);
         webParser.parseQuery(queryBuffer, "invert", param_value);
         // must be 1 or 0

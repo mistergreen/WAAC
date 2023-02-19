@@ -53,6 +53,7 @@
 #include "Input.h"
 #include "InputMCP.h"
 #include "InputButton.hpp"
+#include "LightManager.h"
 #include "MCPhelper.h"
 #include "OneWire.h"
 #include "OneWireSensor.h"
