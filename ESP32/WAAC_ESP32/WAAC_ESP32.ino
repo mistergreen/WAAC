@@ -80,7 +80,7 @@ const char *monthName[13] = {"", "January", "February", "March", "April", "May",
 
 /************* Device menu **************/
 // { device type (must be unique & same as classType/Name), description, html form to configure it }
-const char *deviceMenu[16][3] = {
+const char *deviceMenu[17][3] = {
                         {"AdaFruitPWM8","PCA9685 PWM 12-bit, 8 channel", "adapwm8.htm"},
                         {"Alert","Email Alerts", "alert.htm"},
                         {"Analog","Analog Sensors", "analog.htm"},
@@ -88,6 +88,7 @@ const char *deviceMenu[16][3] = {
                         {"Input","Native Digital Input", "input.htm"},
                         {"InputMCP","MCP23017 Digital Input", "input_i2c.htm"},
                         {"InputButton","Button Digital Input", "input_button.htm"},
+                        {"LightManager","Light Manager", "lightManager.htm"},
                         {"OneWireSensor", "OneWire Dallas/Maxim", "onewire.htm"},
                         {"PWM4","ESP PWM, 4 channels", "pwm4.htm"},
                         {"Relay","Native Digital out", "relay.htm"},
@@ -654,6 +655,13 @@ void parseReceivedRequest(WiFiClient client)
       switchMode(client);
         
     } 
+    // ***************** switch darkmode  ********************
+    else if(webParser.contains(queryBuffer, "switchDarkMode="))
+    {
+      //will work for all device type with toggleState()
+      switchDarkMode(client);
+        
+    } 
     // ***************** set PWM values  ********************
     else if(webParser.contains(queryBuffer, "setpwms"))
     {
@@ -889,6 +897,11 @@ void parseReceivedRequest(WiFiClient client)
                stepperAjaxOutput(client, device);
                 
             }
+            else if(webParser.compare(param_value, "LightManager")) 
+            {
+               lightManagerAjaxOutput(client, device);
+                
+            }
           }
             
           //menus
@@ -1034,6 +1047,9 @@ void parseReceivedRequest(WiFiClient client)
           else if(webParser.compare(param_value, "StepperMotor")) {
              saveStepperMotor(device);
           }
+          else if(webParser.compare(param_value, "LightManager")) {
+             saveLightManager(device);
+          }
           //turn / reset devices back
           //device->setSuspendTime(false);
           
@@ -1087,6 +1103,9 @@ void parseReceivedRequest(WiFiClient client)
           }
           else if(webParser.compare(param_value, "StepperMotor")) {
               createStepperMotor();
+          }
+          else if(webParser.compare(param_value, "LightManager")) {
+              createLightManager();
           }
         }
         

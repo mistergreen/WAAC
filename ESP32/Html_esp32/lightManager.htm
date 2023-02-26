@@ -46,10 +46,10 @@
 					$('#name').val(decodeURIComponent($(data).find("deviceName").text()));
 					
 					var whitepin = $(data).find("lightControlPin").text()
-					$('#lightControlPin').val((whitepin=="-1")?"":whitepin);
+					$('#whitePin').val((whitepin=="-1")?"":whitepin);
 					
 					var whiteChannel = $(data).find("lightControlChannel").text()
-					$('#lightControlChannel').val((whiteChannel=="-1")?"":whiteChannel);
+					$('#whiteChannel').val((whiteChannel=="-1")?"":whiteChannel);
 				
 					var relaypin = $(data).find("relayPin").text()
 					$('#relayPin').val((relaypin=="-1")?"":relaypin);
@@ -256,14 +256,16 @@
 		
 		var str = "";
 
-		str += "name=" + $("#name").val() + "&lightControlPin=" + $("#whitepin").val();
+		str += "name=" + $("#name").val() + "&lightControlPin=" + $("#whitePin").val();
 		str += "&lightControlChannel=" + $("#whiteChannel").val();
-		str += "&relaypin=" + $("#relaypin").val();
-		str += "&sensorpin=" + $("#sensorpin").val();
+		str += "&relayPin=" + $("#relayPin").val();
+		var tempinvert = $("#invert").prop('checked')===true?1:0;
+		str += "&invert=" + tempinvert;
+		str += "&sensorPin=" + $("#sensorPin").val();
 		str += "&image=" + $("#imagemenu option:selected").val() + "&dependent=" + $("#dependentmenu option:selected").val() +"&";
 	
 		var eventStr = "event=";
-		var eventAwayStr = "eventAway=";
+		var eventAwayStr = "&eventAway=";
 		
 		var dow = "";
 				$("input[name='dow']").each(function(){
@@ -352,12 +354,12 @@
 			<div class="ui-grid-a">
 				<div class="ui-block-a">
 					Pin attached to PWM light control
-					<input name="whitepin" type="text" id="whitepin" placeholder="LIGHT PWM PIN" value=""  />
+					<input name="whitePin" type="text" id="whitePin" placeholder="LIGHT PWM PIN" value=""  />
 					Relay control
-					<input name="relaypin" type="text" id="relaypin" placeholder="RELAY PIN" value=""  />
+					<input name="relayPin" type="text" id="relayPin" placeholder="RELAY PIN" value=""  />
 					<input type="checkbox" name="invert" id="invert"><label for="invert">Invert (active low)</label>
 					Light sensor
-					<input name="sensorpin" type="text" id="sensorpin" placeholder="SENSOR PIN" value=""  />
+					<input name="sensorPin" type="text" id="sensorPin" placeholder="SENSOR PIN" value=""  />
 					<legend>Device Status</legend>
 					<select name="status" id="status" data-role="slider" onChange="switchState()">
 						<option value="off">Off</option>

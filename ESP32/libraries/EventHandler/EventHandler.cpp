@@ -361,6 +361,19 @@ void EventHandler::serialize(JsonObject& doc)
     doc["suspendTime"] = suspendTime;
 }
 
+
+void EventHandler::serializeBuffer(char* eventOut, int* dependentDeviceIdOut, bool* suspendTimeOut)
+{
+    getEvent(eventOut);
+    
+    Serial.print("EventHandler::serializeBuffer ");
+    Serial.println(eventOut);
+
+    *dependentDeviceIdOut = dependentDeviceId;
+    *suspendTimeOut = suspendTime;
+}
+
+
 void EventHandler::deserialize(
     JsonObject& doc)
 {
@@ -377,6 +390,17 @@ void EventHandler::deserialize(
     setDependentDevice(doc["dependentDeviceId"]);
 
     setSuspendTime(doc["suspendTime"]);
+}
+
+
+void EventHandler::deserializeBuffer(
+    char* event, int dependentDeviceId, bool suspendTime)
+{
+    setEvent(event);
+
+    setDependentDevice(dependentDeviceId);
+
+    setSuspendTime(suspendTime);
 }
 
 

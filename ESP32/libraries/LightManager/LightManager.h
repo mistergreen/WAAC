@@ -39,7 +39,7 @@ class LightManager : public Device, public EventHandler, public Storable
 
     // Set if events can be suspended.
     virtual void setSuspendTime(bool in_suspend);
-    
+
     // It reurns if the timer is suspended.
     virtual bool getSuspendTime();
 
@@ -108,6 +108,18 @@ class LightManager : public Device, public EventHandler, public Storable
 
     // It gets the dark events string.
     virtual void getEventDark(char *string);
+
+    // It switches to dark schedule.
+    void switchToDarkMode();
+
+    // It switches to normal schedule.
+    void switchToNormalMode();
+
+    // It returns the dark mode value.
+    bool getDarkModelMode();
+
+    // It sets the dependent device ID.
+    void setDependentDevice(int id);
     
   protected:
   
@@ -162,7 +174,12 @@ class LightManager : public Device, public EventHandler, public Storable
     unsigned long debounceDelay; 
     bool lastSensorState;
 
-    
+    // Flag that is true if the dark mode is on.
+    bool darkMode;
+
+    // Flag that is true if the manual mode is on.
+    bool manualMode;
+
     bool getNewValue();
 
     // The realy swithc on command.

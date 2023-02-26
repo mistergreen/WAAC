@@ -30,7 +30,10 @@ class EventHandler : public Storable
     // It sets the dependent device ID.
     virtual void setDependentDevice(int id);
 
-    void setSuspendTime(bool in_suspend);
+    virtual void setSuspendTime(bool in_suspend);
+
+    // It reurns if the timer is suspended.
+    virtual bool getSuspendTime();
 
     // The main loop that executes the scheduling.
     void loop();
@@ -39,11 +42,27 @@ class EventHandler : public Storable
     void serialize(
         // Input Json object pointer to be filled with the class information.
         JsonObject& doc);
+
+    void serializeBuffer(
+      // The pointer to the event
+      char* eventOut, 
+      // The pointer to the device id
+      int* dependentDeviceIdOut, 
+      // The pointer to the suspend time
+      bool* suspendTimeOut);
     
     // It fills the class using the information contained into the document.
     void deserialize(
         // Input Json object pointer containing the class information.
         JsonObject& doc);
+
+    void deserializeBuffer(
+      // The event
+      char* event, 
+      // The device id
+      int dependentDeviceId, 
+      // The suspend time
+      bool suspendTime);
 
   protected:
     // The maximum number of events.
@@ -71,9 +90,6 @@ class EventHandler : public Storable
 
     // It returns the percentage of time elapsed in an event.
     float getEventPercentage();
-
-    // It reurns if the timer is suspended.
-    bool getSuspendTime();
 
     // The ID of the event in progress, -1 if no event is in progress.
     int inProgressEventId;

@@ -19,6 +19,7 @@ LightManager::LightManager(char *in_name, int in_dependent_device_id) :
     strcpy(classType,"LightManager");
 
     pwmsIndexCounter = 0;
+    pwmsDarkIndexCounter = 0;
 
     color.currentColor = 0;
     color.initColor = 0;
@@ -36,6 +37,11 @@ LightManager::LightManager(char *in_name, int in_dependent_device_id) :
 
     relayInvert = false;
     relayState = false;
+
+    darkMode = false;
+    manualMode = false;
+
+    darkEvent.setDependentDevice(in_dependent_device_id);
 }
 
 
@@ -124,6 +130,8 @@ void LightManager::loop()
     lastSensorState = temp;
 
     EventHandler::loop();
+
+    darkEvent.loop();
 }
 
 
@@ -381,14 +389,52 @@ void LightManager::setPWM(int pwm)
 void LightManager::setSuspendTime(
     bool in_suspend)
 {
-    EventHandler::setSuspendTime(in_suspend);
+
+    manualMode = in_suspend;
+
+    if (false == in_suspend)
+    {
+        if(true == darkMode)
+        {
+            EventHandler::setSuspendTime(true);
+            darkEvent.setSuspendTime(false);
+        }
+        else
+        {
+            EventHandler::setSuspendTime(false);
+            darkEvent.setSuspendTime(true);
+        }
+    }
+    else
+    {
+            EventHandler::setSuspendTime(in_suspend);
+    darkEvent.setSuspendTime(in_suspend);
+    }
 }
 
 bool LightManager::getSuspendTime()
 {
-    bool suspendTime = EventHandler::getSuspendTime();
+    bool suspendTime = false;
+    
+    if (true == darkMode)
+    {
+        suspendTime = darkEvent.getSuspendTime();
+    }
+    else
+    {
+        suspendTime = EventHandler::getSuspendTime();
+    }
+     
     return suspendTime;
 }
+
+
+void LightManager::setDependentDevice(int id)
+{
+    EventHandler::setDependentDevice(id);
+    darkEvent.setDependentDevice(id);
+}
+
 
 void LightManager::setPin(uint8_t channel, uint16_t color)
 {
@@ -420,32 +466,50 @@ void LightManager::serialize(JsonObject& doc)
     // First call father serialization
     Device::serialize(doc);
     EventHandler::serialize(doc);
-    darkEvent.serialize(doc);
+
+    // 64 characters per event + carriage return
+    char darkEventBuff[67*12];
+
+    // clean the buffer
+    memset(darkEventBuff, 0, sizeof(darkEventBuff));
+
+    int darkDependentDeviceId = 0;
+
+    bool darkSuspendTime = false;
+
+    darkEvent.serializeBuffer(darkEventBuff, &darkDependentDeviceId, &darkSuspendTime);
+
+    doc["darkEvent"] = darkEventBuff;
+    doc["darkDependentDeviceId"] = darkDependentDeviceId;
+    doc["darkSuspendTime"] = darkSuspendTime;
 
     char event[sPWMS_BUFFER_SIZE];
     // clean the buffer
     memset(event, 0, sizeof(event));
 
-    serializePwms(event);
-
-    char darkEvent[sPWMS_BUFFER_SIZE];
+    char darkEventString[sPWMS_BUFFER_SIZE];
     // clean the buffer
-    memset(darkEvent, 0, sizeof(darkEvent));
+    memset(darkEventString, 0, sizeof(darkEventString));
 
-    serializeDarkPwms(darkEvent);
-
-    Serial.print("LightManager::serialize ");
-    Serial.println(event);
+    serializePwms(event);
+    serializeDarkPwms(darkEventString);
+    
+    Serial.print("LightManager::serialize event= ");
+    Serial.print(event);
+    Serial.print(" darkEvent= ");
+    Serial.println(darkEventString);
 
     doc["pin0"] = color.pin;
     doc["cha0"] = color.pwmChannel;
 
     doc["eventPwms"] = event;
-    doc["eventDarkPwms"] = darkEvent;
+    doc["eventDarkPwms"] = darkEventString;
 
     doc["relayPin"] = relayPin;
     doc["sensorPin"] = sensorPin;
     doc["relayInvert"] = relayInvert;
+
+
 }
 
 
@@ -455,7 +519,20 @@ void LightManager::deserialize(
    // First call father deserialization
     Device::deserialize(doc);
     EventHandler::deserialize(doc);
-    darkEvent.deserialize(doc);
+
+    // 64 characters per event + carriage return
+    char darkEventBuffer[67*12];
+    
+    // clean the buffer
+    memset(darkEventBuffer, 0, sizeof(darkEvent));
+
+    strcpy (darkEventBuffer, doc["darkEvent"]);
+
+    darkEvent.setEvent(darkEventBuffer);
+
+    darkEvent.setDependentDevice(doc["darkDependentDeviceId"]);
+
+    darkEvent.setSuspendTime(doc["darkSuspendTime"]);
 
     char event[sPWMS_BUFFER_SIZE];
     
@@ -463,16 +540,16 @@ void LightManager::deserialize(
     memset(event, 0, sizeof(event));
     strcpy (event, doc["eventPwms"]);
 
-    char darkEvent[sPWMS_BUFFER_SIZE];
+    char darkEventPwms[sPWMS_BUFFER_SIZE];
     
     // clean the buffer
-    memset(darkEvent, 0, sizeof(darkEvent));
-    strcpy (darkEvent, doc["eventDarkPwms"]);
+    memset(darkEventPwms, 0, sizeof(darkEventPwms));
+    strcpy (darkEventPwms, doc["eventDarkPwms"]);
 
     setLightControlPin((int)doc["pin0"], (int)doc["cha0"]);
     
     deserializePwms(event);
-    deserializeDarkPwms(darkEvent);
+    deserializeDarkPwms(darkEventPwms);
 
     setRelayPin(doc["relayPin"]);
     setSensorPin(doc["sensorPin"]);
@@ -528,4 +605,31 @@ void LightManager::setEventDark(char *in_string)
 void LightManager::getEventDark(char *in_string)
 {
     darkEvent.getEvent(in_string);
+}
+
+void LightManager::switchToDarkMode()
+{
+    darkMode = true;
+
+    if (false == manualMode)
+    {
+        EventHandler:setSuspendTime(true);
+        darkEvent.setSuspendTime(false);
+    }
+}
+
+void LightManager::switchToNormalMode()
+{
+    darkMode = false;
+
+    if (false == manualMode)
+    {
+        EventHandler:setSuspendTime(false);
+        darkEvent.setSuspendTime(true);
+    }
+}
+
+bool LightManager::getDarkModelMode()
+{
+    return darkMode;
 }

@@ -22,6 +22,26 @@ void setPWM(WiFiClient client)
   }
 }
 
+void switchDarkMode(WiFiClient client) {
+      webParser.clearBuffer(param_value, queryMax);
+      webParser.parseQuery(queryBuffer, "switchDark", param_value);
+      int deviceId = atoi(param_value);
+      if(deviceId > 0) { 
+        webParser.clearBuffer(param_value, queryMax);
+        webParser.parseQuery(queryBuffer, "dark", param_value);
+
+        if(0 == strcmp(param_value, "dark")) {
+          static_cast<LightManager*>(deviceDelegate.findDevice(deviceId))->switchToDarkMode();
+        }
+        else {
+          static_cast<LightManager*>(deviceDelegate.findDevice(deviceId))->switchToNormalMode();
+        }
+        Serial.print("switchDarkMode: ");
+        Serial.println(param_value);
+        successAjax(client);
+      }
+}
+
 void lightManagerAjaxOutput(WiFiClient client, Device *device) {
   client.print(F("<pin>"));
   client.print(device->getPin());
@@ -61,9 +81,18 @@ void lightManagerAjaxOutput(WiFiClient client, Device *device) {
   client.print(F("<relayPin>"));
   client.print(static_cast<LightManager*>(device)->getRelayPin());
   client.print(F("</relayPin>"));
+  client.print(F("<invert>"));
+  client.print(static_cast<LightManager*>(device)->getInvert());
+  client.print(F("</invert>"));
   client.print(F("<sensorPin>"));
   client.print(static_cast<LightManager*>(device)->getSensorPin());
   client.print(F("</sensorPin>"));
+  client.print(F("<mode>"));
+  client.print(static_cast<LightManager*>(device)->getSuspendTime());
+  client.print(F("</mode>"));
+  client.print(F("<dark>"));
+  client.print(static_cast<LightManager*>(device)->getDarkModelMode());
+  client.print(F("</dark>"));
 }
 
 void saveLightManager(Device *device) { 
@@ -108,6 +137,35 @@ void saveLightManager(Device *device) {
   webParser.clearBuffer(param_value, queryMax);
   webParser.parseQuery(queryBuffer, "eventDarkPwms", param_value);
   static_cast<LightManager*>(device)->deserializeDarkPwms(param_value);
+
+
+  webParser.clearBuffer(param_value, queryMax);
+  webParser.parseQuery(queryBuffer, "relayPin", param_value);
+
+  int relayPin;
+
+  if(param_value[0] == '\0') {
+    relayPin = UNSET;
+  } else {
+    relayPin = convertPin(param_value);
+  }
+  static_cast<LightManager*>(device)->setRelayPin(relayPin);
+
+  webParser.clearBuffer(param_value, queryMax);
+  webParser.parseQuery(queryBuffer, "invert", param_value);
+  static_cast<LightManager*>(device)->setInvert(atoi(param_value));
+
+  webParser.clearBuffer(param_value, queryMax);
+  webParser.parseQuery(queryBuffer, "sensorPin", param_value);
+
+  int sensorPin;
+
+  if(param_value[0] == '\0') {
+    sensorPin = UNSET;
+  } else {
+    sensorPin = convertPin(param_value);
+  }
+  static_cast<LightManager*>(device)->setSensorPin(sensorPin);
 }
 
 void createLightManager() {
@@ -174,6 +232,12 @@ void createLightManager() {
     relayPin = convertPin(param_value);
   }
 
+  temp->setRelayPin(relayPin);
+
+  webParser.clearBuffer(param_value, queryMax);
+  webParser.parseQuery(queryBuffer, "invert", param_value);
+  temp->setInvert(atoi(param_value));
+
   webParser.clearBuffer(param_value, queryMax);
   webParser.parseQuery(queryBuffer, "sensorPin", param_value);
   int sensorPin;
@@ -183,4 +247,6 @@ void createLightManager() {
   } else {
     sensorPin = convertPin(param_value);
   }
+
+  temp->setSensorPin(sensorPin);
 }
