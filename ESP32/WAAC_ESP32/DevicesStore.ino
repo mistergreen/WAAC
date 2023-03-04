@@ -99,6 +99,10 @@ void loadDevices(const char *filename) {
       {
         temp = new Video();
       }
+      else if (strcmp("LightManager", deviceType) == 0)
+      {
+        temp = new LightManager();
+      }
       
       if (temp != NULL)
       {

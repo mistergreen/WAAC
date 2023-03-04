@@ -37,6 +37,8 @@ LightManager::LightManager(char *in_name, int in_dependent_device_id) :
 
     relayInvert = false;
     relayState = false;
+    deviceState = false;
+    lightSensorValue = false;
 
     darkMode = false;
     manualMode = false;
@@ -122,8 +124,19 @@ void LightManager::loop()
         // whatever the reading is at, it has been there for longer than the debounce
         // delay, so take it as the actual current state
 
-         if (temp != deviceState) 
-            deviceState = temp; // set deviceState 
+         if (temp != lightSensorValue)
+         {
+            lightSensorValue = temp;
+
+            if (true == lightSensorValue)
+            {
+                switchToDarkMode();
+            }
+            else
+            {
+                switchToNormalMode();
+            }
+         }
     }
 
     // save the reading. Next time through the loop, it'll be the lastState:
@@ -363,10 +376,11 @@ void LightManager::relaySwitchOff()
 void LightManager::toggleState() {
     EventHandler::setSuspendTime(true);
 
-    if (deviceState) {
-        switchOff();
-        
-    } else {
+    if (true == deviceState) 
+    {
+        switchOff();    
+    } else 
+    {
         switchOn();
     }
 }
@@ -438,12 +452,12 @@ void LightManager::setDependentDevice(int id)
 
 void LightManager::setPin(uint8_t channel, uint16_t color)
 {
-    //char setPinsLog[512];
-    //sprintf (setPinsLog, "%s channel %d, color %d", 
-    //        __PRETTY_FUNCTION__ , 
-    //        channel,
-    //        color);
-    //Serial.println(setPinsLog);
+    char setPinsLog[512];
+    sprintf (setPinsLog, "%s channel %d, color %d", 
+            __PRETTY_FUNCTION__ , 
+            channel,
+            color);
+    Serial.println(setPinsLog);
 
     ledcWrite(channel, color);
 }
@@ -611,22 +625,20 @@ void LightManager::switchToDarkMode()
 {
     darkMode = true;
 
-    if (false == manualMode)
-    {
-        EventHandler:setSuspendTime(true);
-        darkEvent.setSuspendTime(false);
-    }
+    Serial.println("LightManager::switchToNormalMode switching to dark");
+
+    EventHandler:setSuspendTime(true);
+    darkEvent.setSuspendTime(false);
 }
 
 void LightManager::switchToNormalMode()
 {
     darkMode = false;
 
-    if (false == manualMode)
-    {
-        EventHandler:setSuspendTime(false);
-        darkEvent.setSuspendTime(true);
-    }
+    Serial.println("LightManager::switchToNormalMode switching to normal");
+
+    EventHandler:setSuspendTime(false);
+    darkEvent.setSuspendTime(true);
 }
 
 bool LightManager::getDarkModelMode()

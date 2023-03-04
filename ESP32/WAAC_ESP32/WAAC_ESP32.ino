@@ -656,7 +656,7 @@ void parseReceivedRequest(WiFiClient client)
         
     } 
     // ***************** switch darkmode  ********************
-    else if(webParser.contains(queryBuffer, "switchDarkMode="))
+    else if(webParser.contains(queryBuffer, "switchDark="))
     {
       //will work for all device type with toggleState()
       switchDarkMode(client);

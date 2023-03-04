@@ -170,6 +170,9 @@ class LightManager : public Device, public EventHandler, public Storable
 
     bool relayState;
 
+    // The last light sensor value read.
+    bool lightSensorValue;
+
     unsigned long lastDebounceTime;  // the last time the output pin was toggled
     unsigned long debounceDelay; 
     bool lastSensorState;

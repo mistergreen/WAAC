@@ -218,8 +218,16 @@ void createLightManager() {
   temp->setEvent(param_value);
 
   webParser.clearBuffer(param_value, queryMax);
+  webParser.parseQuery(queryBuffer, "eventDark", param_value);
+  temp->setEventDark(param_value);
+
+  webParser.clearBuffer(param_value, queryMax);
   webParser.parseQuery(queryBuffer, "eventPwms", param_value);
   temp->deserializePwms(param_value);
+
+  webParser.clearBuffer(param_value, queryMax);
+  webParser.parseQuery(queryBuffer, "eventDarkPwms", param_value);
+  temp->deserializeDarkPwms(param_value);
 
   webParser.clearBuffer(param_value, queryMax);
   webParser.parseQuery(queryBuffer, "relayPin", param_value);

@@ -118,7 +118,7 @@
 							var k = 0;
 
 							$("input[name='dow']").each(function(){
-								var day = parts[i+4].charAt(k);
+								var day = parts[i+2].charAt(k);
 								if(day == "1") {
 									$(this).prop("checked",true).checkboxradio("refresh");
 								}
@@ -143,7 +143,7 @@
 							$("#minute_dark"+j).val(startDark[1]);
 							$("#second_dark"+j).val(startDark[2]);
 
-							var durationDark = darkParts[i+3].split(":");
+							var durationDark = darkParts[i+1].split(":");
 							$("#hourd_dark"+j).val(durationDark[0]);
 							$("#minuted_dark"+j).val(durationDark[1]);
 							$("#secondd_dark"+j).val(durationDark[2]);
@@ -265,7 +265,7 @@
 		str += "&image=" + $("#imagemenu option:selected").val() + "&dependent=" + $("#dependentmenu option:selected").val() +"&";
 	
 		var eventStr = "event=";
-		var eventAwayStr = "&eventAway=";
+		var eventAwayStr = "&eventDark=";
 		
 		var dow = "";
 				$("input[name='dow']").each(function(){
@@ -307,7 +307,7 @@
 		for( var i = 1; i <= 4; i++) {
 			if($("#hour_dark"+i).val() != "") {
 				if(i >= 2) eventColorsDarkStr += ",";
-				eventColorsDarkStr = eventColorsDarkStr + $("#white"+i).val();
+				eventColorsDarkStr = eventColorsDarkStr + $("#white_dark"+i).val();
 			}
 		}
 
