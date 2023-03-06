@@ -16,14 +16,69 @@
 #include "EventHandler.h"
 #include "DeviceDelegate.h"
 
-class LightManager : public Device, public EventHandler, public Storable
+class LightManager : public Device, public Storable
 {
   public:
+   // The Light Manager custom event manager.
+    class LMEventManager : public EventHandler
+    {
+      public:
+        // The class constructor.
+        LMEventManager(LightManager* lightManager, int in_dependent_device_id = 0);
+
+        // The class destructor.
+        ~LMEventManager();
+
+        // It sets the current color.
+        void setCurrentColor(int currentColor);
+
+        // It returns the current color.
+        int getCurrentColor();
+
+        // It is the action performed during an event.
+        void performActionInEvent();
+
+        // It is the action performed out of an event.
+        void performActionOutEvent();
+
+        // It is the action performed not during an event by a dependent device.
+        void performActionInEventNoSchedule();
+
+        // It is the action performed out not during an event by a dependent device.
+        void performActionOutEventNoSchedule();
+
+        // Deserialize the PWM values from the incoming string.
+        void deserializePwms(char *in_string);
+
+        // Serialize the PWM values into the passed string.
+        void serializePwms(char *string);
+
+        // The maximum PWM value size.
+        static const int sMAX_PWM_VALUE_SIZE = 5;
+
+        // The maximum PWMs buffer size.
+        static const int sPWMS_BUFFER_SIZE = sMAX_NUM_EVENTS * sMAX_PWM_VALUE_SIZE;
+
+      private:
+        typedef struct {
+          int pwm[4]; // - for each events, value of pwm
+          int initColor;
+          int currentColor;
+          long colorStartTime;
+        } colorAux;
+
+        colorAux color;
+
+        LightManager* lm;
+
+        uint8_t pwmsIndexCounter;
+    };
+
     // The maximum PWM value size.
-    static const int sMAX_PWM_VALUE_SIZE = 5;
+    static const int sMAX_PWM_VALUE_SIZE = LMEventManager::sMAX_PWM_VALUE_SIZE;
 
     // The maximum PWMs buffer size.
-    static const int sPWMS_BUFFER_SIZE = sMAX_NUM_EVENTS * sMAX_PWM_VALUE_SIZE;
+    static const int sPWMS_BUFFER_SIZE = LMEventManager::sPWMS_BUFFER_SIZE;
 
     // Class constructor, it sets the default values.
     LightManager(char *in_name = "", int in_dependent_device_id = 0);
@@ -104,6 +159,12 @@ class LightManager : public Device, public EventHandler, public Storable
     );
 
     // It sets the dark events string.
+    void setEvent(char *in_string);
+
+    // It gets the dark events string.
+    virtual void getEvent(char *string);
+
+    // It sets the dark events string.
     void setEventDark(char *in_string);
 
     // It gets the dark events string.
@@ -118,31 +179,14 @@ class LightManager : public Device, public EventHandler, public Storable
     // It returns the dark mode value.
     bool getDarkModelMode();
 
+    // It returns the dependendent device ID.
+    int getDependentDevice();
+
     // It sets the dependent device ID.
     void setDependentDevice(int id);
-    
-  protected:
-  
-    typedef struct {
-        int pwm[4]; // - for each events, value of pwm
-        int initColor;
-        int currentColor;
-        int pin;
-        int pwmChannel;
-        long colorStartTime;
-    } colorAux;
-    
-    colorAux color;
-
-    colorAux colorDark;
-
-    // It is the action performed during an event.
-    virtual void performActionInEvent();
-
-    // It is the action performed out of an event.
-    virtual void performActionOutEvent();
 
   private:
+
     // The number of button actions implemented by the device.
     static const int sNUM_BUTTON_ACTIONS = 2;
 
@@ -151,14 +195,15 @@ class LightManager : public Device, public EventHandler, public Storable
 
     static const int sMAX_BIT = pow(2, LEDC_TIMER_BIT) -1;
 
-    uint8_t pwmsIndexCounter;
-
-    uint8_t pwmsDarkIndexCounter;
-
     long initMillis;
 
-    // This class handles the secondary schedule for the away mode.
-    EventHandler darkEvent;
+    LMEventManager* currentLM;
+
+    // This class handles the primary schedule for the normal mode.
+    LMEventManager* normalEvent;
+
+    // This class handles the secondary schedule for the dark mode.
+    LMEventManager* darkEvent;
 
     // The relay pin.
     int relayPin;
@@ -169,6 +214,12 @@ class LightManager : public Device, public EventHandler, public Storable
     bool relayInvert;
 
     bool relayState;
+
+    // The PWM control pin.
+    int pwmPin;
+
+    // The PWM control channel.
+    int pwmChannel;
 
     // The last light sensor value read.
     bool lightSensorValue;
@@ -191,14 +242,8 @@ class LightManager : public Device, public EventHandler, public Storable
     // The relay switch off command.
     void relaySwitchOff();
     
-    // It is the action performed not during an event by a dependent device.
-    virtual void performActionInEventNoSchedule();
-
-    // It is the action performed out not during an event by a dependent device.
-    virtual void performActionOutEventNoSchedule();
-
     // It sets the pin value.
-    virtual void setPin(uint8_t channel, uint16_t color);
+    virtual void setPin(uint16_t color);
 };
 
 #endif

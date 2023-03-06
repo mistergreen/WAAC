@@ -10,30 +10,19 @@
 const char* LightManager::sNAME_BUTTON_ACTIONS[] = {"Toggle State", "Set to auto"};
 
 LightManager::LightManager(char *in_name, int in_dependent_device_id) : 
-    Device(), EventHandler(in_dependent_device_id)
+    Device()
 {
     //deviceID is automatically set my deviceDeleGate
 
     strcpy(deviceName, in_name);
     //classType inherit from base
     strcpy(classType,"LightManager");
-
-    pwmsIndexCounter = 0;
-    pwmsDarkIndexCounter = 0;
-
-    color.currentColor = 0;
-    color.initColor = 0;
-    color.pwmChannel = UNSET;
-    color.pin = UNSET;
-
-    colorDark.currentColor = 0;
-    colorDark.initColor = 0;
-    colorDark.pwmChannel = UNSET;
-    colorDark.pin = UNSET;
  
     pin = UNSET;
     relayPin = UNSET;
     sensorPin = UNSET;
+    pwmPin = UNSET;
+    pwmChannel = UNSET;
 
     relayInvert = false;
     relayState = false;
@@ -43,7 +32,10 @@ LightManager::LightManager(char *in_name, int in_dependent_device_id) :
     darkMode = false;
     manualMode = false;
 
-    darkEvent.setDependentDevice(in_dependent_device_id);
+    normalEvent = new LMEventManager(this, in_dependent_device_id);
+    darkEvent = new LMEventManager(this, in_dependent_device_id);
+
+    currentLM = normalEvent;
 }
 
 
@@ -57,22 +49,22 @@ void LightManager::setLightControlPin(int pin, int channel) {
     //turn off any previous pin
     switchOff();
 
-    color.pin = pin;
-    color.pwmChannel = channel;
+    pwmPin = pin;
+    pwmChannel = channel;
     
     // Set the pin and attach pin to channel
-    if(color.pin > UNSET) {
-        pinMode(color.pin, OUTPUT);
-        ledcSetup(color.pwmChannel, LEDC_BASE_FREQ, LEDC_TIMER_BIT);
-        ledcAttachPin(color.pin, color.pwmChannel);
+    if((pwmPin > UNSET) && (pwmChannel> UNSET)) {
+        pinMode(pwmPin, OUTPUT);
+        ledcSetup(pwmChannel, LEDC_BASE_FREQ, LEDC_TIMER_BIT);
+        ledcAttachPin(pwmPin, pwmChannel);
     }
 }
 
 
 void LightManager::getLightControlPin(int *pin, int *channel) 
 {
-    *pin = color.pin;
-    *channel = color.pwmChannel;
+    *pin = pwmPin;
+    *channel = pwmChannel;
 }
 
 
@@ -85,10 +77,12 @@ void LightManager::setRelayPin(int pin)
                            // devices need pullup or pulldown for desired output
 }
 
+
 int LightManager::getRelayPin()
 {
     return relayPin;
 }
+
 
 void LightManager::setSensorPin(int pin)
 {
@@ -101,11 +95,11 @@ void LightManager::setSensorPin(int pin)
     lastSensorState = LOW; 
 }
 
+
 int LightManager::getSensorPin()
 {
     return sensorPin;
 }
-
 
 
 void LightManager::loop()
@@ -142,175 +136,31 @@ void LightManager::loop()
     // save the reading. Next time through the loop, it'll be the lastState:
     lastSensorState = temp;
 
-    EventHandler::loop();
-
-    darkEvent.loop();
-}
-
-
-void LightManager::performActionInEventNoSchedule()
-{
-    switchOn();
-}
-
-
-void LightManager::performActionOutEventNoSchedule()
-{
-    switchOff();
-}
-
-
-void LightManager::performActionInEvent()
-{
-    if(color.pin > UNSET) {
-        int colorDif = color.pwm[inProgressEventId] - color.initColor; // can be + -
-
-        // Get the percentage of event reached.
-        float percentage = getEventPercentage();
-
-        if(percentage >= 0.0f && percentage <= 1.0f) {
-            //Calculate the next color
-            int nextColor = color.initColor + colorDif * percentage;
-
-            // If the new color is different then peform the change.
-            if (nextColor != color.currentColor)
-            {
-                color.currentColor = nextColor;
-                setPin(color.pwmChannel, color.currentColor);
-            }
-        }
-    }
-
-    deviceState = true;
-}
-
-
-void LightManager::performActionOutEvent()
-{
-    // Action to perform when turning off
-    if ((true == deviceState) && (inProgressEventId > 0) && (inProgressEventId < sMAX_NUM_EVENTS))
-    {
-        // Store the maximum value for the event.
-        if(color.pin > UNSET) {
-            color.currentColor = color.pwm[inProgressEventId];
-            color.initColor = color.currentColor;
-
-            setPin(color.pwmChannel, color.currentColor);
-
-            if (0 == color.currentColor)
-            {
-                relaySwitchOff();
-            }
-            else
-            {
-                relaySwitchOn();
-            }
-        }
-
-        deviceState = false;
-    }
+    currentLM->loop();
 }
 
 
 void LightManager::deserializePwms(char *in_string)
 {
-    if(in_string[0] == '\0')
-    {
-        Serial.println("LightManager::deserializePwms no events");
-        pwmsIndexCounter = 0;
-    }
-    else
-    {
-        Serial.print("LightManager::deserializePwms::in_string ");
-        Serial.println(in_string);
-
-        //parse incoming string
-        char *tok1;
-        tok1 = strtok(in_string, ",");
-
-        for (pwmsIndexCounter = 0; (pwmsIndexCounter < sMAX_NUM_EVENTS && tok1 != NULL); pwmsIndexCounter++) 
-        {
-            sscanf(tok1, "%d", &color.pwm[pwmsIndexCounter]);
-            tok1 = strtok(NULL, ",");
-        }
-    }
+    normalEvent->deserializePwms(in_string);
 }
 
 
 void LightManager::serializePwms(char *string)
 {
-    if(pwmsIndexCounter > 0) 
-    {    
-        char buf[sPWMS_BUFFER_SIZE];
-
-        memset(buf, 0, sizeof(buf));
-        memset(string, 0, sizeof(buf));
-        
-        for (uint8_t i=0; i < pwmsIndexCounter; i++) {
-            if (i > 0)
-            {
-                strcat(string, ",");
-            }
-
-            sprintf(buf, "%d", color.pwm[i]);
-            strcat(string, buf);
-        }
-    } 
-    else 
-    {
-        string[0] = '\0';  
-    }
+    normalEvent->serializePwms(string);
 }
 
 
 void LightManager::deserializeDarkPwms(char *in_string)
 {
-    if(in_string[0] == '\0')
-    {
-        Serial.println("LightManager::deserializeDarkPwms no events");
-        pwmsDarkIndexCounter = 0;
-    }
-    else
-    {
-        Serial.print("LightManager::deserializeDarkPwms::in_string ");
-        Serial.println(in_string);
-
-        //parse incoming string
-        char *tok1;
-        tok1 = strtok(in_string, ",");
-
-        for (pwmsDarkIndexCounter = 0; (pwmsDarkIndexCounter < sMAX_NUM_EVENTS && tok1 != NULL); pwmsDarkIndexCounter++) 
-        {
-            sscanf(tok1, "%d", &colorDark.pwm[pwmsDarkIndexCounter]);
-            tok1 = strtok(NULL, ",");
-        }
-    }
+    darkEvent->deserializePwms(in_string);
 }
 
 
 void LightManager::serializeDarkPwms(char *string)
 {
-    if(pwmsDarkIndexCounter > 0) 
-    {    
-        char buf[sPWMS_BUFFER_SIZE];
-
-        memset(buf, 0, sizeof(buf));
-        memset(string, 0, sizeof(buf));
-        
-        for (uint8_t i=0; i < pwmsDarkIndexCounter; i++) {
-            if (i > 0)
-            {
-                strcat(string, ",");
-            }
-
-            sprintf(buf, "%d", colorDark.pwm[i]);
-            strcat(string, buf);
-        }
-    } 
-    else 
-    {
-        string[0] = '\0';  
-    }
+    darkEvent->serializePwms(string);
 }
 
 
@@ -319,26 +169,14 @@ void LightManager::switchOn()
     // address is defined in the device cpp file
     Serial.println("switching on");
 
-    relaySwitchOn();
-    
-    if(color.pin > UNSET) {
-        setPin(color.pwmChannel, sMAX_BIT);
-    }
-
-    deviceState = true;
+    setPin(sMAX_BIT);
 }
 
 void LightManager::switchOff()
 {
     Serial.println("switching off");
 
-    relaySwitchOff();
-
-    if(color.pin > UNSET) {
-        setPin(color.pwmChannel, 0);
-    }
-
-    deviceState = false;
+    setPin(0);
 }
 
 void LightManager::relaySwitchOn()
@@ -374,7 +212,7 @@ void LightManager::relaySwitchOff()
 }
 
 void LightManager::toggleState() {
-    EventHandler::setSuspendTime(true);
+    setSuspendTime(true);
 
     if (true == deviceState) 
     {
@@ -395,72 +233,67 @@ void LightManager::setInvert(boolean state) {
 
 void LightManager::setPWM(int pwm)
 {
-    if(color.pin > UNSET) {
-        setPin(color.pwmChannel, pwm);
-    }
+    setPin(pwm);
 }
+
 
 void LightManager::setSuspendTime(
     bool in_suspend)
 {
-
     manualMode = in_suspend;
 
-    if (false == in_suspend)
-    {
-        if(true == darkMode)
-        {
-            EventHandler::setSuspendTime(true);
-            darkEvent.setSuspendTime(false);
-        }
-        else
-        {
-            EventHandler::setSuspendTime(false);
-            darkEvent.setSuspendTime(true);
-        }
-    }
-    else
-    {
-            EventHandler::setSuspendTime(in_suspend);
-    darkEvent.setSuspendTime(in_suspend);
-    }
+    currentLM->setSuspendTime(in_suspend);
 }
 
 bool LightManager::getSuspendTime()
 {
     bool suspendTime = false;
     
-    if (true == darkMode)
-    {
-        suspendTime = darkEvent.getSuspendTime();
-    }
-    else
-    {
-        suspendTime = EventHandler::getSuspendTime();
-    }
+    suspendTime = currentLM->getSuspendTime();
      
     return suspendTime;
 }
 
 
+int LightManager::getDependentDevice()
+{
+    return currentLM->getDependentDevice();
+}
+
 void LightManager::setDependentDevice(int id)
 {
-    EventHandler::setDependentDevice(id);
-    darkEvent.setDependentDevice(id);
+    normalEvent->setDependentDevice(id);
+    darkEvent->setDependentDevice(id);
 }
 
 
-void LightManager::setPin(uint8_t channel, uint16_t color)
+void LightManager::setPin(uint16_t color)
 {
     char setPinsLog[512];
     sprintf (setPinsLog, "%s channel %d, color %d", 
             __PRETTY_FUNCTION__ , 
-            channel,
+            pwmChannel,
             color);
     Serial.println(setPinsLog);
 
-    ledcWrite(channel, color);
+    if((pwmPin > UNSET) && (pwmChannel > UNSET)) {
+        if (0 == color)
+        {
+            relaySwitchOff();
+
+            deviceState = false;
+        }
+        else
+        {
+            relaySwitchOn();
+
+            deviceState = true;
+        }
+
+        ledcWrite(pwmChannel, color);
+    }
 }
+
 
 bool LightManager::getNewValue() 
 {
@@ -479,7 +312,7 @@ void LightManager::serialize(JsonObject& doc)
 {
     // First call father serialization
     Device::serialize(doc);
-    EventHandler::serialize(doc);
+    normalEvent->serialize(doc);
 
     // 64 characters per event + carriage return
     char darkEventBuff[67*12];
@@ -491,7 +324,7 @@ void LightManager::serialize(JsonObject& doc)
 
     bool darkSuspendTime = false;
 
-    darkEvent.serializeBuffer(darkEventBuff, &darkDependentDeviceId, &darkSuspendTime);
+    darkEvent->serializeBuffer(darkEventBuff, &darkDependentDeviceId, &darkSuspendTime);
 
     doc["darkEvent"] = darkEventBuff;
     doc["darkDependentDeviceId"] = darkDependentDeviceId;
@@ -513,8 +346,8 @@ void LightManager::serialize(JsonObject& doc)
     Serial.print(" darkEvent= ");
     Serial.println(darkEventString);
 
-    doc["pin0"] = color.pin;
-    doc["cha0"] = color.pwmChannel;
+    doc["pin0"] = pwmPin;
+    doc["cha0"] = pwmChannel;
 
     doc["eventPwms"] = event;
     doc["eventDarkPwms"] = darkEventString;
@@ -522,8 +355,6 @@ void LightManager::serialize(JsonObject& doc)
     doc["relayPin"] = relayPin;
     doc["sensorPin"] = sensorPin;
     doc["relayInvert"] = relayInvert;
-
-
 }
 
 
@@ -532,7 +363,7 @@ void LightManager::deserialize(
 {
    // First call father deserialization
     Device::deserialize(doc);
-    EventHandler::deserialize(doc);
+    normalEvent->deserialize(doc);
 
     // 64 characters per event + carriage return
     char darkEventBuffer[67*12];
@@ -542,11 +373,11 @@ void LightManager::deserialize(
 
     strcpy (darkEventBuffer, doc["darkEvent"]);
 
-    darkEvent.setEvent(darkEventBuffer);
+    darkEvent->setEvent(darkEventBuffer);
 
-    darkEvent.setDependentDevice(doc["darkDependentDeviceId"]);
+    darkEvent->setDependentDevice(doc["darkDependentDeviceId"]);
 
-    darkEvent.setSuspendTime(doc["darkSuspendTime"]);
+    darkEvent->setSuspendTime(doc["darkSuspendTime"]);
 
     char event[sPWMS_BUFFER_SIZE];
     
@@ -606,20 +437,34 @@ void LightManager::callButtonAction(
     }
     else if (actionId == 1)
     {
-        EventHandler::setSuspendTime(false);
+        setSuspendTime(false);
     }
+}
+
+
+void LightManager::setEvent(char *in_string)
+{
+    normalEvent->setEvent(in_string);
+}
+
+
+void LightManager::getEvent(char *in_string)
+{
+    normalEvent->getEvent(in_string);
 }
 
 
 void LightManager::setEventDark(char *in_string)
 {
-    darkEvent.setEvent(in_string);
+    darkEvent->setEvent(in_string);
 }
+
 
 void LightManager::getEventDark(char *in_string)
 {
-    darkEvent.getEvent(in_string);
+    darkEvent->getEvent(in_string);
 }
+
 
 void LightManager::switchToDarkMode()
 {
@@ -627,9 +472,15 @@ void LightManager::switchToDarkMode()
 
     Serial.println("LightManager::switchToNormalMode switching to dark");
 
-    EventHandler:setSuspendTime(true);
-    darkEvent.setSuspendTime(false);
+    darkEvent->setSuspendTime(currentLM->getSuspendTime());
+
+    darkEvent->setCurrentColor(currentLM->getCurrentColor());
+
+    currentLM = darkEvent;
+
+    normalEvent->setSuspendTime(true);
 }
+
 
 void LightManager::switchToNormalMode()
 {
@@ -637,11 +488,145 @@ void LightManager::switchToNormalMode()
 
     Serial.println("LightManager::switchToNormalMode switching to normal");
 
-    EventHandler:setSuspendTime(false);
-    darkEvent.setSuspendTime(true);
+    normalEvent->setSuspendTime(currentLM->getSuspendTime());
+
+    normalEvent->setCurrentColor(currentLM->getCurrentColor());
+
+    currentLM = normalEvent;
+
+    darkEvent->setSuspendTime(true);
 }
+
 
 bool LightManager::getDarkModelMode()
 {
     return darkMode;
+}
+
+
+LightManager::LMEventManager::LMEventManager(LightManager* lightManager, int in_dependent_device_id) : EventHandler(in_dependent_device_id)
+{
+    lm = lightManager;
+
+    color.currentColor = 0;
+    color.initColor = 0;
+
+    pwmsIndexCounter = 0;
+}
+
+LightManager::LMEventManager::~LMEventManager()
+{
+    lm = static_cast<LightManager*>(0);
+}
+
+
+void LightManager::LMEventManager::setCurrentColor(int currentColor)
+{
+    lm->setPin(color.currentColor);
+    
+    color.initColor = currentColor;
+    color.currentColor = currentColor;
+}
+
+
+int LightManager::LMEventManager::getCurrentColor()
+{
+    return color.currentColor;
+}
+
+
+// It is the action performed during an event.
+void LightManager::LMEventManager::performActionInEvent()
+{
+    int colorDif = color.pwm[inProgressEventId] - color.initColor; // can be + -
+
+    // Get the percentage of event reached.
+    float percentage = getEventPercentage();
+
+    if(percentage >= 0.0f && percentage <= 1.0f) {
+        //Calculate the next color
+        int nextColor = color.initColor + colorDif * percentage;
+
+        // If the new color is different then peform the change.
+        if (nextColor != color.currentColor)
+        {
+            color.currentColor = nextColor;
+
+            lm->setPin(color.currentColor);
+        }
+    }
+}
+
+// It is the action performed out of an event.
+void LightManager::LMEventManager::performActionOutEvent()
+{
+    // Action to perform when turning off
+    if ((inProgressEventId > 0) && (inProgressEventId < sMAX_NUM_EVENTS))
+    {
+        color.currentColor = color.pwm[inProgressEventId];
+        color.initColor = color.currentColor;
+
+        lm->setPin(color.currentColor);
+    }
+}
+
+void LightManager::LMEventManager::performActionInEventNoSchedule()
+{
+    lm->switchOn();
+}
+
+
+void LightManager::LMEventManager::performActionOutEventNoSchedule()
+{
+    lm->switchOff();
+}
+
+void LightManager::LMEventManager::deserializePwms(char *in_string)
+{
+    if(in_string[0] == '\0')
+    {
+        Serial.println("LightManager::deserializePwms no events");
+        pwmsIndexCounter = 0;
+    }
+    else
+    {
+        Serial.print("LightManager::deserializePwms::in_string ");
+        Serial.println(in_string);
+
+        //parse incoming string
+        char *tok1;
+        tok1 = strtok(in_string, ",");
+
+        for (pwmsIndexCounter = 0; (pwmsIndexCounter < sMAX_NUM_EVENTS && tok1 != NULL); pwmsIndexCounter++) 
+        {
+            sscanf(tok1, "%d", &color.pwm[pwmsIndexCounter]);
+            tok1 = strtok(NULL, ",");
+        }
+    }
+}
+
+
+void LightManager::LMEventManager::serializePwms(char *string)
+{
+    if(pwmsIndexCounter > 0) 
+    {    
+        char buf[sPWMS_BUFFER_SIZE];
+
+        memset(buf, 0, sizeof(buf));
+        memset(string, 0, sizeof(buf));
+        
+        for (uint8_t i=0; i < pwmsIndexCounter; i++) {
+            if (i > 0)
+            {
+                strcat(string, ",");
+            }
+
+            sprintf(buf, "%d", color.pwm[i]);
+            strcat(string, buf);
+        }
+    } 
+    else 
+    {
+        string[0] = '\0';  
+    }
 }
