@@ -64,6 +64,8 @@ class EventHandler : public Storable
       // The suspend time
       bool suspendTime);
 
+    static long convertToSeconds(int in_hour, int in_minute, int in_second);
+
   protected:
     // The maximum number of events.
     static const int sMAX_NUM_EVENTS = 5;
@@ -121,8 +123,6 @@ class EventHandler : public Storable
     // It stores the days of week.
     char dow[sMAX_NUM_EVENTS][8];
 
-    long convertToSeconds(int in_hour, int in_minute, int in_second);
-    
     void stripTime(char *inString, int *inArray);
 };
 

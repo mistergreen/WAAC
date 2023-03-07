@@ -53,6 +53,9 @@ class LightManager : public Device, public Storable
         // Serialize the PWM values into the passed string.
         void serializePwms(char *string);
 
+        // The color transition out of event.
+        void colorTransitionLoop();
+
         // The maximum PWM value size.
         static const int sMAX_PWM_VALUE_SIZE = 5;
 
@@ -72,6 +75,15 @@ class LightManager : public Device, public Storable
         LightManager* lm;
 
         uint8_t pwmsIndexCounter;
+
+        // Set to true during color transitions not during events.
+        bool colorTransition;
+
+        // The start of color transition event.
+        long colorTransitionTime;
+
+        // The color transition duration.
+        long colorTransitionDuration;
     };
 
     // The maximum PWM value size.

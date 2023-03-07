@@ -6,6 +6,8 @@
 #define UNSET -1
 
 #include "LightManager.h"
+#include "WWWsettings.h"
+#include <ezTime.h>
 
 const char* LightManager::sNAME_BUTTON_ACTIONS[] = {"Toggle State", "Set to auto"};
 
@@ -136,6 +138,7 @@ void LightManager::loop()
     // save the reading. Next time through the loop, it'll be the lastState:
     lastSensorState = temp;
 
+    currentLM->colorTransitionLoop();
     currentLM->loop();
 }
 
@@ -512,6 +515,9 @@ LightManager::LMEventManager::LMEventManager(LightManager* lightManager, int in_
     color.initColor = 0;
 
     pwmsIndexCounter = 0;
+
+    colorTransition = false;
+    colorTransitionDuration = convertToSeconds(0, 1, 0);
 }
 
 LightManager::LMEventManager::~LMEventManager()
@@ -522,16 +528,78 @@ LightManager::LMEventManager::~LMEventManager()
 
 void LightManager::LMEventManager::setCurrentColor(int currentColor)
 {
-    lm->setPin(color.currentColor);
-    
-    color.initColor = currentColor;
-    color.currentColor = currentColor;
+    if (currentColor != color.currentColor)
+    {
+        color.initColor = currentColor;
+        color.currentColor = currentColor;
+
+        // Get the settings instance.
+        WWWsettings* settings = WWWsettings::getinstance();
+
+        // Get the current time.
+        Timezone* now = settings->getTime();
+
+        // Get the current time.        
+        long currentTime = convertToSeconds(now->hour(), now->minute(), now->second());
+
+        colorTransition = true;
+    }
+    else
+    {
+        colorTransition = false;
+    }
 }
 
 
 int LightManager::LMEventManager::getCurrentColor()
 {
     return color.currentColor;
+}
+
+
+void LightManager::LMEventManager::colorTransitionLoop()
+{
+    if ((true == colorTransition) && (lastEventId >= 0))
+    {
+        int colorDif = color.pwm[lastEventId] - color.initColor; // can be + -
+
+        // Get the settings instance.
+        WWWsettings* settings = WWWsettings::getinstance();
+
+        // Get the current time.
+        Timezone* now = settings->getTime();
+
+        // Get the current time.        
+        long currentTime = convertToSeconds(now->hour(), now->minute(), now->second());
+
+        float percentage = (float)(currentTime-colorTransitionTime) / (float)colorTransitionDuration;
+
+        // Clip for possible rounding problems.
+        if (percentage < 0)
+        {
+            percentage = 0;
+        }
+        else if (percentage > 1)
+        {
+            percentage = 1;
+        }
+
+        //Calculate the next color
+        int nextColor = color.initColor + colorDif * percentage;
+
+        // If the new color is different then peform the change.
+        if (nextColor != color.currentColor)
+        {
+            color.currentColor = nextColor;
+
+            lm->setPin(color.currentColor);
+        }
+
+        if (color.currentColor == color.pwm[lastEventId])
+        {
+            colorTransition = false;
+        }
+    }
 }
 
 
