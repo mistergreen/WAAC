@@ -11,6 +11,7 @@
 
 const char* LightManager::sNAME_BUTTON_ACTIONS[] = {"Toggle State", "Set to auto"};
 
+
 LightManager::LightManager(char *in_name, int in_dependent_device_id) : 
     Device()
 {
@@ -186,15 +187,17 @@ void LightManager::relaySwitchOn()
 {       
     if (false == relayState)
     {       
-        Serial.println("LightManager::relaySwitchOn switching on");
+        Serial.print("LightManager::relaySwitchOn switching on, pin ");
+        Serial.println(relayPin);
 
         if(relayInvert) {
-            digitalWrite(pin,LOW);
+            digitalWrite(relayPin,LOW);
         } else {
-            digitalWrite(pin,HIGH);
+            digitalWrite(relayPin,HIGH);
         }
 
         relayState = true;
+        deviceState = true;
     }
 }
 
@@ -202,14 +205,16 @@ void LightManager::relaySwitchOff()
 {
     if(true == relayState)
     {
-        Serial.println("LightManager::relaySwitchOff switching off");
+        Serial.print("LightManager::relaySwitchOff switching off, pin ");
+        Serial.println(relayPin);
 
         if(relayInvert) {
-            digitalWrite(pin,HIGH);
+            digitalWrite(relayPin,HIGH);
         } else {
-            digitalWrite(pin,LOW);
+            digitalWrite(relayPin,LOW);
         }
 
+        deviceState = false;
         relayState = false;
     }
 }
@@ -273,8 +278,9 @@ void LightManager::setDependentDevice(int id)
 void LightManager::setPin(uint16_t color)
 {
     char setPinsLog[512];
-    sprintf (setPinsLog, "%s channel %d, color %d", 
-            __PRETTY_FUNCTION__ , 
+    sprintf (setPinsLog, "%s pin %d, channel %d, color %d", 
+            __PRETTY_FUNCTION__ ,
+            pwmPin,
             pwmChannel,
             color);
     Serial.println(setPinsLog);
@@ -283,14 +289,10 @@ void LightManager::setPin(uint16_t color)
         if (0 == color)
         {
             relaySwitchOff();
-
-            deviceState = false;
         }
         else
         {
             relaySwitchOn();
-
-            deviceState = true;
         }
 
         ledcWrite(pwmChannel, color);
@@ -366,6 +368,12 @@ void LightManager::deserialize(
 {
    // First call father deserialization
     Device::deserialize(doc);
+
+    setLightControlPin((int)doc["pin0"], (int)doc["cha0"]);
+    setRelayPin(doc["relayPin"]);
+    setSensorPin(doc["sensorPin"]);
+    setInvert(doc["relayInvert"]);
+
     normalEvent->deserialize(doc);
 
     // 64 characters per event + carriage return
@@ -394,14 +402,9 @@ void LightManager::deserialize(
     memset(darkEventPwms, 0, sizeof(darkEventPwms));
     strcpy (darkEventPwms, doc["eventDarkPwms"]);
 
-    setLightControlPin((int)doc["pin0"], (int)doc["cha0"]);
     
     deserializePwms(event);
     deserializeDarkPwms(darkEventPwms);
-
-    setRelayPin(doc["relayPin"]);
-    setSensorPin(doc["sensorPin"]);
-    setInvert(doc["relayInvert"]);
 }
 
 
