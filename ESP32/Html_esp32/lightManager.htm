@@ -282,6 +282,7 @@
 				eventStr = eventStr + $("#hour"+i).val() + ":" + $("#minute"+i).val() + ":" + $("#second"+i).val()+ "," ;
 				eventStr = eventStr + $("#hourd"+i).val() + ":" + $("#minuted"+i).val() + ":" + $("#secondd"+i).val()+ "," ;
 
+				if(i >= 2) eventAwayStr += ",";
 				eventAwayStr = eventAwayStr + $("#hour_dark"+i).val() + ":" + $("#minute_dark"+i).val() + ":" + $("#second_dark"+i).val()+ "," ;
 				eventAwayStr = eventAwayStr + $("#hourd_dark"+i).val() + ":" + $("#minuted_dark"+i).val() + ":" + $("#secondd_dark"+i).val()+ "," ;
 
