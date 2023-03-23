@@ -281,6 +281,8 @@ void EventHandler::setEvent(char *in_string)
                 
             }
         }
+
+        calculateLastEvent();
     }
 }
 
@@ -288,7 +290,7 @@ void EventHandler::setEvent(char *in_string)
 void EventHandler::getEvent(char *string) {
     //manipulat incoming string rather than returning. Saves memory?
     if(timedIndexCounter > 0) {
-        Serial.println("EventHandler::getEvent timedIndexCounter");
+        Serial.print("EventHandler::getEvent timedIndexCounter ");
         Serial.println(timedIndexCounter);
         
         // Define a temporary string buffer.
@@ -418,5 +420,74 @@ void EventHandler::stripTime(char *inString, int *inArray) {
         tok1 = strtok(NULL, ":");
         i++;
         
+    }
+}
+
+
+void EventHandler::calculateLastEvent()
+{
+    // Check if an event is in progress.
+    if ((false == isEventInProgress()) && (timedIndexCounter > 0) && (timedIndexCounter < sMAX_NUM_EVENTS)) {
+        Serial.print("EventHandler::calculateLastEvent timedIndexCounter=");
+        Serial.println(timedIndexCounter);
+        
+        // Get the settings instance.
+        WWWsettings* settings = WWWsettings::getinstance();
+
+        // Get the current time.
+        Timezone* now = settings->getTime();
+
+        // Get the current time.
+        long currentTime = convertToSeconds(now->hour(), now->minute(), now->second());
+
+        long nearestEvent = 0;
+
+        // Start with today
+        uint8_t checkWeekDay = now->weekday() -1;
+
+        lastEventId = -1;
+        
+        for (uint8_t weekday = 0; weekday < 7; weekday++)
+        {
+            // Loop over all the events
+            for (uint8_t i = 0; i < timedIndexCounter; i++) 
+            {
+                if(dow[i][checkWeekDay] == '1')
+                {
+                    // Get start time
+                    long eventTime = convertToSeconds(hour[i],minute[i],second[i]);
+                    
+                    // Check if there is an event in progress now.
+                    if ((currentTime > eventTime) && (nearestEvent < eventTime))
+                    {
+                        lastEventId = i;
+                        nearestEvent = eventTime;
+                    }             
+                }
+            }
+
+            if (lastEventId == -1) // search for previous day
+            {
+                checkWeekDay--;
+
+                currentTime = 86400;
+
+                // Loop back at the final part of the week
+                if (checkWeekDay < 0)
+                {
+                    checkWeekDay = 6;
+                }
+            }
+            else // exit loop if it was found
+            {
+                weekday = 7;
+            }
+        }
+        
+        Serial.print("EventHandler::calculateLastEvent lastEventId ");
+        Serial.println(lastEventId);
+    } else {
+        Serial.print("EventHandler::timedIndexCounter out of range ");
+        Serial.println(timedIndexCounter);
     }
 }

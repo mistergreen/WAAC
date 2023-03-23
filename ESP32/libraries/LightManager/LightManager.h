@@ -56,6 +56,9 @@ class LightManager : public Device, public Storable
         // The color transition out of event.
         void colorTransitionLoop();
 
+        // It returns the last event color value.
+        int getLastEventColor();
+
         // The maximum PWM value size.
         static const int sMAX_PWM_VALUE_SIZE = 5;
 

@@ -66,6 +66,9 @@ class EventHandler : public Storable
 
     static long convertToSeconds(int in_hour, int in_minute, int in_second);
 
+    // It calculates the last passed event from the current time.
+    void calculateLastEvent();
+
   protected:
     // The maximum number of events.
     static const int sMAX_NUM_EVENTS = 5;

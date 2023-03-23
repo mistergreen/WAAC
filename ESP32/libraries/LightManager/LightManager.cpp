@@ -405,6 +405,22 @@ void LightManager::deserialize(
     
     deserializePwms(event);
     deserializeDarkPwms(darkEventPwms);
+
+    if ((true == darkEvent->getSuspendTime()) && (false == normalEvent->getSuspendTime()))
+    {
+        switchToDarkMode();
+    }
+    else
+    {
+        switchToNormalMode();
+    }
+
+    int lastColor = currentLM->getLastEventColor();
+    
+    Serial.print("LightManager::deserialize last color ");
+    Serial.println(lastColor);
+
+    setPin(lastColor);
 }
 
 
@@ -451,6 +467,16 @@ void LightManager::callButtonAction(
 void LightManager::setEvent(char *in_string)
 {
     normalEvent->setEvent(in_string);
+
+    if (false == darkMode)
+    {
+        int lastColor = normalEvent->getLastEventColor();
+
+        Serial.print("LightManager::setEvent last color ");
+        Serial.println(lastColor);
+
+        setPin(lastColor);
+    }
 }
 
 
@@ -463,6 +489,16 @@ void LightManager::getEvent(char *in_string)
 void LightManager::setEventDark(char *in_string)
 {
     darkEvent->setEvent(in_string);
+
+    if (true == darkMode)
+    {
+        int lastColor = darkEvent->getLastEventColor();
+
+        Serial.print("LightManager::setEventDark last color ");
+        Serial.println(lastColor);
+
+        setPin(lastColor);
+    }
 }
 
 
@@ -700,4 +736,18 @@ void LightManager::LMEventManager::serializePwms(char *string)
     {
         string[0] = '\0';  
     }
+}
+
+
+int LightManager::LMEventManager::getLastEventColor()
+{
+    // The returned value.
+    int retVal = 0;
+
+    if ((lastEventId >= 0) && (lastEventId < sMAX_NUM_EVENTS))
+    {
+        retVal = color.pwm[lastEventId];
+    }
+
+    return retVal;
 }
