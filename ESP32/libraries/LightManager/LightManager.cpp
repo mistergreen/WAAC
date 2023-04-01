@@ -557,6 +557,8 @@ LightManager::LMEventManager::LMEventManager(LightManager* lightManager, int in_
 
     colorTransition = false;
     colorTransitionDuration = convertToSeconds(0, 1, 0);
+    
+    colorTransitionTime = 0;
 }
 
 LightManager::LMEventManager::~LMEventManager()
@@ -579,7 +581,7 @@ void LightManager::LMEventManager::setCurrentColor(int currentColor)
         Timezone* now = settings->getTime();
 
         // Get the current time.        
-        long currentTime = convertToSeconds(now->hour(), now->minute(), now->second());
+        colorTransitionTime = convertToSeconds(now->hour(), now->minute(), now->second());
 
         colorTransition = true;
     }
