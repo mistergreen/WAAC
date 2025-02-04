@@ -1,0 +1,769 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Light Manager PWM</title>
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+<link rel="stylesheet" href="common.css" />
+<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+<script src="common.js"></script>
+
+<script>
+
+	$(document).on('pageshow',function(event) {
+
+		var deviceId = localStorage.getItem("deviceId");
+		var deviceType = localStorage.getItem("deviceType");
+
+		$.mobile.loading("show");
+		//get data from the server
+		nocache = "&nocache=" + Math.random() * 1000000;
+		var imageStr="";
+		var deviceStr="";
+					
+		$.get( "?deviceid="+ deviceId +"&devicetype=" + deviceType + nocache, 
+			function(data) {
+				//console.dirxml(data);
+				$.mobile.loading("hide");
+				// grab images & color list
+				$(data).find("item").each(function() {
+					imageStr += '<option value="'+ $(this).find("image").text()+'">'+ $(this).find("image").text()+'</option>';
+				});
+			
+				$('#imagemenu').append(imageStr).selectmenu("refresh",true);
+				
+				// grab dependent device  list
+				$(data).find("device").each(function() {
+					deviceStr += '<option value="'+ $(this).find("id").text()+'">'+ decodeURIComponent($(this).find("name").text()) +'</option>';
+				});
+				
+				$('#dependentmenu').append(deviceStr).selectmenu("refresh",true);
+							
+				//****** grab device specific data & populate fields ********
+				if(deviceId != 0) {	
+				
+					$('#name').val(decodeURIComponent($(data).find("deviceName").text()));
+					
+					var whitepin = $(data).find("lightControlPin").text()
+					$('#whitePin').val((whitepin=="-1")?"":whitepin);
+					
+					var whiteChannel = $(data).find("lightControlChannel").text()
+					$('#whiteChannel').val((whiteChannel=="-1")?"":whiteChannel);
+				
+					var relaypin = $(data).find("relayPin").text()
+					$('#relayPin').val((relaypin=="-1")?"":relaypin);
+
+					var sensorpin = $(data).find("sensorPin").text()
+					$('#sensorPin').val((sensorpin=="-1")?"":sensorpin);
+
+					var value = $(data).find("state").text();
+				
+					if(value == "0") {
+						$('#status').val("off").slider("refresh");
+					} else {
+						$('#status').val("on").slider("refresh");
+					}
+
+					var mode = $(data).find("mode").text();
+
+					if(mode == "0") {
+						$('#mode').val("auto").slider("refresh");
+					} else {
+						$('#mode').val("manual").slider("refresh");
+					}
+
+					var dark = $(data).find("dark").text();
+
+					if(dark == "0") {
+						$('#dark').val("normal").slider("refresh");
+					} else {
+						$('#dark').val("dark").slider("refresh");
+					}
+
+					var invert = $(data).find("invert").text();
+
+					if(invert == "0") {
+						$('#invert').prop("checked", false).checkboxradio('refresh');
+					} else {
+						console.log("invert: "+ invert)
+						$('#invert').prop("checked", true).checkboxradio('refresh');
+					}
+
+					var imageMenu = $(data).find("deviceImage").text();
+					$('#imagemenu').val(imageMenu).selectmenu("refresh");
+					
+					var depend = $(data).find("dependent").text();
+					$('#dependentmenu').val(depend).selectmenu("refresh");
+					
+					$('#readout').html($(data).find("readout").text());
+					
+					var events = $(data).find("event").text();
+					var parts = events.split(",");
+				
+					var j = 1;
+					//console.log("***"+parts+" - "+ parts.length/3);
+					if ((events != null) && (parts.length > 1)) {
+						for(var i=0; i < parts.length; i+=3) {
+							var start = parts[i].split(":");
+							$("#hour"+j).val(start[0]);
+							$("#minute"+j).val(start[1]);
+							$("#second"+j).val(start[2]);
+							var duration = parts[i+1].split(":");
+							$("#hourd"+j).val(duration[0]);
+							$("#minuted"+j).val(duration[1]);
+							$("#secondd"+j).val(duration[2]);
+
+							//dow
+							var k = 0;
+
+							$("input[name='dow']").each(function(){
+								var day = parts[i+2].charAt(k);
+								if(day == "1") {
+									$(this).prop("checked",true).checkboxradio("refresh");
+								}
+
+								k++;
+							});
+							//
+							j++;
+						}
+					}
+
+					var darkEvents = $(data).find("eventDark").text();
+					var darkParts = darkEvents.split(",");
+				
+					var j = 1;
+					//console.log("***"+parts+" - "+ parts.length/3);
+					if ((darkEvents != null) && (darkParts.length > 1)) {
+						for(var i=0; i < darkParts.length; i+=3) 
+						{
+							var startDark = darkParts[i].split(":");
+							$("#hour_dark"+j).val(startDark[0]);
+							$("#minute_dark"+j).val(startDark[1]);
+							$("#second_dark"+j).val(startDark[2]);
+
+							var durationDark = darkParts[i+1].split(":");
+							$("#hourd_dark"+j).val(durationDark[0]);
+							$("#minuted_dark"+j).val(durationDark[1]);
+							$("#secondd_dark"+j).val(durationDark[2]);
+							//
+							j++;
+						}
+					}
+
+					var events = $(data).find("eventPwms").text();
+					var parts = events.split(",");
+
+					var j = 1;
+			
+					for(var i=0; i < parts.length; i+=1) {
+						$("#white"+j).val(parts[i]).slider("refresh");
+						j++;
+					}
+
+					var events = $(data).find("eventDarkPwms").text();
+					var parts = events.split(",");
+
+					var j = 1;
+			
+					for(var i=0; i < parts.length; i+=1) {
+						$("#white_dark"+j).val(parts[i]).slider("refresh");
+						j++;
+					}
+				}//end deviceId
+
+				$.mobile.loading("hide");
+							
+			}).fail(function( jqXHR, textStatus, errorThrown ) {
+				alert("Unsuccessful. See console.log for info.");
+				console.log( "error: " +":"+textStatus +":"+errorThrown);
+				}); // xml function
+					
+		$("#imagemenu").change(function() {
+			var str = $(this).val();
+			
+			$("#display_image img").attr("src", "images/"+str);
+			
+		});
+		
+		var pwmVal = [];
+		$('input[name=slider1]').on('slidestop', function(event) {
+			var i = 0;
+			$('input[name=slider1]').each(function() {
+				pwmVal[i] = $(this).val();
+				i++;
+			});
+			setPWMs(pwmVal);
+		});
+		
+		$('input[name=slider2]').on('slidestop', function(event) {
+			var i = 0;
+			$('input[name=slider2]').each(function() {
+				pwmVal[i] = $(this).val();
+				i++;
+			});
+			setPWMs(pwmVal);
+		});
+		
+		$('input[name=slider3]').on('slidestop', function(event) {
+			var i = 0;
+			$('input[name=slider3]').each(function() {
+				pwmVal[i] = $(this).val();
+				i++;
+			});
+			setPWMs(pwmVal);
+		});
+		$('input[name=slider4]').on('slidestop', function(event) {
+			var i = 0;
+			$('input[name=slider4]').each(function() {
+				pwmVal[i] = $(this).val();
+				i++;
+			});
+			setPWMs(pwmVal);
+		});
+	});
+			
+	
+	function setPWMs(inArray) {
+		var id = localStorage.getItem("deviceId");
+		console.log(inArray);
+		if(id!=0) {
+			$.get("?setpwm=" + id + "&white="+inArray, function(data) {
+			//nothing
+			});
+		}	
+	}
+	
+	function switchDark() {			
+		var id = localStorage.getItem("deviceId");
+		var dark = document.getElementById("dark").value;
+		if(id != 0) {
+			nocache = "&nocache=" + Math.random() * 1000000;
+			$.get("?switchDark=" + id + "&dark=" + dark + nocache, function(data, status, response) {
+					//no need for a response
+			});
+		}
+	}
+
+	function validate() {
+
+		var deviceId = localStorage.getItem("deviceId");
+		var deviceType = localStorage.getItem("deviceType");
+		// we got formatted data to do serialize()
+		//var formStr = $("form").serialize();
+		//console.log(formStr);
+		const datastring = {};
+	
+		datastring.deviceType = deviceType;
+		datastring.deviceName = $("#name").val();
+		datastring.pin0 = ($("#whitePin").val() != "") ? parseInt($("#whitePin").val()):-1;
+		datastring.cha0 = ($("#whiteChannel").val() != "") ? parseInt($("#whiteChannel").val()):-1;
+		datastring.relayPin = ($("#relayPin").val() != "") ? parseInt($("#relayPin").val()):-1;
+		datastring.relayInvert = $("#invert").prop('checked')===true?1:0;
+		datastring.sensorPin = ($("#sensorPin").val() != "") ? parseInt($("#sensorPin").val()):-1;
+		datastring.imageName =  $("#imagemenu option:selected").val();
+
+	
+		var eventStr = "";
+		var eventAwayStr = "";
+		
+		var dow = "";
+				$("input[name='dow']").each(function(){
+					if($(this).is(":checked")) {
+						dow +="1";
+					} else {
+						dow +="0";
+					}
+				});
+
+		for( var i = 1; i <= 4; i++) {
+			if($("#hour"+i).val() != "") {
+				if(i >= 2) eventStr += ",";
+				eventStr = eventStr + $("#hour"+i).val() + ":" + $("#minute"+i).val() + ":" + $("#second"+i).val()+ "," ;
+				eventStr = eventStr + $("#hourd"+i).val() + ":" + $("#minuted"+i).val() + ":" + $("#secondd"+i).val()+ "," ;
+
+				if(i >= 2) eventAwayStr += ",";
+				eventAwayStr = eventAwayStr + $("#hour_dark"+i).val() + ":" + $("#minute_dark"+i).val() + ":" + $("#second_dark"+i).val()+ "," ;
+				eventAwayStr = eventAwayStr + $("#hourd_dark"+i).val() + ":" + $("#minuted_dark"+i).val() + ":" + $("#secondd_dark"+i).val()+ "," ;
+
+				eventStr += dow;
+				eventAwayStr += dow;
+			}
+		}
+		
+		datastring.event = eventStr;
+		datastring.darkEvents = eventAwayStr;
+		datastring.darkDependentDeviceId = parseInt($("#dependentmenu option:selected").val());
+
+		var eventColorsStr = "";
+		
+		for( var i = 1; i <= 4; i++) {
+			if($("#hour"+i).val() != "") {
+				if(i >= 2) eventColorsStr += ",";
+				eventColorsStr = eventColorsStr + $("#white"+i).val();
+			}
+		}
+		datastring.eventPwms = eventColorsStr;
+
+		var eventColorsDarkStr = "";
+		
+		for( var i = 1; i <= 4; i++) {
+			if($("#hour_dark"+i).val() != "") {
+				if(i >= 2) eventColorsDarkStr += ",";
+				eventColorsDarkStr = eventColorsDarkStr + $("#white_dark"+i).val();
+			}
+		}
+		datastring.eventDarkPwms = eventColorsDarkStr; 
+
+		//console.log( jsonString );
+		const jsonString = JSON.stringify(datastring);
+
+		$.post("", "savedevice="+ deviceId +"&devicetype="+ deviceType +"&json="+ jsonString, function(data){
+			if(data != null) {
+				//on complete save, go back to home
+				if($(data).find("response").text() == "success") {
+					location.href="index.htm";
+				}
+			}
+		}).fail(function( jqXHR, textStatus, errorThrown ) {
+						alert("Unsuccessful. See console.log for info.");
+						console.log( "error: " +":"+textStatus +":"+errorThrown);
+		});
+
+		
+	}// end function
+	
+	function clearOut(inId) {
+		if(confirm("Are you sure?")) {
+			$("#hour"+inId+", #minute"+inId+", #second"+inId+", #hourd"+inId+", #minuted"+inId+", #secondd"+inId).val("");
+			//$("input[name='dow']").attr("checked",false).checkboxradio("refresh");
+			$("input[name='slider" +inId+"']").val(0).slider("refresh");
+
+			$("#hour_dark"+inId+", #minute_dark"+inId+", #second_dark"+inId+", #hourd_dark"+inId+", #minuted_dark"+inId+", #secondd_dark"+inId).val("");
+			//$("input[name='dow']").attr("checked",false).checkboxradio("refresh");
+			$("input[name='slider_dark" +inId+"']").val(0).slider("refresh");
+		}
+	}
+	
+</script>
+              
+</head>
+
+<body>
+
+	<div data-role="header" data-theme="b">
+	<h1>PWM Light Manager 12-bit</h1>
+	</div>
+
+	<div class="ui-body ui-grid-a ui-responsive">
+		<div class="ui-block-a">
+			<input name="name" type="text" id="name" placeholder="Name" value="" maxlength="25" /> 
+			<div class="ui-grid-a">
+				<div class="ui-block-a">
+					Pin attached to PWM light control - some pins will crash the app
+					<input name="whitePin" type="text" id="whitePin" placeholder="LIGHT PWM PIN" value=""  />
+					Relay control
+					<input name="relayPin" type="text" id="relayPin" placeholder="RELAY PIN" value=""  />
+					<input type="checkbox" name="invert" id="invert"><label for="invert">Invert (active low)</label>
+					Light sensor
+					<input name="sensorPin" type="text" id="sensorPin" placeholder="SENSOR PIN" value=""  />
+					<legend>Device Status</legend>
+					<select name="status" id="status" data-role="slider" onChange="switchState()">
+						<option value="off">Off</option>
+						<option value="on">On</option>
+					</select>
+					<legend>Device Mode</legend>
+					<select name="mode" id="mode" data-role="slider" onChange="switchMode()">
+						<option value="auto">Auto</option>
+						<option value="manual">Manual</option>
+					</select>
+					<select name="dark" id="dark" data-role="slider" onChange="switchDark()">
+						<option value="normal">Normal</option>
+						<option value="dark">Dark</option>
+					</select>
+				</div>
+				<div class="ui-block-b">
+					(0-15)
+					<input name="whiteChannel" type="text" id="whiteChannel" placeholder="LIGHT PWM CHANNEL" value=""  />
+				</div>
+			</div>
+		</div>
+		<div class="ui-block-b">
+			<select name="dependentmenu" id="dependentmenu">
+				<option value="0">Dependent device</option>
+			</select>
+			<select name="imagemenu" id="imagemenu">
+				<option value="none.jpg">Image</option>
+			</select>
+			<div id="display_image"><img src="" align="center"></div>
+		</div>
+	</div>
+
+	<div data-role="tabs" id="tabs">
+		<div class="ui-body">
+			<b>Day of the week</b>
+			<fieldset data-role="controlgroup" data-type="horizontal"  data-theme="b">
+				<input type="checkbox" name="dow" id="su1" value="su">
+				<label for="su1">Su</label>
+				<input type="checkbox" name="dow" id="mo1" value="mo">
+				<label for="mo1">Mo</label>
+				<input type="checkbox" name="dow" id="tu1" value="tu">
+				<label for="tu1">Tu</label>
+				<input type="checkbox" name="dow" id="we1" value="we">
+				<label for="we1">We</label>
+				<input type="checkbox" name="dow" id="th1" value="th">
+				<label for="th1">Th</label>
+				<input type="checkbox" name="dow" id="fr1" value="fr">
+				<label for="fr1">Fr</label>
+				<input type="checkbox" name="dow" id="sa1" value="sa">
+				<label for="sa1">Sa</label>
+			</fieldset>
+		</div>
+		<div data-role="navbar" id="navbar">
+			<ul>
+				<li><a href="#one" data-ajax="false" class="ui-btn-active" data-theme="b">one</a></li>
+				<li><a href="#two" data-ajax="false" data-theme="b">two</a></li>
+				<li><a href="#three" data-ajax="false" data-theme="b">three</a></li>
+				<li><a href="#four" data-ajax="false" data-theme="b">four</a></li>
+			</ul>
+		</div>
+		
+		<div id="zero" class="ui-body-d ui-content"></div>
+
+		<div id="one" class="ui-body-d ui-content">
+			<div class="ui-field-contain" >
+				<b>Normal Mode</b>
+			</div>
+			<fieldset class="ui-grid-a ui-responsive">
+				<div class = "ui-block-a">
+					<b>Start</b>
+					<div class="ui-grid-b">
+						<div class = "ui-block-a">
+							<input name="hour1" type="number" id="hour1" placeholder="Hour" value="" />
+						</div>
+						<div class = "ui-block-b">
+							<input name="minute1" type="number" id="minute1" placeholder="Minute" value="" />
+						</div>
+						<div class = "ui-block-c">
+							<input name="second1" type="number" id="second1" placeholder="Second" value="" />
+						</div>
+					</div>
+				</div>
+				<div class = "ui-block-b">
+					<b>Duration</b>
+					<div class="ui-grid-b">
+						<div class = "ui-block-a">
+								<input name="hourd1" type="number" id="hourd1" placeholder="Hour" value="" />
+						</div>
+						<div class = "ui-block-b">
+								<input name="minuted1" type="number" id="minuted1" placeholder="Minute" value="" />
+						</div>
+						<div class = "ui-block-c">
+							<input name="secondd1" type="number" id="secondd1" placeholder="Second" value="" />
+						</div>
+					</div>
+				</div>  
+			</fieldset>
+			<div class="ui-field-contain" >
+				<label for="slider">LIGHT PWM VALUE</label>
+				<input type="range" name="slider1" id="white1" data-highlight="true" min="0" max="4095" value="0">
+			</div>
+
+			<div class="ui-field-contain" >
+				<hr>
+			</div>
+			<div class="ui-field-contain" >
+				<b>Away Mode</b>
+			</div>
+			<fieldset class="ui-grid-a ui-responsive">
+				<div class = "ui-block-a">
+					<b>Start</b>
+					<div class="ui-grid-b">
+						<div class = "ui-block-a">
+							<input name="hour_dark1" type="number" id="hour_dark1" placeholder="Hour" value="" />
+						</div>
+						<div class = "ui-block-b">
+							<input name="minute_dark1" type="number" id="minute_dark1" placeholder="Minute" value="" />
+						</div>
+						<div class = "ui-block-c">
+							<input name="second_dark1" type="number" id="second_dark1" placeholder="Second" value="" />
+						</div>
+					</div>
+				</div>
+				<div class = "ui-block-b">
+					<b>Duration</b>
+					<div class="ui-grid-b">
+						<div class = "ui-block-a">
+								<input name="hourd_dark1" type="number" id="hourd_dark1" placeholder="Hour" value="" />
+						</div>
+						<div class = "ui-block-b">
+								<input name="minuted_dark1" type="number" id="minuted_dark1" placeholder="Minute" value="" />
+						</div>
+						<div class = "ui-block-c">
+							<input name="secondd_dark1" type="number" id="secondd_dark1" placeholder="Second" value="" />
+						</div>
+					</div>
+				</div>  
+			</fieldset>
+			<div class="ui-field-contain" >
+				<label for="slider">LIGHT PWM VALUE</label>
+				<input type="range" name="slider_dark1" id="white_dark1" data-highlight="true" min="0" max="4095" value="0">
+			</div>
+			<a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="clearOut(1)" style="width: 55px; float: right;">RESET</a>      
+		</div>
+
+		<div id="two" class="ui-body-d ui-content">
+			<div class="ui-field-contain" >
+				<b>Normal Mode</b>
+			</div>
+			<fieldset class="ui-grid-a ui-responsive">
+				<div class = "ui-block-a">
+					<b>Start</b>
+					<div class="ui-grid-b">
+						<div class = "ui-block-a">
+							<input name="hour2" type="number" id="hour2" placeholder="Hour" value="" />
+						</div>
+						<div class = "ui-block-b">
+							<input name="minute2" type="number" id="minute2" placeholder="Minute" value="" />
+						</div>
+						<div class = "ui-block-c">
+							<input name="second2" type="number" id="second2" placeholder="Second" value="" />
+						</div>
+					</div>
+				</div>
+				<div class = "ui-block-b">
+					<b>Duration</b>
+					<div class="ui-grid-b">
+						<div class = "ui-block-a">
+							<input name="hourd2" type="number" id="hourd2" placeholder="Hour" value="" />
+						</div>
+						<div class = "ui-block-b">
+							<input name="minuted2" type="number" id="minuted2" placeholder="Minute" value="" />
+						</div>
+						<div class = "ui-block-c">
+							<input name="secondd2" type="number" id="secondd2" placeholder="Second" value="" />
+						</div>
+					</div>
+				</div>    
+			</fieldset>
+			<div class="ui-field-contain" >
+				<label for="slider">LIGHT PWM VALUE</label>
+				<input type="range" name="slider2" id="white2" data-highlight="true" min="0" max="4095" value="0">
+			</div>
+
+			<div class="ui-field-contain" >
+				<hr>
+			</div>
+			<div class="ui-field-contain" >
+				<b>Dark Mode</b>
+			</div>
+			<fieldset class="ui-grid-a ui-responsive">
+				<div class = "ui-block-a">
+					<b>Start</b>
+					<div class="ui-grid-b">
+						<div class = "ui-block-a">
+							<input name="hour_dark2" type="number" id="hour_dark2" placeholder="Hour" value="" />
+						</div>
+						<div class = "ui-block-b">
+							<input name="minute_dark2" type="number" id="minute_dark2" placeholder="Minute" value="" />
+						</div>
+						<div class = "ui-block-c">
+							<input name="second_dark2" type="number" id="second_dark2" placeholder="Second" value="" />
+						</div>
+					</div>
+				</div>
+				<div class = "ui-block-b">
+					<b>Duration</b>
+					<div class="ui-grid-b">
+						<div class = "ui-block-a">
+								<input name="hourd_dark2" type="number" id="hourd_dark2" placeholder="Hour" value="" />
+						</div>
+						<div class = "ui-block-b">
+								<input name="minuted_dark2" type="number" id="minuted_dark2" placeholder="Minute" value="" />
+						</div>
+						<div class = "ui-block-c">
+							<input name="secondd_dark2" type="number" id="secondd_dark2" placeholder="Second" value="" />
+						</div>
+					</div>
+				</div>  
+			</fieldset>
+			<div class="ui-field-contain" >
+				<label for="slider">LIGHT PWM VALUE</label>
+				<input type="range" name="slider_dark2" id="white_dark2" data-highlight="true" min="0" max="4095" value="0">
+			</div>
+			<a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="clearOut(2)" style="width: 55px; float: right;">RESET</a>	 
+		</div>
+		<div id="three" class="ui-body-d ui-content">
+			<div class="ui-field-contain" >
+				<b>Normal Mode</b>
+			</div>	
+			<fieldset class="ui-grid-a ui-responsive">
+				<div class = "ui-block-a">
+					<b>Start</b>
+					<div class="ui-grid-b">
+						<div class = "ui-block-a">
+							<input name="hour3" type="number" id="hour3" placeholder="Hour" value="" />
+						</div>
+						<div class = "ui-block-b">
+							<input name="minute3" type="number" id="minute3" placeholder="Minute" value="" />
+						</div>
+						<div class = "ui-block-c">
+							<input name="second3" type="number" id="second3" placeholder="Second" value="" />
+						</div>
+					</div>
+				</div>
+				<div class = "ui-block-b">
+					<b>Duration</b>
+					<div class="ui-grid-b">
+						<div class = "ui-block-a">
+							<input name="hourd3" type="number" id="hourd3" placeholder="Hour" value="" />
+						</div>
+						<div class = "ui-block-b">
+							<input name="minuted3" type="number" id="minuted3" placeholder="Minute" value="" />
+						</div>
+						<div class = "ui-block-c">
+							<input name="secondd3" type="number" id="secondd3" placeholder="Second" value="" />
+						</div>
+					</div>
+				</div>    
+			</fieldset>
+			<div class="ui-field-contain" >
+				<label for="slider">LIGHT PWM VALUE</label>
+				<input type="range" name="slider3" id="white3" data-highlight="true" min="0" max="4095" value="0">
+			</div>
+
+			<div class="ui-field-contain" >
+				<hr>
+			</div>
+			<div class="ui-field-contain" >
+				<b>Away Mode</b>
+			</div>
+			<fieldset class="ui-grid-a ui-responsive">
+				<div class = "ui-block-a">
+					<b>Start</b>
+					<div class="ui-grid-b">
+						<div class = "ui-block-a">
+							<input name="hour_dark3" type="number" id="hour_dark3" placeholder="Hour" value="" />
+						</div>
+						<div class = "ui-block-b">
+							<input name="minute_dark3" type="number" id="minute_dark3" placeholder="Minute" value="" />
+						</div>
+						<div class = "ui-block-c">
+							<input name="second_dark3" type="number" id="second_dark3" placeholder="Second" value="" />
+						</div>
+					</div>
+				</div>
+				<div class = "ui-block-b">
+					<b>Duration</b>
+					<div class="ui-grid-b">
+						<div class = "ui-block-a">
+								<input name="hourd_dark3" type="number" id="hourd_dark3" placeholder="Hour" value="" />
+						</div>
+						<div class = "ui-block-b">
+								<input name="minuted_dark3" type="number" id="minuted_dark3" placeholder="Minute" value="" />
+						</div>
+						<div class = "ui-block-c">
+							<input name="secondd_dark3" type="number" id="secondd_dark3" placeholder="Second" value="" />
+						</div>
+					</div>
+				</div>  
+			</fieldset>
+			<div class="ui-field-contain" >
+				<label for="slider">LIGHT PWM VALUE</label>
+				<input type="range" name="slider_dark3" id="white_dark3" data-highlight="true" min="0" max="4095" value="0">
+			</div>
+			<a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="clearOut(3)" style="width: 55px; float: right;">RESET</a> 
+		</div>
+		<div id="four" class="ui-body-d ui-content">
+			<div class="ui-field-contain" >
+				<b>Normal Mode</b>
+			</div>
+			<fieldset class="ui-grid-a ui-responsive">
+				<div class = "ui-block-a">
+					<b>Start</b>
+					<div class="ui-grid-b">
+						<div class = "ui-block-a">
+							<input name="hour4" type="number" id="hour4" placeholder="Hour" value="" />
+						</div>
+						<div class = "ui-block-b">
+							<input name="minute4" type="number" id="minute4" placeholder="Minute" value="" />
+						</div>
+						<div class = "ui-block-c">
+							<input name="second4" type="number" id="second4" placeholder="Second" value="" />
+						</div>
+					</div>
+				</div>
+				<div class = "ui-block-b">
+					<b>Duration</b>
+					<div class="ui-grid-b">
+						<div class = "ui-block-a">
+							<input name="hourd4" type="number" id="hourd4" placeholder="Hour" value="" />
+						</div>
+						<div class = "ui-block-b">
+							<input name="minuted4" type="number" id="minuted4" placeholder="Minute" value="" />
+						</div>
+						<div class = "ui-block-c">
+							<input name="secondd4" type="number" id="secondd4" placeholder="Second" value="" />
+						</div>
+					</div>
+				</div>    
+			</fieldset>
+			<div class="ui-field-contain" >        
+				<label for="slider">LIGHT PWM VALUE</label>
+				<input type="range" name="slider4" id="white4" data-highlight="true" min="0" max="4095" value="0">
+			</div>
+
+			<div class="ui-field-contain" >
+				<hr>
+			</div>
+			<div class="ui-field-contain" >
+				<b>Away Mode</b>
+			</div>
+			<fieldset class="ui-grid-a ui-responsive">
+				<div class = "ui-block-a">
+					<b>Start</b>
+					<div class="ui-grid-b">
+						<div class = "ui-block-a">
+							<input name="hour_dark4" type="number" id="hour_dark4" placeholder="Hour" value="" />
+						</div>
+						<div class = "ui-block-b">
+							<input name="minute_dark4" type="number" id="minute_dark4" placeholder="Minute" value="" />
+						</div>
+						<div class = "ui-block-c">
+							<input name="second_dark4" type="number" id="second_dark4" placeholder="Second" value="" />
+						</div>
+					</div>
+				</div>
+				<div class = "ui-block-b">
+					<b>Duration</b>
+					<div class="ui-grid-b">
+						<div class = "ui-block-a">
+								<input name="hourd_dark4" type="number" id="hourd_dark4" placeholder="Hour" value="" />
+						</div>
+						<div class = "ui-block-b">
+								<input name="minuted_dark4" type="number" id="minuted_dark4" placeholder="Minute" value="" />
+						</div>
+						<div class = "ui-block-c">
+							<input name="secondd_dark4" type="number" id="secondd_dark4" placeholder="Second" value="" />
+						</div>
+					</div>
+				</div>  
+			</fieldset>
+			<div class="ui-field-contain" >
+				<label for="slider">LIGHT PWM VALUE</label>
+				<input type="range" name="slider_dark4" id="white_dark4" data-highlight="true" min="0" max="4095" value="0">
+			</div>
+			<a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="clearOut(4)" style="width: 55px; float: right;">RESET</a>	 
+		</div>
+	</div>
+    <div data-role="footer" data-position="fixed" data-id="footer" data-type="horizontal" data-tap-toggle="false" data-theme="b">
+        <div style="text-align: center">
+            <a href="#" class="ui-btn ui-icon-check ui-btn-icon-left" onClick="validate()">SAVE</a>
+            <a href="#" data-ajax="false" class="ui-btn ui-icon-minus ui-btn-icon-left" onClick="cancel()">CANCEL</a>
+            <a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="deleteDevice()">DELETE</a>
+        </div>  
+    </div>
+</body>
+
+</html>
