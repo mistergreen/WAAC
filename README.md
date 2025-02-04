@@ -8,7 +8,7 @@ This version is ESP32 only.
   <li>Internal storage has been added, so all configuration can be stored in the internal flash of the ESP32.</li>
   <li>EzTime library is used instead of the default time library. This allows to use timezones instead of fixed time shifts.</li>
   <li>Servo motor library has been added to potentially handle an automated fish feeder (physically under development).</li>
-  <li>The HTML configuration pages send JSON back to the app to deserialize. Cleaner code and flow but make sure not send back wrong type or NULL or the app will crash.</li>
+  <li>The HTML configuration pages send JSON back to the app to deserialize. Cleaner code and flow but make sure not to send back wrong data type or NULL or the app will crash.</li>
 </ul>
 
 <strong>Bug Fixes:</strong>
