@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Analog Input</title>
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+        <link rel="stylesheet" href="common.css" />
+		<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+        <script src="common.js"></script>
+
+        <script language="javascript" type="text/javascript">
+		
+			$(document).on('pageshow',function(event) {
+					var deviceId = localStorage.getItem("deviceId");
+					var deviceType = localStorage.getItem("deviceType");
+					$.mobile.loading("show");
+					//get data from the server
+					nocache = "&nocache=" + Math.random() * 1000000;
+					var imageStr="";
+					
+						$.get( "?deviceid="+ deviceId +"&devicetype=" + deviceType + nocache,  
+							function(data) {
+                                $.mobile.loading("hide");
+                                        // grab images & color list
+                                $(data).find("item").each(function() {
+                                    imageStr += '<option value="'+ $(this).find("image").text()+'">'+ $(this).find("image").text()+'</option>';
+                                });
+
+                                $('#imagemenu').append(imageStr).selectmenu("refresh",true);
+							
+								//****** grab device specific data & populate fields ********
+								if(deviceId != 0) {	
+										$('#name').val(decodeURIComponent($(data).find("deviceName").text()));
+										$('#pin').val($(data).find("pin").text());
+										
+										var value = $(data).find("state").text();
+									
+										
+										if(value == "0") {
+											$('#status').html('<span class="led-off"></span>OFF');
+										} else {
+											$('#status').html('<span class="led-on"></span>ON');
+										}
+										
+										var imageMenu = $(data).find("deviceImage").text();
+										$('#imagemenu').val(imageMenu).selectmenu("refresh");
+			
+										$('#readout').html(decodeURIComponent($(data).find("readout").text()));
+										
+					
+								}
+								
+	
+							
+							}).fail(function( jqXHR, textStatus, errorThrown ) {
+								alert("Unsuccessful. See console.log for info.");
+								console.log( "error: " +":"+textStatus +":"+errorThrown);
+						}); // xml function
+					
+				$("#imagemenu").change(function() {
+					var str = $(this).val();
+					
+					$("#display_image img").attr("src", "images/"+str);
+					
+				});
+				
+				
+			});
+	
+	
+			function validate() {
+	 
+				var deviceId = localStorage.getItem("deviceId");
+				var deviceType = localStorage.getItem("deviceType");
+
+				const datastring = {};
+	
+				datastring.deviceType = deviceType;
+				datastring.deviceName = $("#name").val();
+				datastring.pin = parseInt($("#pin").val());
+				datastring.imageName =  $("#imagemenu option:selected").val();
+
+				//console.log( jsonString );
+				const jsonString = JSON.stringify(datastring);
+
+				$.post("", "savedevice="+ deviceId +"&devicetype="+ deviceType +"&json="+ jsonString, function(data){
+					if(data != null) {
+						//on complete save, go back to home
+						if($(data).find("response").text() == "success") {
+							location.href="index.htm";
+						}
+					}
+				}).fail(function( jqXHR, textStatus, errorThrown ) {
+								alert("Unsuccessful. See console.log for info.");
+								console.log( "error: " +":"+textStatus +":"+errorThrown);
+				});
+
+			
+				
+			}// end function
+			
+	
+		</script>
+         <style>
+
+			#minField div.ui-input-text, #maxField div.ui-input-text {
+				width: 50px !important
+			}
+			#minField {
+				
+				position: absolute;
+				left: 5px;
+				top: 0px;
+			}
+			#maxField {
+				position: absolute;
+				right: 5px;
+				top: 0px;
+			}
+			
+			
+		</style>
+
+    </head>
+<body>        
+<div data-role="page" id="relay_device">
+            <div data-role="header" data-theme="b">
+                <a href="index.htm" data-ajax="false" data-icon="arrow-l" class="ui-btn-left">Back</a>
+        		<h1>Input</h1>
+            </div>
+            
+            <div data-role="content" id="content" class="ui-content">
+<form method="get" id="one-form">
+	
+	<div class="ui-grid-a ui-responsive">
+        <div class="ui-block-a">
+            <input name="name" type="text" id="name" placeholder="Name" value=""  maxlength="25"/> 
+            <input name="pin" type="text" id="pin" placeholder="PIN" value=""  />
+              <p>
+            <legend>Device Status</legend>
+            <span id="status"><span class="led-off"></span>OFF</span>
+            </p>
+          
+         </div>
+         <div class="ui-block-b">
+            <select name="imagemenu" id="imagemenu">
+              <option value="none.jpg">Image</option>
+            </select>
+            <div id="display_image"><img src="" align="center"></div>
+
+         </div>
+         
+	</div>
+
+  </form>
+           		     
+                  
+            </div>
+           	<div data-role="footer" data-position="fixed" data-type="horizontal" data-theme="b" data-tap-toggle="false">
+                <div style="text-align: center">
+                    <a href="#" class="ui-btn ui-icon-check ui-btn-icon-left" onClick="validate()">SAVE</a>
+                    <a href="#" data-ajax="false" class="ui-btn ui-icon-minus ui-btn-icon-left" onClick="cancel()">CANCEL</a>
+                    <a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="deleteDevice()">DELETE</a>
+                </div>
+    		</div>
+</div>
+
+
+</body>
+</html>
+

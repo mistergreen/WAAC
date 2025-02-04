@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Input Button</title>
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+        <link rel="stylesheet" href="common.css" />
+		<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+        <script src="common.js"></script>
+
+        <script language="javascript" type="text/javascript">
+		
+			var devices;
+
+			$(document).on('pageshow',function(event) {
+				var deviceId = localStorage.getItem("deviceId");
+				var deviceType = localStorage.getItem("deviceType");
+				$.mobile.loading("show");
+				//get data from the server
+				nocache = "&nocache=" + Math.random() * 1000000;
+				var imageStr="";
+				var deviceStr="";
+					
+				$.get( "?deviceid="+ deviceId +"&devicetype=" + deviceType + nocache,  
+					function(data) {
+						devices = $(data);
+						$.mobile.loading("hide");
+						// grab images & color list
+						$(data).find("item").each(function() {
+							imageStr += '<option value="'+ $(this).find("image").text()+'">'+ $(this).find("image").text()+'</option>';
+						});
+
+						// grab dependent device  list
+						$(data).find("device").each(function() {
+							deviceStr += '<option value="'+ $(this).find("id").text()+'">'+ decodeURIComponent($(this).find("name").text()) +'</option>';
+						});
+							
+						deviceStr += '<option value="255"> System </option>';
+
+						
+						$('#actiondevicemenuclick').append(deviceStr).selectmenu("refresh",true);
+						$('#actiondevicemenudoubleclick').append(deviceStr).selectmenu("refresh",true);
+						$('#actiondevicemenutripleclick').append(deviceStr).selectmenu("refresh",true);
+						$('#actiondevicemenulongclick').append(deviceStr).selectmenu("refresh",true);
+
+						$('#imagemenu').append(imageStr).selectmenu("refresh",true);
+					
+						//****** grab device specific data & populate fields ********
+						if(deviceId != 0) {	
+							$('#name').val(decodeURIComponent($(data).find("deviceName").text()));
+							$('#pin').val($(data).find("pin").text());
+							
+							var value = $(data).find("state").text();
+						
+							
+							if(value == "0") {
+								$('#status').html('<span class="led-off"></span>OFF');
+							} else {
+								$('#status').html('<span class="led-on"></span>ON');
+							}
+							
+							var deviceClick = $(data).find("deviceclick").text();
+							$('#actiondevicemenuclick').val(deviceClick).selectmenu("refresh");
+							$("#actionmenuclick").attr('disabled',false);
+							$("#actionmenuclick").empty();
+
+							var actionsStr =""
+
+							devices.find("device").each(function() {
+								if ($(this).find("id").text() == $("#actiondevicemenuclick option:selected").val())
+								{
+									$(this).find("action").each(function() {
+										actionsStr += '<option value="'+ $(this).find("action_id").text()+'">'+ decodeURIComponent($(this).find("action_name").text()) +'</option>';
+									});
+								}
+							});
+							if (255 == $("#actiondevicemenuclick option:selected").val())
+							{
+								$(data).find("systemaction").each(function() {
+									actionsStr += '<option value="'+ $(this).find("action_id").text()+'">'+ decodeURIComponent($(this).find("action_name").text()) +'</option>';
+								});
+							}
+						
+							$('#actionmenuclick').append(actionsStr).selectmenu("refresh",true);
+							var actionClick = $(data).find("actionclick").text();
+							$('#actionmenuclick').val(actionClick).selectmenu("refresh");
+
+							var deviceDoubleClick = $(data).find("devicedoubleclick").text();
+							$('#actiondevicemenudoubleclick').val(deviceDoubleClick).selectmenu("refresh");
+							$("#actionmenudoubleclick").attr('disabled',false);
+							$("#actionmenudoubleclick").empty();
+
+							var actionsStr =""
+
+							devices.find("device").each(function() {
+								if ($(this).find("id").text() == $("#actiondevicemenudoubleclick option:selected").val())
+								{
+									$(this).find("action").each(function() {
+										actionsStr += '<option value="'+ $(this).find("action_id").text()+'">'+ decodeURIComponent($(this).find("action_name").text()) +'</option>';
+									});
+								}
+							});
+							if (255 == $("#actiondevicemenudoubleclick option:selected").val())
+							{
+								$(data).find("systemaction").each(function() {
+									actionsStr += '<option value="'+ $(this).find("action_id").text()+'">'+ decodeURIComponent($(this).find("action_name").text()) +'</option>';
+								});
+							}
+
+							$('#actionmenudoubleclick').append(actionsStr).selectmenu("refresh",true);
+							var actionDoubleClick = $(data).find("actiondoubleclick").text();
+							$('#actionmenudoubleclick').val(actionDoubleClick).selectmenu("refresh");
+
+							var deviceTripleClick = $(data).find("devicetripleclick").text();
+							$('#actiondevicemenutripleclick').val(deviceTripleClick).selectmenu("refresh");
+							$("#actionmenutripleclick").attr('disabled',false);
+							$("#actionmenutripleclick").empty();
+
+							var actionsStr =""
+
+							devices.find("device").each(function() {
+								if ($(this).find("id").text() == $("#actiondevicemenutripleclick option:selected").val())
+								{
+									$(this).find("action").each(function() {
+										actionsStr += '<option value="'+ $(this).find("action_id").text()+'">'+ decodeURIComponent($(this).find("action_name").text()) +'</option>';
+									});
+								}
+							});
+							if (255 == $("#actiondevicemenutripleclick option:selected").val())
+							{
+								$(data).find("systemaction").each(function() {
+									actionsStr += '<option value="'+ $(this).find("action_id").text()+'">'+ decodeURIComponent($(this).find("action_name").text()) +'</option>';
+								});
+							}
+
+							$('#actionmenutripleclick').append(actionsStr).selectmenu("refresh",true);
+							var actionTripleClick = $(data).find("actiontripleclick").text();
+							$('#actionmenutripleclick').val(actionTripleClick).selectmenu("refresh");
+
+							var deviceLongClick = $(data).find("devicelongclick").text();
+							$('#actiondevicemenulongclick').val(deviceLongClick).selectmenu("refresh");
+							$("#actionmenulongclick").attr('disabled',false);
+							$("#actionmenulongclick").empty();
+
+							var actionsStr =""
+
+							devices.find("device").each(function() {
+								if ($(this).find("id").text() == $("#actiondevicemenulongclick option:selected").val())
+								{
+									$(this).find("action").each(function() {
+										actionsStr += '<option value="'+ $(this).find("action_id").text()+'">'+ decodeURIComponent($(this).find("action_name").text()) +'</option>';
+									});
+								}
+							});
+
+							if (255 == $("#actiondevicemenulongclick option:selected").val())
+							{
+								$(data).find("systemaction").each(function() {
+									actionsStr += '<option value="'+ $(this).find("action_id").text()+'">'+ decodeURIComponent($(this).find("action_name").text()) +'</option>';
+								});
+							}
+						
+							$('#actionmenulongclick').append(actionsStr).selectmenu("refresh",true);
+							var actionLongClick = $(data).find("actionlongclick").text();
+							$('#actionmenulongclick').val(actionLongClick).selectmenu("refresh");
+
+							var imageMenu = $(data).find("deviceImage").text();
+							$('#imagemenu').val(imageMenu).selectmenu("refresh");
+
+							$('#readout').html(decodeURIComponent($(data).find("readout").text()));
+						}
+					}).fail(function( jqXHR, textStatus, errorThrown ) {
+						alert("Unsuccessful. See console.log for info.");
+						console.log( "error: " +":"+textStatus +":"+errorThrown);
+				}); // xml function
+					
+				$("#imagemenu").change(function() {
+					var str = $(this).val();
+					
+					$("#display_image img").attr("src", "images/"+str);
+				});
+			});
+
+			$(document).ready(function(){
+				$("#actiondevicemenuclick").change(function() {
+					if($(this).val()){
+						$("#actionmenuclick").attr('disabled',false);
+						$("#actionmenuclick").empty();
+
+						var actionsStr =""
+
+						devices.find("device").each(function() {
+							if ($(this).find("id").text() == $("#actiondevicemenuclick option:selected").val())
+							{
+								$(this).find("action").each(function() {
+									actionsStr += '<option value="'+ $(this).find("action_id").text()+'">'+ decodeURIComponent($(this).find("action_name").text()) +'</option>';
+								});
+							}
+						});
+
+						if (255 == $("#actiondevicemenuclick option:selected").val())
+						{
+							devices.find("systemaction").each(function() {
+								actionsStr += '<option value="'+ $(this).find("action_id").text()+'">'+ decodeURIComponent($(this).find("action_name").text()) +'</option>';
+							});
+						}
+
+						$('#actionmenuclick').append(actionsStr).selectmenu("refresh",true);
+					}
+					else {
+						$("#actionmenuclick").attr('disabled',true);
+						$("#actionmenuclick").empty();
+					}
+				});
+
+				$("#actiondevicemenudoubleclick").change(function() {
+					if($(this).val()){
+						$("#actionmenudoubleclick").attr('disabled',false);
+						$("#actionmenudoubleclick").empty();
+
+						var actionsStr =""
+
+						devices.find("device").each(function() {
+							if ($(this).find("id").text() == $("#actiondevicemenudoubleclick option:selected").val())
+							{
+								$(this).find("action").each(function() {
+									actionsStr += '<option value="'+ $(this).find("action_id").text()+'">'+ decodeURIComponent($(this).find("action_name").text()) +'</option>';
+								});
+							}
+						});
+						
+						if (255 == $("#actiondevicemenudoubleclick option:selected").val())
+						{
+							devices.find("systemaction").each(function() {
+								actionsStr += '<option value="'+ $(this).find("action_id").text()+'">'+ decodeURIComponent($(this).find("action_name").text()) +'</option>';
+							});
+						}
+					
+						$('#actionmenudoubleclick').append(actionsStr).selectmenu("refresh",true);
+					}
+					else {
+						$("#actionmenudoubleclick").attr('disabled',true);
+						$("#actionmenudoubleclick").empty();
+					}
+				});
+
+				$("#actiondevicemenutripleclick").change(function() {
+					if($(this).val()){
+						$("#actionmenutripleclick").attr('disabled',false);
+						$("#actionmenutripleclick").empty();
+
+						var actionsStr =""
+
+						devices.find("device").each(function() {
+							if ($(this).find("id").text() == $("#actiondevicemenutripleclick option:selected").val())
+							{
+								$(this).find("action").each(function() {
+									actionsStr += '<option value="'+ $(this).find("action_id").text()+'">'+ decodeURIComponent($(this).find("action_name").text()) +'</option>';
+								});
+							}
+						});
+
+						if (255 == $("#actiondevicemenutripleclick option:selected").val())
+						{
+							devices.find("systemaction").each(function() {
+								actionsStr += '<option value="'+ $(this).find("action_id").text()+'">'+ decodeURIComponent($(this).find("action_name").text()) +'</option>';
+							});
+						}
+					
+						$('#actionmenutripleclick').append(actionsStr).selectmenu("refresh",true);
+					}
+					else {
+						$("#actionmenutripleclick").attr('disabled',true);
+						$("#actionmenutripleclick").empty();
+					}
+				});
+
+				$("#actiondevicemenulongclick").change(function() {
+					if($(this).val()){
+						$("#actionmenulongclick").attr('disabled',false);
+						$("#actionmenulongclick").empty();
+
+						var actionsStr =""
+
+						devices.find("device").each(function() {
+							if ($(this).find("id").text() == $("#actiondevicemenulongclick option:selected").val())
+							{
+								$(this).find("action").each(function() {
+									actionsStr += '<option value="'+ $(this).find("action_id").text()+'">'+ decodeURIComponent($(this).find("action_name").text()) +'</option>';
+								});
+							}
+						});
+
+						if (255 == $("#actiondevicemenulongclick option:selected").val())
+						{
+							devices.find("systemaction").each(function() {
+								actionsStr += '<option value="'+ $(this).find("action_id").text()+'">'+ decodeURIComponent($(this).find("action_name").text()) +'</option>';
+							});
+						}
+					
+						$('#actionmenulongclick').append(actionsStr).selectmenu("refresh",true);
+					}
+					else {
+						$("#actionmenulongclick").attr('disabled',true);
+						$("#actionmenulongclick").empty();
+					}
+				});
+			});
+	
+			function validate() {
+	
+				var deviceId = localStorage.getItem("deviceId");
+				var deviceType = localStorage.getItem("deviceType");
+
+				const datastring = {};
+	
+				datastring.deviceType = deviceType;
+				datastring.deviceName = $("#name").val();
+				datastring.pin = parseInt($("#pin").val());
+				datastring.dependent = parseInt($("#dependentmenu option:selected").val());
+				datastring.imageName =  $("#imagemenu option:selected").val();
+				datastring.device0 = parseInt($("#actiondevicemenuclick option:selected").val());
+				datastring.device1 = parseInt($("#actiondevicemenudoubleclick option:selected").val());
+				datastring.device2 = parseInt($("#actiondevicemenutripleclick option:selected").val());
+				datastring.device3 = parseInt($("#actiondevicemenulongclick option:selected").val());
+				datastring.actions0 = parseInt($("#actionmenuclick option:selected").val());
+				datastring.actions1 = parseInt($("#actionmenudoubleclick option:selected").val());
+				datastring.actions2 = parseInt($("#actionmenutripleclick option:selected").val());
+				datastring.actions3 = parseInt($("#actionmenulongclick option:selected").val());
+				//console.log( jsonString );
+				const jsonString = JSON.stringify(datastring);
+
+				$.post("", "savedevice="+ deviceId +"&devicetype="+ deviceType +"&json="+ jsonString, function(data){
+					if(data != null) {
+						//on complete save, go back to home
+						if($(data).find("response").text() == "success") {
+							location.href="index.htm";
+						}
+					}
+				}).fail(function( jqXHR, textStatus, errorThrown ) {
+								alert("Unsuccessful. See console.log for info.");
+								console.log( "error: " +":"+textStatus +":"+errorThrown);
+				});
+		
+				
+			}// end function
+			
+	
+		</script>
+         <style>
+
+			#minField div.ui-input-text, #maxField div.ui-input-text {
+				width: 50px !important
+			}
+			#minField {
+				
+				position: absolute;
+				left: 5px;
+				top: 0px;
+			}
+			#maxField {
+				position: absolute;
+				right: 5px;
+				top: 0px;
+			}
+
+			ol {
+				list-style-type: none;
+				margin: 0;
+				padding: 0;
+			}
+			
+			legend {
+				font-size: 1.15em;
+				font-weight: bold;
+				margin: 1.7em 0 .7em 0;	
+				
+			}
+			
+			.ui-block-a, .ui-block-b, .ui-block-c {
+				padding: 0 5px 10px 0;
+			}
+			
+			li {
+				margin-bottom: 20px;
+				padding: 7px;
+				background: #EDEDED;
+				box-shadow: 0px 3px 10px #AAA;
+			}
+		</style>
+
+    </head>
+	
+	<body>        
+	<div data-role="page" id="relay_device">
+		<div data-role="header" data-theme="b">
+			<a href="index.htm" data-ajax="false" data-icon="arrow-l" class="ui-btn-left">Back</a>
+			<h1>Input Button</h1>
+		</div>
+            
+		<div data-role="content" id="content" class="ui-content">
+			<form method="get" id="one-form">
+				<div class="ui-grid-a ui-responsive">
+					<div class="ui-block-a">
+						<input name="name" type="text" id="name" placeholder="Name" value=""  maxlength="25"/> 
+						<input name="pin" type="text" id="pin" placeholder="PIN" value=""  />
+						<p>
+						<legend>Device Status</legend>
+						<span id="status"><span class="led-off"></span>OFF</span>
+						</p>
+					
+					</div>
+					<div class="ui-block-b">
+						<select name="imagemenu" id="imagemenu">
+						<option value="none.jpg">Image</option>
+						</select>
+						<div id="display_image"><img src="" align="center"></div>
+
+					</div>
+				</div>
+				<legend>Button Events</legend>
+				<ol>
+					<li>
+						<fieldset class="ui-grid-a ui-responsive">
+							<div class = "ui-block-a">
+								<b>Click</b>
+								<div class="ui-grid-b">
+									<select name="actiondevicemenuclick" id="actiondevicemenuclick">
+										<option value="0">Device</option>
+									</select>
+								</div>
+							</div>
+							<div class = "ui-block-b">
+								<br>
+								<select name="actionmenuclick" id="actionmenuclick">
+									<option value="0">Action</option>
+								</select>
+							</div>
+						</fieldset>
+						<fieldset class="ui-grid-a ui-responsive">
+							<div class = "ui-block-a">
+								<b>Double Click</b>
+								<div class="ui-grid-b">
+									<select name="actiondevicemenudoubleclick" id="actiondevicemenudoubleclick">
+										<option value="0">Device</option>
+									</select>
+								</div>
+							</div>
+							<div class = "ui-block-b">
+								<br>
+								<select name="actionmenudoubleclick" id="actionmenudoubleclick">
+									<option value="0">Action</option>
+								</select>
+							</div>
+						</fieldset>
+						<fieldset class="ui-grid-a ui-responsive">
+							<div class = "ui-block-a">
+								<b>Triple Click</b>
+								<div class="ui-grid-b">
+									<select name="actiondevicemenutripleclick" id="actiondevicemenutripleclick">
+										<option value="0">Device</option>
+									</select>
+								</div>
+							</div>
+							<div class = "ui-block-b">
+								<br>
+								<select name="actionmenutripleclick" id="actionmenutripleclick">
+									<option value="0">Action</option>
+								</select>
+							</div>
+						</fieldset>
+						<fieldset class="ui-grid-a ui-responsive">
+							<div class = "ui-block-a">
+								<b>Long Click</b>
+								<div class="ui-grid-b">
+									<select name="actiondevicemenulongclick" id="actiondevicemenulongclick">
+										<option value="0">Device</option>
+									</select>
+								</div>
+							</div>
+							<div class = "ui-block-b">
+								<br>
+								<select name="actionmenulongclick" id="actionmenulongclick">
+									<option value="0">Action</option>
+								</select>
+							</div>
+						</fieldset>
+					</li>
+				</ol>
+			</form>   
+            </div>
+           	<div data-role="footer" data-position="fixed" data-type="horizontal" data-theme="b" data-tap-toggle="false">
+                <div style="text-align: center">
+                    <a href="#" class="ui-btn ui-icon-check ui-btn-icon-left" onClick="validate()">SAVE</a>
+                    <a href="#" data-ajax="false" class="ui-btn ui-icon-minus ui-btn-icon-left" onClick="cancel()">CANCEL</a>
+                    <a href="#" class="ui-btn ui-icon-delete ui-btn-icon-left" onClick="deleteDevice()">DELETE</a>
+                </div>
+    		</div>
+		</div>
+	</body>
+</html>
+
