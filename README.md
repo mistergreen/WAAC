@@ -23,8 +23,8 @@ This version is ESP32 only.
 In file WAAC_ESP32_JSON.ino
 <ul>
   <li>line 19  #define USE_SPIFFS  true</li>
-  Set true to use SPIFF or false to use an SD reader
-  <li>Upload the all the contents of Html_esp32 and Json folder to the SPIFF or SD card</li>
+  Set true to use SPIFFS or false to use an SD reader
+  <li>Upload the all the contents of Html_esp32 and Json folder to the SPIFFS or SD card</li>
   <li>You can change the web GUI user/pass on line 167 & 168</li>
   <li>Setting up the server network static IP or setting a hostname on lines 241 through 250. Use one or the other.</li>
   <li>Set up your Wifi ssid & password in settings.json. If you change routers, you can change the ssid/pass on the json instead of recompile the app</li>
